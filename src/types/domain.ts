@@ -5,14 +5,18 @@ export type DonationStatus =
   | 'DELIVERED' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED' | 'EXCEPTION'
 export type MatchStatus = 'SUGGESTED' | 'VIEWED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED'
 export type PickupTaskStatus = 'AVAILABLE' | 'ASSIGNED' | 'COLLECTED' | 'DELIVERED' | 'CANCELLED'
+export type NotificationType =
+  | 'DONATION_ACCEPTED' | 'MATCH_FOUND' | 'PICKUP_ASSIGNED' | 'PICKUP_REMINDER'
+  | 'FOOD_COLLECTED' | 'FOOD_DELIVERED' | 'DONATION_COMPLETED'
+  | 'DONATION_EXPIRED' | 'DONATION_CANCELLED'
 
 export interface User {
   id: string
   name: string
   email: string
-  phone: string
+  phone: string | null
   role: UserRole
-  location: string
+  location: string | null
   created_at: string
 }
 
@@ -20,11 +24,11 @@ export interface NGO {
   id: string
   user_id: string
   organization_name: string
-  description: string
+  description: string | null
   location: string
   capacity: number
   accepted_food_types: string[]
-  contact_information: string
+  contact_information: string | null
   created_at: string
 }
 
@@ -37,8 +41,8 @@ export interface Donation {
   location: string
   available_from: string
   collection_deadline: string
-  safety_information: string
-  description: string
+  safety_information: string | null
+  description: string | null
   status: DonationStatus
   created_at: string
   updated_at: string
@@ -69,7 +73,7 @@ export interface PickupTask {
   collected_at: string | null
   delivered_at: string | null
   status: PickupTaskStatus
-  notes: string
+  notes: string | null
   created_at: string
 }
 
@@ -78,15 +82,15 @@ export interface Notification {
   user_id: string
   title: string
   message: string
-  // ERD lists examples, not an exhaustive enum.
-  type: string
+  type: NotificationType
   is_read: boolean
   created_at: string
 }
 
 export interface ActivityLog {
   id: string
-  user_id: string
+  // Preserved when an authentication/profile record is removed.
+  user_id: string | null
   action: string
   entity_type: string
   entity_id: string
