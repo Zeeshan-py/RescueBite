@@ -1,0 +1,24 @@
+import { describe, expect, it } from 'vitest'
+import { canRoleAccessPath, roleHomePath } from './route-access'
+
+describe('role route access', () => {
+  it('maps every role to its dashboard', () => {
+    expect(roleHomePath).toEqual({ DONOR: '/donor', NGO: '/ngo', VOLUNTEER: '/volunteer', ADMIN: '/admin' })
+  })
+
+  it('blocks cross-role workspace access', () => {
+    expect(canRoleAccessPath('DONOR', '/ngo')).toBe(false)
+    expect(canRoleAccessPath('DONOR', '/volunteer/tasks')).toBe(false)
+    expect(canRoleAccessPath('DONOR', '/admin')).toBe(false)
+    expect(canRoleAccessPath('VOLUNTEER', '/donor')).toBe(false)
+    expect(canRoleAccessPath('NGO', '/admin/users')).toBe(false)
+  })
+
+  it('allows each role into its own workspace and shared account pages', () => {
+    expect(canRoleAccessPath('DONOR', '/donor/donations')).toBe(true)
+    expect(canRoleAccessPath('NGO', '/ngo/setup')).toBe(true)
+    expect(canRoleAccessPath('VOLUNTEER', '/volunteer/tasks')).toBe(true)
+    expect(canRoleAccessPath('ADMIN', '/admin/activity-logs')).toBe(true)
+    expect(canRoleAccessPath('DONOR', '/profile')).toBe(true)
+  })
+})

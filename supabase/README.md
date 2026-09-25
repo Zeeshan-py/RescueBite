@@ -43,3 +43,9 @@ npx supabase db reset
 ```
 
 Development users should be created through Supabase Auth. No seed file is included because profile rows must reference real `auth.users` UUIDs, and passwords must never be stored in SQL seed files.
+
+## Registration and administrator accounts
+
+The Phase 3 Auth trigger creates a `public.users` profile from validated signup metadata for `DONOR`, `NGO`, and `VOLUNTEER` registrations. It intentionally rejects `ADMIN` as a public registration role. With email confirmation enabled, this lets the profile be created before the user has an authenticated browser session.
+
+Provision an administrator separately: create the authentication account through the Supabase dashboard or another trusted server-side administration process, then insert its matching UUID and profile details into `public.users` with role `ADMIN` from the SQL editor. Never expose the service-role key in the browser or add an admin option to the public registration form.

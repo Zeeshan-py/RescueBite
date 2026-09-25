@@ -1,0 +1,17 @@
+import { Link } from 'react-router-dom'
+import { useAuth } from '../../auth/useAuth'
+import type { UserRole } from '../../types/domain'
+
+const content: Record<UserRole, { eyebrow: string; description: string; cards: Array<{ title: string; text: string; to: string }> }> = {
+  DONOR: { eyebrow: 'Donor workspace', description: 'Your account is secure and ready. Donation tools arrive in the next phase.', cards: [{ title: 'My donations', text: 'Donation creation and tracking will appear here.', to: '/donor/donations' }, { title: 'Notifications', text: 'Updates related to your rescues.', to: '/notifications' }, { title: 'Profile', text: 'Keep your contact details current.', to: '/profile' }] },
+  NGO: { eyebrow: 'NGO workspace', description: 'Your organization profile is available now; donation acceptance comes later.', cards: [{ title: 'Organization profile', text: 'Review capacity, food types, and contact details.', to: '/ngo/setup' }, { title: 'Available donations', text: 'Suitable donation matches will appear here.', to: '/ngo/donations' }, { title: 'Accepted donations', text: 'Track future accepted rescues.', to: '/ngo/accepted' }] },
+  VOLUNTEER: { eyebrow: 'Volunteer workspace', description: 'Authentication is active. Pickup assignment tools arrive in a later phase.', cards: [{ title: 'Pickup tasks', text: 'Available and assigned tasks will appear here.', to: '/volunteer/tasks' }, { title: 'Notifications', text: 'Assignment and delivery updates.', to: '/notifications' }, { title: 'Profile', text: 'Keep your location and phone current.', to: '/profile' }] },
+  ADMIN: { eyebrow: 'Administration', description: 'Administrative data remains protected by database RLS. Management tools are placeholders in this phase.', cards: [{ title: 'Users', text: 'User management arrives in a later phase.', to: '/admin/users' }, { title: 'Organizations', text: 'NGO oversight will appear here.', to: '/admin/ngos' }, { title: 'Activity logs', text: 'Reviewable only by administrators.', to: '/admin/activity-logs' }] },
+}
+
+export default function RoleDashboardPage() {
+  const { role, profile, ngoProfile } = useAuth()
+  if (!role) return null
+  const page = content[role]
+  return <div><p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">{page.eyebrow}</p><h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight sm:text-5xl">Hello, {profile?.name?.split(' ')[0] ?? 'there'}.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-muted">{page.description}</p>{role === 'NGO' && !ngoProfile && <Link to="/ngo/setup" className="mt-7 flex max-w-2xl items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900"><span><strong>Complete your organization profile</strong><span className="mt-1 block text-xs">Capacity, location, and accepted food types are required.</span></span><span aria-hidden="true">→</span></Link>}<div className="mt-9 grid gap-4 md:grid-cols-3">{page.cards.map((card, index) => <Link key={card.title} to={card.to} className="group rounded-xl border border-line bg-white p-6 transition hover:-translate-y-0.5 hover:border-forest/35 hover:shadow-sm"><span className="font-display text-2xl text-forest/45">0{index + 1}</span><h2 className="mt-5 text-base font-semibold">{card.title}</h2><p className="mt-2 text-sm leading-6 text-muted">{card.text}</p><span className="mt-5 inline-block text-sm font-semibold text-forest group-hover:translate-x-1">Open →</span></Link>)}</div></div>
+}

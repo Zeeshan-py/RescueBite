@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { supabaseConfigurationError } from '../lib/supabase'
 
 const roles = [
@@ -18,12 +19,12 @@ export default function OverviewPage() {
         <p className="relative text-xs font-semibold tracking-[0.16em] text-forest uppercase">Welcome to FoodBridge</p>
         <h1 id="welcome-heading" className="relative mt-4 max-w-xl font-display text-4xl leading-[1.15] tracking-tight sm:text-5xl">Good food deserves<br />somewhere to go.</h1>
         <p className="relative mt-5 max-w-lg text-sm leading-7 text-muted">Connecting donors, NGOs, and volunteers to help surplus food reach the communities that need it.</p>
-        <a href="#rescue-journey" className="relative mt-7 inline-flex items-center gap-5 rounded-lg bg-forest px-5 py-3 text-sm font-medium text-white hover:bg-pine">Explore the rescue journey <span aria-hidden="true">↓</span></a>
+        <div className="relative mt-7 flex flex-wrap gap-3"><Link to="/register" className="inline-flex items-center gap-5 rounded-lg bg-forest px-5 py-3 text-sm font-medium text-white hover:bg-pine">Create an account <span aria-hidden="true">→</span></Link><Link to="/login" className="inline-flex items-center rounded-lg border border-forest/25 bg-white/60 px-5 py-3 text-sm font-semibold text-forest hover:bg-white">Sign in</Link></div>
       </section>
 
       <div className="my-6 flex flex-col gap-2 rounded-xl border border-line bg-white px-5 py-4 sm:flex-row sm:gap-5">
-        <span className="shrink-0 text-sm font-semibold text-forest">The foundation is here</span>
-        <p className="text-sm leading-6 text-muted">This is an early preview. Account access, donations, and rescue operations are not available yet.</p>
+        <span className="shrink-0 text-sm font-semibold text-forest">Account access is ready</span>
+        <p className="text-sm leading-6 text-muted">Donors, NGOs, and volunteers can register securely and enter a role-protected workspace.</p>
       </div>
 
       <section aria-labelledby="community-heading" className="mt-10">
@@ -53,7 +54,7 @@ export default function OverviewPage() {
 
       <details className="my-8 rounded-lg border border-line px-5 py-4 text-xs text-muted">
         <summary className="cursor-pointer font-medium text-ink">Development setup</summary>
-        <p className="mt-3 leading-6">{supabaseConfigurationError ?? 'Supabase configuration is present. Connection has not been tested; this preview does not read or write backend data.'}</p>
+        <p className="mt-3 leading-6">{supabaseConfigurationError ?? 'Supabase authentication and protected profile access are configured.'}</p>
       </details>
     </div>
   )
