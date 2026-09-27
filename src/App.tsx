@@ -15,6 +15,10 @@ const PlaceholderPage = lazy(() => import('./pages/dashboard/PlaceholderPage'))
 const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
 const NgoSetupPage = lazy(() => import('./pages/account/NgoSetupPage'))
 const AccountUnavailablePage = lazy(() => import('./pages/account/AccountUnavailablePage'))
+const DonorDashboardPage = lazy(() => import('./pages/donor/DonorDashboardPage'))
+const DonationListPage = lazy(() => import('./pages/donor/DonationListPage'))
+const DonationFormPage = lazy(() => import('./pages/donor/DonationFormPage'))
+const DonationDetailsPage = lazy(() => import('./pages/donor/DonationDetailsPage'))
 
 const allRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN']
 
@@ -57,8 +61,11 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['DONOR']} />}>
         <Route element={<AuthenticatedLayout />}>
-          <Route path="/donor" element={<Page><RoleDashboardPage /></Page>} />
-          <Route path="/donor/donations" element={<Page><PlaceholderPage title="My donations" description="Donation CRUD is intentionally outside Phase 3." /></Page>} />
+          <Route path="/donor" element={<Page><DonorDashboardPage /></Page>} />
+          <Route path="/donor/donations" element={<Page><DonationListPage /></Page>} />
+          <Route path="/donor/donations/new" element={<Page><DonationFormPage /></Page>} />
+          <Route path="/donor/donations/:id" element={<Page><DonationDetailsPage /></Page>} />
+          <Route path="/donor/donations/:id/edit" element={<Page><DonationFormPage /></Page>} />
         </Route>
       </Route>
 

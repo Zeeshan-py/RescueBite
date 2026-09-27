@@ -14,6 +14,8 @@ RLS is enabled on all seven application tables. Policies restrict profiles and n
 
 Frontend role checks are only for user experience; RLS is the actual data boundary. The Supabase `service_role` is reserved for trusted backend processes that will later create matches, pickup tasks, notifications, and activity logs. Never expose the service-role key in browser code.
 
+The Phase 4 donation migration requires positive quantities and meal portions. Its update trigger limits donors to editing a `POSTED` donation or moving it to `CANCELLED`; later workflow transitions remain reserved for trusted future services and administrators.
+
 ## Applying migrations
 
 With the Supabase CLI and Docker installed, a clean local database can be created with:
