@@ -16,6 +16,8 @@ Frontend role checks are only for user experience; RLS is the actual data bounda
 
 The Phase 4 donation migration requires positive quantities and meal portions. Its update trigger limits donors to editing a `POSTED` donation or moving it to `CANCELLED`; later workflow transitions remain reserved for trusted future services and administrators.
 
+Phase 5 stores rule-based suggestions through `store_donation_matches`. This narrow `SECURITY DEFINER` function verifies donation ownership, candidate NGO compatibility/capacity, score ranges, the weighted total, and duplicate keys before it writes. It is also the only donor-accessible path that can move a donation between `POSTED` and `MATCHED`; the frontend never receives the service-role key.
+
 ## Applying migrations
 
 With the Supabase CLI and Docker installed, a clean local database can be created with:

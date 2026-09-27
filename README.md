@@ -72,6 +72,10 @@ npm run preview
 Build runs strict TypeScript checks before generating `dist/`. Preview serves the
 production build locally, normally at http://127.0.0.1:4173.
 
+## Phase 5 matching assumptions
+
+The first matching engine is deterministic TypeScript logic using the documented weights: distance 30%, urgency 25%, food compatibility 20%, capacity 15%, and pickup availability 10%. Location records do not yet include coordinates, so exact normalized location text scores 100 and all other locations receive a neutral 50 rather than an invented physical distance. Eligible NGOs must accept the food category and have capacity for the donation's meal portions. Availability uses a documented score of 70 until volunteer scheduling exists. These two isolated scoring functions can be replaced when coordinates and schedules are added.
+
 ## Project structure
 
 ```text
