@@ -19,6 +19,9 @@ const DonorDashboardPage = lazy(() => import('./pages/donor/DonorDashboardPage')
 const DonationListPage = lazy(() => import('./pages/donor/DonationListPage'))
 const DonationFormPage = lazy(() => import('./pages/donor/DonationFormPage'))
 const DonationDetailsPage = lazy(() => import('./pages/donor/DonationDetailsPage'))
+const NgoDashboardPage = lazy(() => import('./pages/ngo/NgoDashboardPage'))
+const NgoDonationListPage = lazy(() => import('./pages/ngo/NgoDonationListPage'))
+const NgoDonationDetailsPage = lazy(() => import('./pages/ngo/NgoDonationDetailsPage'))
 
 const allRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN']
 
@@ -71,10 +74,11 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['NGO']} />}>
         <Route element={<AuthenticatedLayout />}>
-          <Route path="/ngo" element={<Page><RoleDashboardPage /></Page>} />
+          <Route path="/ngo" element={<Page><NgoDashboardPage /></Page>} />
           <Route path="/ngo/setup" element={<Page><NgoSetupPage /></Page>} />
-          <Route path="/ngo/donations" element={<Page><PlaceholderPage title="Available donations" description="Matching and donation acceptance are intentionally outside Phase 3." /></Page>} />
-          <Route path="/ngo/accepted" element={<Page><PlaceholderPage title="Accepted donations" description="The acceptance workflow will be implemented in a later phase." /></Page>} />
+          <Route path="/ngo/donations" element={<Page><NgoDonationListPage /></Page>} />
+          <Route path="/ngo/donations/:matchId" element={<Page><NgoDonationDetailsPage /></Page>} />
+          <Route path="/ngo/accepted" element={<Page><NgoDonationListPage acceptedOnly /></Page>} />
         </Route>
       </Route>
 

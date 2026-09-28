@@ -83,7 +83,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-w-0">
         <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><span className="rounded-full border border-line px-3 py-1 text-xs text-muted">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 5</span></footer>
+        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 6</span></footer>
       </div>
     </div>
   )

@@ -76,6 +76,10 @@ production build locally, normally at http://127.0.0.1:4173.
 
 The first matching engine is deterministic TypeScript logic using the documented weights: distance 30%, urgency 25%, food compatibility 20%, capacity 15%, and pickup availability 10%. Location records do not yet include coordinates, so exact normalized location text scores 100 and all other locations receive a neutral 50 rather than an invented physical distance. Eligible NGOs must accept the food category and have capacity for the donation's meal portions. Availability uses a documented score of 70 until volunteer scheduling exists. These two isolated scoring functions can be replaced when coordinates and schedules are added.
 
+## Phase 6 NGO workflow
+
+NGOs can review only matches associated with their organization, accept one atomically, or preserve a declined suggestion as history. The database locks the donation during a decision, expires competing suggestions after acceptance, restores `POSTED` when the final actionable suggestion is declined, and records NGO decisions in `activity_logs`. Pickup, delivery, notifications, and realtime behavior remain outside this phase.
+
 ## Project structure
 
 ```text

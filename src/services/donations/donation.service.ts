@@ -75,10 +75,8 @@ export async function updateDonation(id: string, input: DonationInput): Promise<
 
 export async function cancelDonation(id: string): Promise<Donation> {
   await authenticatedUserId()
-  const { data, error } = await getSupabaseClient().from('donations').update({ status: 'CANCELLED' })
-    .eq('id', id).eq('status', 'POSTED').select('*').maybeSingle()
+  const { data, error } = await getSupabaseClient().rpc('cancel_my_donation', { target_donation_id: id })
   if (error) throw friendlyFailure('cancelled', error)
   if (!data) throw new DonationServiceError('This donation can no longer be cancelled.', 'INVALID_STATUS')
   return data as Donation
 }
-

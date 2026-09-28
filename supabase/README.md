@@ -18,6 +18,8 @@ The Phase 4 donation migration requires positive quantities and meal portions. I
 
 Phase 5 stores rule-based suggestions through `store_donation_matches`. This narrow `SECURITY DEFINER` function verifies donation ownership, candidate NGO compatibility/capacity, score ranges, the weighted total, and duplicate keys before it writes. It is also the only donor-accessible path that can move a donation between `POSTED` and `MATCHED`; the frontend never receives the service-role key.
 
+Phase 6 uses `respond_to_donation_match` for NGO decisions. It locks both the NGO-owned match and donation, validates the role, ownership, deadline, and current states, then accepts or declines in one transaction. Direct browser updates to match status are revoked. Acceptance expires competing suggestions and creates an activity log; declining the last actionable suggestion restores the donation to `POSTED`.
+
 ## Applying migrations
 
 With the Supabase CLI and Docker installed, a clean local database can be created with:
