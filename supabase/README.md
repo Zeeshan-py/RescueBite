@@ -20,6 +20,8 @@ Phase 5 stores rule-based suggestions through `store_donation_matches`. This nar
 
 Phase 6 uses `respond_to_donation_match` for NGO decisions. It locks both the NGO-owned match and donation, validates the role, ownership, deadline, and current states, then accepts or declines in one transaction. Direct browser updates to match status are revoked. Acceptance expires competing suggestions and creates an activity log; declining the last actionable suggestion restores the donation to `POSTED`.
 
+Phase 7 extends acceptance to create one active pickup task per donation. `claim_pickup_task` locks the task so simultaneous volunteers produce one winner; `mark_pickup_collected` requires the assigned volunteer. Protected pickup assignment and status columns are guarded by a trigger and workflow RPCs. The migration stops at `COLLECTED`.
+
 ## Applying migrations
 
 With the Supabase CLI and Docker installed, a clean local database can be created with:

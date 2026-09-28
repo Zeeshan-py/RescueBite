@@ -80,6 +80,10 @@ The first matching engine is deterministic TypeScript logic using the documented
 
 NGOs can review only matches associated with their organization, accept one atomically, or preserve a declined suggestion as history. The database locks the donation during a decision, expires competing suggestions after acceptance, restores `POSTED` when the final actionable suggestion is declined, and records NGO decisions in `activity_logs`. Pickup, delivery, notifications, and realtime behavior remain outside this phase.
 
+## Phase 7 volunteer pickup workflow
+
+Accepting an NGO match creates one `AVAILABLE` pickup task using the donation and NGO text locations. Volunteers can view shared available tasks, atomically claim one, and mark only their own assigned task `COLLECTED`. Claim and collection also move the donation to `PICKUP_ASSIGNED` and `COLLECTED`. Delivery, completion, maps, and realtime tracking remain outside this phase.
+
 ## Project structure
 
 ```text

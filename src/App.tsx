@@ -22,6 +22,9 @@ const DonationDetailsPage = lazy(() => import('./pages/donor/DonationDetailsPage
 const NgoDashboardPage = lazy(() => import('./pages/ngo/NgoDashboardPage'))
 const NgoDonationListPage = lazy(() => import('./pages/ngo/NgoDonationListPage'))
 const NgoDonationDetailsPage = lazy(() => import('./pages/ngo/NgoDonationDetailsPage'))
+const VolunteerDashboardPage = lazy(() => import('./pages/volunteer/VolunteerDashboardPage'))
+const PickupListPage = lazy(() => import('./pages/volunteer/PickupListPage'))
+const PickupDetailsPage = lazy(() => import('./pages/volunteer/PickupDetailsPage'))
 
 const allRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN']
 
@@ -84,8 +87,9 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['VOLUNTEER']} />}>
         <Route element={<AuthenticatedLayout />}>
-          <Route path="/volunteer" element={<Page><RoleDashboardPage /></Page>} />
-          <Route path="/volunteer/tasks" element={<Page><PlaceholderPage title="Pickup tasks" description="Volunteer pickup and delivery workflows are intentionally outside Phase 3." /></Page>} />
+          <Route path="/volunteer" element={<Page><VolunteerDashboardPage /></Page>} />
+          <Route path="/volunteer/pickups" element={<Page><PickupListPage /></Page>} />
+          <Route path="/volunteer/pickups/:id" element={<Page><PickupDetailsPage /></Page>} />
         </Route>
       </Route>
 

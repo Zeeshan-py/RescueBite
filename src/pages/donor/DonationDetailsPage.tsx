@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LoadingState } from '../../components/common/LoadingState'
 import { DonationStatusBadge } from '../../components/donations/DonationStatusBadge'
 import { SuggestedMatchesSection } from '../../components/donations/SuggestedMatchesSection'
+import { PickupSummary } from '../../components/pickups/PickupSummary'
 import { cancelDonation, getDonationById } from '../../services/donations/donation.service'
 import type { Donation } from '../../types/domain'
 
@@ -39,6 +40,7 @@ export default function DonationDetailsPage() {
     <section aria-labelledby="details-heading" className="mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8"><h2 id="details-heading" className="text-lg font-semibold">Donation information</h2><dl className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label} className="border-b border-line pb-4"><dt className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</dt><dd className="mt-2 break-words text-sm">{value}</dd></div>)}</dl><div className="mt-6 grid gap-6 sm:grid-cols-2"><div><h3 className="text-sm font-semibold">Food safety information</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{donation.safety_information || 'No additional safety information supplied.'}</p><p className="mt-3 text-xs text-muted">This information is donor reported. FoodBridge does not inspect or certify donated food.</p></div><div><h3 className="text-sm font-semibold">Description</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{donation.description || 'No additional description supplied.'}</p></div></div></section>
     <section aria-labelledby="status-heading" className="mt-5 rounded-xl border border-line bg-white p-5 sm:p-6"><h2 id="status-heading" className="text-base font-semibold">Current status</h2><div className="mt-4 flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-forest text-sm text-white">✓</span><div><p className="text-sm font-semibold">{donation.status.replace('_', ' ')}</p><p className="text-xs text-muted">Last updated {formatDate(donation.updated_at)}</p></div></div></section>
     <SuggestedMatchesSection donation={donation} onStatusChange={(status) => setDonation((current) => current ? { ...current, status } : current)} />
+    <PickupSummary donationId={donation.id} />
     {(editable || cancellable) && <div className="mt-6 flex flex-col gap-3 sm:flex-row">{editable && <Link to={`/donor/donations/${donation.id}/edit`} className="rounded-lg bg-pine px-5 py-3 text-center text-sm font-semibold text-white hover:bg-forest">Edit donation</Link>}{cancellable && <button type="button" onClick={() => void handleCancel()} disabled={cancelling} className="rounded-lg border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60">{cancelling ? 'Cancelling…' : 'Cancel donation'}</button>}</div>}
   </div>
 }
