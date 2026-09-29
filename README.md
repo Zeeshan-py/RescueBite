@@ -84,6 +84,10 @@ NGOs can review only matches associated with their organization, accept one atom
 
 Accepting an NGO match creates one `AVAILABLE` pickup task using the donation and NGO text locations. Volunteers can view shared available tasks, atomically claim one, and mark only their own assigned task `COLLECTED`. Claim and collection also move the donation to `PICKUP_ASSIGNED` and `COLLECTED`. Delivery, completion, maps, and realtime tracking remain outside this phase.
 
+## Phase 8 delivery and completion workflow
+
+An assigned volunteer can atomically move a collected pickup and donation to `DELIVERED`, recording `delivered_at`. Only the NGO with the accepted match can then confirm receipt, moving the donation to `COMPLETED` and recording `completed_at`. Both actions use secured database functions, row locks, guarded status transitions, and activity logs. Donors can follow the seven-step rescue journey and view the receiving NGO without seeing private volunteer details. Notifications, realtime updates, maps, proof of delivery, analytics, and administration remain outside this phase.
+
 ## Project structure
 
 ```text

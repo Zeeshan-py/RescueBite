@@ -22,6 +22,8 @@ Phase 6 uses `respond_to_donation_match` for NGO decisions. It locks both the NG
 
 Phase 7 extends acceptance to create one active pickup task per donation. `claim_pickup_task` locks the task so simultaneous volunteers produce one winner; `mark_pickup_collected` requires the assigned volunteer. Protected pickup assignment and status columns are guarded by a trigger and workflow RPCs. The migration stops at `COLLECTED`.
 
+Phase 8 adds `donations.completed_at` and completes the operational lifecycle without adding another table. `mark_pickup_delivered` requires the assigned volunteer and atomically synchronizes the pickup and donation at `DELIVERED`. `confirm_donation_receipt` requires ownership of the accepted NGO match and moves only the donation to `COMPLETED`. Row locks make duplicate and concurrent requests produce one successful transition, while timestamp constraints and the existing workflow triggers prevent contradictory states.
+
 ## Applying migrations
 
 With the Supabase CLI and Docker installed, a clean local database can be created with:

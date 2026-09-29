@@ -12,6 +12,7 @@ export function groupPickupTasks(tasks: PickupTaskWithDonation[], currentUserId:
     available: tasks.filter((task) => isPickupClaimable(task, now)),
     assigned: tasks.filter((task) => task.volunteer_id === currentUserId && task.status === 'ASSIGNED'),
     collected: tasks.filter((task) => task.volunteer_id === currentUserId && task.status === 'COLLECTED'),
+    delivered: tasks.filter((task) => task.volunteer_id === currentUserId && task.status === 'DELIVERED'),
     unavailable: tasks.filter((task) => task.status === 'AVAILABLE' && !isPickupClaimable(task, now)),
   }
 }

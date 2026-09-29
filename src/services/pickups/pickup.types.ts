@@ -8,5 +8,6 @@ export interface PickupGroups {
   available: PickupTaskWithDonation[]
   assigned: PickupTaskWithDonation[]
   collected: PickupTaskWithDonation[]
+  delivered: PickupTaskWithDonation[]
   unavailable: PickupTaskWithDonation[]
 }
