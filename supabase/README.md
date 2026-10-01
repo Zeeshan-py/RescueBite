@@ -12,7 +12,7 @@ The application roles are `DONOR`, `NGO`, `VOLUNTEER`, and `ADMIN`. PostgreSQL e
 
 RLS is enabled on all seven application tables. Policies restrict profiles and notifications to their owners, donations and workflow records to participating users, NGO profiles to their owner for writes, pickup tasks to authorized volunteers, and activity logs to administrators. Private `SECURITY DEFINER` helper functions perform role and ownership checks without recursively invoking policies on `public.users`.
 
-Frontend role checks are only for user experience; RLS is the actual data boundary. The Supabase `service_role` is reserved for trusted backend processes that will later create matches, pickup tasks, notifications, and activity logs. Never expose the service-role key in browser code.
+Frontend role checks are only for user experience; RLS is the actual data boundary. Secured database functions and triggers create workflow notifications; browser users cannot insert or delete them and can update only their own `is_read` value. The Supabase `service_role` remains reserved for trusted backend processes and must never be exposed in browser code.
 
 The Phase 4 donation migration requires positive quantities and meal portions. Its update trigger limits donors to editing a `POSTED` donation or moving it to `CANCELLED`; later workflow transitions remain reserved for trusted future services and administrators.
 
@@ -23,6 +23,8 @@ Phase 6 uses `respond_to_donation_match` for NGO decisions. It locks both the NG
 Phase 7 extends acceptance to create one active pickup task per donation. `claim_pickup_task` locks the task so simultaneous volunteers produce one winner; `mark_pickup_collected` requires the assigned volunteer. Protected pickup assignment and status columns are guarded by a trigger and workflow RPCs. The migration stops at `COLLECTED`.
 
 Phase 8 adds `donations.completed_at` and completes the operational lifecycle without adding another table. `mark_pickup_delivered` requires the assigned volunteer and atomically synchronizes the pickup and donation at `DELIVERED`. `confirm_donation_receipt` requires ownership of the accepted NGO match and moves only the donation to `COMPLETED`. Row locks make duplicate and concurrent requests produce one successful transition, while timestamp constraints and the existing workflow triggers prevent contradictory states.
+
+Phase 9 extends `notifications` with an optional related entity and a stable event key. Private trigger functions create persistent donor, NGO, and volunteer notifications in the same transaction as each successful workflow change. A unique partial index prevents duplicate events, including concurrent requests. Realtime publishes only `notifications`, `donations`, and `pickup_tasks`; table RLS still decides which rows an authenticated subscriber can receive.
 
 ## Applying migrations
 

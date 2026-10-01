@@ -6,9 +6,10 @@ export type DonationStatus =
 export type MatchStatus = 'SUGGESTED' | 'VIEWED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED'
 export type PickupTaskStatus = 'AVAILABLE' | 'ASSIGNED' | 'COLLECTED' | 'DELIVERED' | 'CANCELLED'
 export type NotificationType =
-  | 'DONATION_ACCEPTED' | 'MATCH_FOUND' | 'PICKUP_ASSIGNED' | 'PICKUP_REMINDER'
+  | 'DONATION_CREATED' | 'DONATION_ACCEPTED' | 'MATCH_FOUND' | 'PICKUP_AVAILABLE'
+  | 'PICKUP_ASSIGNED' | 'PICKUP_REMINDER' | 'RECEIPT_CONFIRMED'
   | 'FOOD_COLLECTED' | 'FOOD_DELIVERED' | 'DONATION_COMPLETED'
-  | 'DONATION_EXPIRED' | 'DONATION_CANCELLED'
+  | 'DONATION_EXPIRED' | 'DONATION_CANCELLED' | 'DONATION_REJECTED' | 'DONATION_EXCEPTION'
 
 export interface User {
   id: string
@@ -85,6 +86,9 @@ export interface Notification {
   message: string
   type: NotificationType
   is_read: boolean
+  entity_type: string | null
+  entity_id: string | null
+  event_key: string | null
   created_at: string
 }
 

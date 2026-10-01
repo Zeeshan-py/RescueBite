@@ -25,6 +25,7 @@ const NgoDonationDetailsPage = lazy(() => import('./pages/ngo/NgoDonationDetails
 const VolunteerDashboardPage = lazy(() => import('./pages/volunteer/VolunteerDashboardPage'))
 const PickupListPage = lazy(() => import('./pages/volunteer/PickupListPage'))
 const PickupDetailsPage = lazy(() => import('./pages/volunteer/PickupDetailsPage'))
+const NotificationsPage = lazy(() => import('./pages/notifications/NotificationsPage'))
 
 const allRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN']
 
@@ -61,7 +62,7 @@ export default function App() {
       <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/profile" element={<Page><ProfilePage /></Page>} />
-          <Route path="/notifications" element={<Page><PlaceholderPage title="Notifications" description="Notification records remain protected and will be presented in a later phase." /></Page>} />
+          <Route path="/notifications" element={<Page><NotificationsPage /></Page>} />
         </Route>
       </Route>
 

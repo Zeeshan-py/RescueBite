@@ -6,6 +6,7 @@ import { acceptDonation, declineMatch, getNgoDonationMatch } from '../../service
 import type { NgoDonationMatch } from '../../services/ngo/ngo-workflow.types'
 import { isActionableMatch } from '../../services/ngo/ngo-workflow.utils'
 import { PickupSummary } from '../../components/pickups/PickupSummary'
+import { subscribeToDonationStatus, unsubscribeFromWorkflow } from '../../services/realtime/workflow-realtime.service'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
 const scoreLabels: Array<[keyof NgoDonationMatch, string]> = [['distance_score', 'Distance'], ['urgency_score', 'Urgency'], ['compatibility_score', 'Compatibility'], ['capacity_score', 'Capacity'], ['availability_score', 'Availability']]
@@ -15,6 +16,12 @@ export default function NgoDonationDetailsPage() {
   const [item, setItem] = useState<NgoDonationMatch | null>(null), [loading, setLoading] = useState(true), [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null), [message, setMessage] = useState<string | null>(null)
   useEffect(() => { if (!matchId) return; void getNgoDonationMatch(matchId).then(setItem).catch((e: Error) => setError(e.message)).finally(() => setLoading(false)) }, [matchId])
+  useEffect(() => {
+    const donationId = item?.donation.id
+    if (!donationId) return
+    const channel = subscribeToDonationStatus(donationId, (donation) => setItem((current) => current ? { ...current, donation } : current))
+    return () => { void unsubscribeFromWorkflow(channel) }
+  }, [item?.donation.id])
   async function decide(decision: 'ACCEPT' | 'DECLINE') {
     if (!matchId || (decision === 'DECLINE' && !window.confirm('Decline this donation suggestion? This decision will remain in history.'))) return
     setWorking(true); setError(null); setMessage(null)

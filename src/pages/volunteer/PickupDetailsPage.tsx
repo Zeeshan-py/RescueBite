@@ -8,6 +8,7 @@ import { isPickupClaimable } from '../../services/pickups/pickup.utils'
 import { useAuth } from '../../auth/useAuth'
 import { markDelivered } from '../../services/delivery/delivery.service'
 import { canMarkDelivered } from '../../services/delivery/delivery.utils'
+import { subscribeToDonationStatus, subscribeToPickupStatus, unsubscribeFromWorkflow } from '../../services/realtime/workflow-realtime.service'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
 export default function PickupDetailsPage() {
@@ -15,6 +16,17 @@ export default function PickupDetailsPage() {
   const [task, setTask] = useState<PickupTaskWithDonation | null>(null), [loading, setLoading] = useState(true), [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null), [message, setMessage] = useState<string | null>(null)
   useEffect(() => { if (!id) return; void getPickupTask(id).then(setTask).catch((e: Error) => setError(e.message)).finally(() => setLoading(false)) }, [id])
+  useEffect(() => {
+    if (!id) return
+    const channel = subscribeToPickupStatus(id, (updated) => setTask((current) => current ? { ...current, ...updated, donation: current.donation } : current))
+    return () => { void unsubscribeFromWorkflow(channel) }
+  }, [id])
+  useEffect(() => {
+    const donationId = task?.donation.id
+    if (!donationId) return
+    const channel = subscribeToDonationStatus(donationId, (donation) => setTask((current) => current ? { ...current, donation } : current))
+    return () => { void unsubscribeFromWorkflow(channel) }
+  }, [task?.donation.id])
   async function act(action: 'CLAIM' | 'COLLECT' | 'DELIVER') {
     if (!id) return
     setWorking(true); setError(null); setMessage(null)

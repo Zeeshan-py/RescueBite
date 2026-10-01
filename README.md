@@ -88,6 +88,10 @@ Accepting an NGO match creates one `AVAILABLE` pickup task using the donation an
 
 An assigned volunteer can atomically move a collected pickup and donation to `DELIVERED`, recording `delivered_at`. Only the NGO with the accepted match can then confirm receipt, moving the donation to `COMPLETED` and recording `completed_at`. Both actions use secured database functions, row locks, guarded status transitions, and activity logs. Donors can follow the seven-step rescue journey and view the receiving NGO without seeing private volunteer details. Notifications, realtime updates, maps, proof of delivery, analytics, and administration remain outside this phase.
 
+## Phase 9 notifications and realtime
+
+Workflow changes now create persistent, recipient-specific notifications inside the same database transaction. Stable event keys prevent duplicate alerts, and RLS permits users to read and mark only their own records. The application header includes a live unread badge and responsive notification panel, while the full notification history supports individual and bulk read actions. Supabase Realtime also keeps visible donation and pickup statuses current through narrowly filtered subscriptions.
+
 ## Project structure
 
 ```text

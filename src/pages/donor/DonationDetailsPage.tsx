@@ -7,6 +7,7 @@ import { SuggestedMatchesSection } from '../../components/donations/SuggestedMat
 import { PickupSummary } from '../../components/pickups/PickupSummary'
 import { cancelDonation, getDonationById } from '../../services/donations/donation.service'
 import type { Donation } from '../../types/domain'
+import { subscribeToDonationStatus, unsubscribeFromWorkflow } from '../../services/realtime/workflow-realtime.service'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
 export default function DonationDetailsPage() {
@@ -30,6 +31,11 @@ export default function DonationDetailsPage() {
       if (active) setLoading(false)
     })
     return () => { active = false }
+  }, [id])
+  useEffect(() => {
+    if (!id) return
+    const channel = subscribeToDonationStatus(id, setDonation)
+    return () => { void unsubscribeFromWorkflow(channel) }
   }, [id])
   async function handleCancel() { if (!id || !window.confirm('Cancel this donation? The record will remain in your history.')) return; setCancelling(true); setError(null); try { setDonation(await cancelDonation(id)); setMessage('Donation cancelled. The record remains available in your history.') } catch (e) { setError(e instanceof Error ? e.message : 'The donation could not be cancelled.') } finally { setCancelling(false) } }
   if (loading) return <LoadingState label="Loading donation details…" />

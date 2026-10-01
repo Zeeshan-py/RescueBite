@@ -3,6 +3,8 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { roleHomePath } from '../../auth/route-access'
 import { useAuth } from '../../auth/useAuth'
 import type { UserRole } from '../../types/domain'
+import { NotificationProvider } from '../../services/notifications/NotificationProvider'
+import { NotificationBell } from '../notifications/NotificationBell'
 
 const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
   DONOR: [
@@ -49,7 +51,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  return (
+  const layout = (
     <div className="min-h-screen lg:grid lg:grid-cols-[252px_1fr]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:p-3">Skip to content</a>
       <aside className="bg-pine text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
@@ -81,10 +83,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><span className="rounded-full border border-line px-3 py-1 text-xs text-muted">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></header>
+        <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="min-w-0 truncate text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}<span className="hidden rounded-full border border-line px-3 py-1 text-xs text-muted sm:inline">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 8</span></footer>
+        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 9</span></footer>
       </div>
     </div>
   )
+  return isAuthenticated ? <NotificationProvider>{layout}</NotificationProvider> : layout
 }
