@@ -14,6 +14,8 @@ export interface RankedMatch extends MatchScores {
   organizationName: string
   location: string
   capacity: number
+  distanceKm: number | null
+  distanceSource: 'coordinates' | 'text-fallback'
   matchId?: string
   status?: Match['status']
 }
@@ -28,4 +30,3 @@ export interface MatchingContext {
   ngo: NGO
   now?: Date
 }
-

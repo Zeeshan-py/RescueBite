@@ -4,11 +4,16 @@ import type { DonationInput } from './donation.types'
 
 const valid: DonationInput = {
   foodType: 'Cooked Food', otherFoodType: '', quantity: 12.5, mealPortions: 25,
-  location: 'Main Street, Lahore', availableFrom: '2026-09-27T12:00',
+  location: 'Main Street, Lahore', latitude: null, longitude: null, availableFrom: '2026-09-27T12:00',
   collectionDeadline: '2026-09-27T15:00', safetyInformation: 'Kept covered.', description: '',
 }
 
 describe('donation validation', () => {
+  it('rejects incomplete or invalid map coordinates', () => {
+    expect(validateDonation({ ...valid, latitude: 31, longitude: null }).latitude).toBeTruthy()
+    expect(validateDonation({ ...valid, latitude: 91, longitude: 0 }).latitude).toBeTruthy()
+    expect(validateDonation({ ...valid, latitude: 31, longitude: 74 })).toEqual({})
+  })
   it('accepts valid donation information', () => expect(validateDonation(valid)).toEqual({}))
   it('rejects a non-positive quantity', () => expect(validateDonation({ ...valid, quantity: -1 }).quantity).toBeTruthy())
   it('rejects zero or fractional meal portions', () => {
@@ -23,4 +28,3 @@ describe('donation validation', () => {
     expect(validateDonation({ ...valid, collectionDeadline: valid.availableFrom }).collectionDeadline).toBeTruthy()
   })
 })
-

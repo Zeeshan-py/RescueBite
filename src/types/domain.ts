@@ -27,6 +27,8 @@ export interface NGO {
   organization_name: string
   description: string | null
   location: string
+  latitude: number | null
+  longitude: number | null
   capacity: number
   accepted_food_types: string[]
   contact_information: string | null
@@ -40,6 +42,8 @@ export interface Donation {
   quantity: number
   meal_portions: number
   location: string
+  latitude: number | null
+  longitude: number | null
   available_from: string
   collection_deadline: string
   safety_information: string | null
@@ -56,6 +60,7 @@ export interface Match {
   ngo_id: string
   matching_score: number
   distance_score: number
+  distance_km: number | null
   urgency_score: number
   compatibility_score: number
   capacity_score: number

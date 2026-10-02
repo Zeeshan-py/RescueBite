@@ -1,4 +1,5 @@
 import { FOOD_TYPES, type DonationFieldErrors, type DonationInput } from './donation.types'
+import { isValidCoordinates } from '../location/location.utils'
 
 export function validateDonation(input: DonationInput): DonationFieldErrors {
   const errors: DonationFieldErrors = {}
@@ -7,6 +8,7 @@ export function validateDonation(input: DonationInput): DonationFieldErrors {
   if (!Number.isFinite(input.quantity) || input.quantity <= 0) errors.quantity = 'Quantity must be greater than zero.'
   if (!Number.isInteger(input.mealPortions) || input.mealPortions <= 0) errors.mealPortions = 'Meal portions must be a whole number greater than zero.'
   if (!input.location.trim()) errors.location = 'Enter the pickup address or location.'
+  if ((input.latitude !== null || input.longitude !== null) && !isValidCoordinates(input)) errors.latitude = 'Select a valid location on the map or clear it.'
 
   const available = new Date(input.availableFrom)
   const deadline = new Date(input.collectionDeadline)
@@ -25,4 +27,3 @@ export function resolvedFoodType(input: DonationInput): string {
 export function hasDonationErrors(errors: DonationFieldErrors): boolean {
   return Object.keys(errors).length > 0
 }
-

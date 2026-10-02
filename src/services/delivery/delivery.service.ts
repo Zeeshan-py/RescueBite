@@ -20,11 +20,11 @@ export async function getDeliveryStatus(donationId: string): Promise<DeliverySta
   const client = getSupabaseClient()
   const [pickupResult, matchResult] = await Promise.all([
     client.from('pickup_tasks').select('*').eq('donation_id', donationId).neq('status', 'CANCELLED').maybeSingle(),
-    client.from('matches').select('ngo:ngos(id, organization_name, location)').eq('donation_id', donationId).eq('status', 'ACCEPTED').maybeSingle(),
+    client.from('matches').select('ngo:ngos(id, organization_name, location, latitude, longitude)').eq('donation_id', donationId).eq('status', 'ACCEPTED').maybeSingle(),
   ])
   if (pickupResult.error) throw failure(pickupResult.error)
   if (matchResult.error) throw failure(matchResult.error)
-  const match = matchResult.data as unknown as { ngo: Pick<NGO, 'id' | 'organization_name' | 'location'> | null } | null
+  const match = matchResult.data as unknown as { ngo: Pick<NGO, 'id' | 'organization_name' | 'location' | 'latitude' | 'longitude'> | null } | null
   return { pickup: pickupResult.data as PickupTask | null, receivingNgo: match?.ngo ?? null }
 }
 
@@ -41,4 +41,10 @@ export async function confirmReceipt(donationId: string): Promise<Donation> {
   const refreshed = await client.from('donations').select('*').eq('id', donationId).single()
   if (refreshed.error) throw failure(refreshed.error)
   return refreshed.data as Donation
+}
+
+export async function getPickupDestination(donationId: string): Promise<DeliveryStatus['receivingNgo']> {
+  const { data, error } = await getSupabaseClient().rpc('get_pickup_destination', { target_donation_id: donationId })
+  if (error) throw failure(error)
+  return data?.[0] ?? null
 }

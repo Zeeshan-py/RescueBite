@@ -8,7 +8,7 @@ import { EMPTY_DONATION_INPUT, type DonationInput, type FoodTypeOption } from '.
 const localDateTime = (value: string) => { const date = new Date(value); const offset = date.getTimezoneOffset(); return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16) }
 function toInput(donation: Awaited<ReturnType<typeof getDonationById>>): DonationInput {
   const isOther = donation.food_type.startsWith('Other: ')
-  return { foodType: isOther ? 'Other' : donation.food_type as FoodTypeOption, otherFoodType: isOther ? donation.food_type.slice(7) : '', quantity: donation.quantity, mealPortions: donation.meal_portions, location: donation.location, availableFrom: localDateTime(donation.available_from), collectionDeadline: localDateTime(donation.collection_deadline), safetyInformation: donation.safety_information ?? '', description: donation.description ?? '' }
+  return { foodType: isOther ? 'Other' : donation.food_type as FoodTypeOption, otherFoodType: isOther ? donation.food_type.slice(7) : '', quantity: donation.quantity, mealPortions: donation.meal_portions, location: donation.location, latitude: donation.latitude, longitude: donation.longitude, availableFrom: localDateTime(donation.available_from), collectionDeadline: localDateTime(donation.collection_deadline), safetyInformation: donation.safety_information ?? '', description: donation.description ?? '' }
 }
 
 export default function DonationFormPage() {

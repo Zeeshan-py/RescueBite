@@ -2,12 +2,15 @@ import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/useAuth'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { saveNgoProfile } from '../../services/auth/auth.service'
+import { LocationPicker } from '../../components/maps/LocationPicker'
+import type { Coordinates } from '../../services/location/location.types'
 
 export default function NgoSetupPage() {
   const { user, ngoProfile, refreshProfile } = useAuth()
   const [organizationName, setOrganizationName] = useState(ngoProfile?.organization_name ?? '')
   const [description, setDescription] = useState(ngoProfile?.description ?? '')
   const [location, setLocation] = useState(ngoProfile?.location ?? '')
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(ngoProfile?.latitude !== null && ngoProfile?.latitude !== undefined && ngoProfile.longitude !== null ? { latitude: ngoProfile.latitude, longitude: ngoProfile.longitude } : null)
   const [capacity, setCapacity] = useState(ngoProfile?.capacity ?? 0)
   const [foodTypes, setFoodTypes] = useState(ngoProfile?.accepted_food_types.join(', ') ?? '')
   const [contact, setContact] = useState(ngoProfile?.contact_information ?? '')
@@ -26,7 +29,7 @@ export default function NgoSetupPage() {
     }
     setSaving(true)
     try {
-      await saveNgoProfile(user.id, { organizationName, description, location, capacity, acceptedFoodTypes, contactInformation: contact })
+      await saveNgoProfile(user.id, { organizationName, description, location, latitude: coordinates?.latitude ?? null, longitude: coordinates?.longitude ?? null, capacity, acceptedFoodTypes, contactInformation: contact })
       await refreshProfile()
       setMessage('Organization profile saved.')
     } catch (caught) {
@@ -46,6 +49,7 @@ export default function NgoSetupPage() {
         {error && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 sm:col-span-2">{error}</p>}
         <FormField label="Organization name" htmlFor="ngo-name"><TextInput id="ngo-name" value={organizationName} onChange={(event) => setOrganizationName(event.target.value)} /></FormField>
         <FormField label="Location" htmlFor="ngo-location"><TextInput id="ngo-location" value={location} onChange={(event) => setLocation(event.target.value)} /></FormField>
+        <div className="sm:col-span-2"><LocationPicker value={coordinates} onChange={setCoordinates} label="Organization destination position" /></div>
         <FormField label="Receiving capacity" htmlFor="ngo-capacity" hint="Approximate meal portions"><TextInput id="ngo-capacity" type="number" min="0" value={capacity} onChange={(event) => setCapacity(Number(event.target.value))} /></FormField>
         <FormField label="Contact information" htmlFor="ngo-contact"><TextInput id="ngo-contact" value={contact} onChange={(event) => setContact(event.target.value)} /></FormField>
         <FormField label="Accepted food types" htmlFor="ngo-food-types" hint="Separate values with commas"><TextInput id="ngo-food-types" value={foodTypes} onChange={(event) => setFoodTypes(event.target.value)} /></FormField>

@@ -165,3 +165,7 @@ Implementation decisions:
 Configuration follows the official [Vite guide](https://vite.dev/guide/),
 [Tailwind Vite integration](https://tailwindcss.com/docs/installation/using-vite),
 and [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing).
+
+## Phase 10 location support
+
+Donation and NGO profiles now support optional confirmed coordinates alongside written addresses. Leaflet/OpenStreetMap maps show pickup and receiving locations; geographic matching uses Haversine distance when both locations are known and preserves text fallback otherwise. See supabase/README.md for the migration, scoring bands, privacy, and live verification command.

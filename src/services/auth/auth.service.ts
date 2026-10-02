@@ -145,6 +145,8 @@ export async function saveNgoProfile(userId: string, input: NgoRegistrationDetai
     organization_name: input.organizationName.trim(),
     description: input.description.trim() || null,
     location: input.location.trim(),
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
     capacity: input.capacity,
     accepted_food_types: input.acceptedFoodTypes,
     contact_information: input.contactInformation.trim() || null,

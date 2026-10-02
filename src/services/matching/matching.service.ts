@@ -28,7 +28,7 @@ async function loadNgos(): Promise<NGO[]> {
 
 function mergeStoredMatches(matches: Match[], ngos: NGO[]): RankedMatch[] {
   const ngoById = new Map(ngos.map((ngo) => [ngo.id, ngo]))
-  return matches.flatMap((match) => {
+  return matches.flatMap<RankedMatch>((match) => {
     const ngo = ngoById.get(match.ngo_id)
     return ngo ? [{
       matchId: match.id,
@@ -37,6 +37,8 @@ function mergeStoredMatches(matches: Match[], ngos: NGO[]): RankedMatch[] {
       organizationName: ngo.organization_name,
       location: ngo.location,
       capacity: ngo.capacity,
+      distanceKm: match.distance_km,
+      distanceSource: match.distance_km === null ? 'text-fallback' : 'coordinates',
       matchingScore: match.matching_score,
       distanceScore: match.distance_score,
       urgencyScore: match.urgency_score,
@@ -80,4 +82,3 @@ export async function generateMatches(donationId: string, now = new Date()): Pro
   if (error) throw matchingFailure(error)
   return { donationId, matches: mergeStoredMatches(data as Match[], ngos) }
 }
-

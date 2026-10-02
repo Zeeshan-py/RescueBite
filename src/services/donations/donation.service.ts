@@ -24,6 +24,8 @@ function values(input: DonationInput) {
     quantity: input.quantity,
     meal_portions: input.mealPortions,
     location: input.location.trim(),
+    latitude: input.latitude,
+    longitude: input.longitude,
     available_from: new Date(input.availableFrom).toISOString(),
     collection_deadline: new Date(input.collectionDeadline).toISOString(),
     safety_information: input.safetyInformation.trim() || null,

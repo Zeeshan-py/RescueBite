@@ -6,6 +6,7 @@ import {
   UNKNOWN_DISTANCE_SCORE,
 } from './matching.constants'
 import type { MatchScores, RankedMatch } from './matching.types'
+import { calculateDistanceKm, calculateDistanceScoreFromKm, isValidCoordinates } from '../location/location.utils'
 
 const wildcardFoodTypes = new Set(['all', 'any', 'all types', 'all food types'])
 
@@ -32,6 +33,16 @@ export function calculateDistanceScore(donationLocation: string, ngoLocation: st
   const donation = normalizeLocation(donationLocation)
   const ngo = normalizeLocation(ngoLocation)
   return donation && ngo && donation === ngo ? SAME_LOCATION_SCORE : UNKNOWN_DISTANCE_SCORE
+}
+
+export function calculateDistanceComponent(donation: Donation, ngo: NGO): Pick<RankedMatch, 'distanceKm' | 'distanceScore' | 'distanceSource'> {
+  const donationCoordinates = { latitude: donation.latitude, longitude: donation.longitude }
+  const ngoCoordinates = { latitude: ngo.latitude, longitude: ngo.longitude }
+  if (isValidCoordinates(donationCoordinates) && isValidCoordinates(ngoCoordinates)) {
+    const distanceKm = calculateDistanceKm(donationCoordinates, ngoCoordinates)
+    return { distanceKm, distanceScore: calculateDistanceScoreFromKm(distanceKm), distanceSource: 'coordinates' }
+  }
+  return { distanceKm: null, distanceScore: calculateDistanceScore(donation.location, ngo.location), distanceSource: 'text-fallback' }
 }
 
 /** Shorter time remaining produces greater urgency. A passed deadline is not matchable and scores 0. */
@@ -87,8 +98,9 @@ export function isEligibleNgo(donation: Donation, ngo: NGO, now = new Date()): b
 }
 
 export function scoreNgo(donation: Donation, ngo: NGO, now = new Date()): RankedMatch {
+  const distance = calculateDistanceComponent(donation, ngo)
   const components = {
-    distanceScore: calculateDistanceScore(donation.location, ngo.location),
+    distanceScore: distance.distanceScore,
     urgencyScore: calculateUrgencyScore(donation.collection_deadline, now),
     compatibilityScore: calculateCompatibilityScore(donation.food_type, ngo.accepted_food_types),
     capacityScore: calculateCapacityScore(donation.meal_portions, ngo.capacity),
@@ -99,6 +111,8 @@ export function scoreNgo(donation: Donation, ngo: NGO, now = new Date()): Ranked
     organizationName: ngo.organization_name,
     location: ngo.location,
     capacity: ngo.capacity,
+    distanceKm: distance.distanceKm,
+    distanceSource: distance.distanceSource,
     ...components,
     matchingScore: calculateMatchingScore(components),
   }

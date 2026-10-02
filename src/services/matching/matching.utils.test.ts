@@ -5,6 +5,7 @@ import {
   calculateCapacityScore,
   calculateCompatibilityScore,
   calculateDistanceScore,
+  calculateDistanceComponent,
   calculateMatchingScore,
   calculateUrgencyScore,
   canGenerateMatches,
@@ -12,12 +13,19 @@ import {
 } from './matching.utils'
 
 const now = new Date('2026-09-28T10:00:00Z')
-const donation: Donation = { id: 'd1', donor_id: 'donor', food_type: 'Cooked Food', quantity: 20, meal_portions: 40, location: 'Gulberg, Lahore', available_from: '2026-09-28T09:00:00Z', collection_deadline: '2026-09-28T14:00:00Z', safety_information: null, description: null, status: 'POSTED', completed_at: null, created_at: now.toISOString(), updated_at: now.toISOString() }
-const ngo = (overrides: Partial<NGO> = {}): NGO => ({ id: 'n1', user_id: 'ngo-user', organization_name: 'Community Support', description: null, location: 'Gulberg, Lahore', capacity: 80, accepted_food_types: ['Cooked Food'], contact_information: null, created_at: now.toISOString(), ...overrides })
+const donation: Donation = { id: 'd1', donor_id: 'donor', food_type: 'Cooked Food', quantity: 20, meal_portions: 40, location: 'Gulberg, Lahore', latitude: null, longitude: null, available_from: '2026-09-28T09:00:00Z', collection_deadline: '2026-09-28T14:00:00Z', safety_information: null, description: null, status: 'POSTED', completed_at: null, created_at: now.toISOString(), updated_at: now.toISOString() }
+const ngo = (overrides: Partial<NGO> = {}): NGO => ({ id: 'n1', user_id: 'ngo-user', organization_name: 'Community Support', description: null, location: 'Gulberg, Lahore', latitude: null, longitude: null, capacity: 80, accepted_food_types: ['Cooked Food'], contact_information: null, created_at: now.toISOString(), ...overrides })
 
 describe('matching scores', () => {
   it('uses the documented weights', () => expect(calculateMatchingScore({ distanceScore: 80, urgencyScore: 90, compatibilityScore: 100, capacityScore: 90, availabilityScore: 80 })).toBe(88))
   it('uses only exact textual locations or a neutral fallback', () => { expect(calculateDistanceScore('Gulberg, Lahore', 'gulberg lahore')).toBe(100); expect(calculateDistanceScore('Gulberg', 'Johar Town')).toBe(50) })
+  it('uses geographic distance when both coordinate pairs exist', () => {
+    const result = calculateDistanceComponent({ ...donation, latitude: 31.5204, longitude: 74.3587 }, ngo({ latitude: 31.4697, longitude: 74.2728 }))
+    expect(result.distanceSource).toBe('coordinates'); expect(result.distanceKm).toBeCloseTo(9.9, 0); expect(result.distanceScore).toBe(75)
+  })
+  it('does not invent distance when a coordinate pair is missing', () => {
+    expect(calculateDistanceComponent({ ...donation, latitude: 31.5204, longitude: 74.3587 }, ngo()).distanceKm).toBeNull()
+  })
   it('increases urgency as the deadline approaches', () => { expect(calculateUrgencyScore('2026-09-28T11:00:00Z', now)).toBe(100); expect(calculateUrgencyScore('2026-09-30T11:00:00Z', now)).toBe(25); expect(calculateUrgencyScore('2026-09-28T09:00:00Z', now)).toBe(0) })
   it('scores exact and general food acceptance', () => { expect(calculateCompatibilityScore('Cooked Food', ['cooked'])).toBe(100); expect(calculateCompatibilityScore('Bakery', ['All Food Types'])).toBe(80); expect(calculateCompatibilityScore('Bakery', ['Vegetables'])).toBe(0) })
   it('scores capacity headroom and rejects insufficient capacity', () => { expect(calculateCapacityScore(40, 40)).toBe(50); expect(calculateCapacityScore(40, 80)).toBe(100); expect(calculateCapacityScore(40, 39)).toBe(0) })

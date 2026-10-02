@@ -61,3 +61,15 @@ Development users should be created through Supabase Auth. No seed file is inclu
 The Phase 3 Auth trigger creates a `public.users` profile from validated signup metadata for `DONOR`, `NGO`, and `VOLUNTEER` registrations. It intentionally rejects `ADMIN` as a public registration role. With email confirmation enabled, this lets the profile be created before the user has an authenticated browser session.
 
 Provision an administrator separately: create the authentication account through the Supabase dashboard or another trusted server-side administration process, then insert its matching UUID and profile details into `public.users` with role `ADMIN` from the SQL editor. Never expose the service-role key in the browser or add an admin option to the public registration form.
+
+## Phase 10: locations and maps
+
+`202610020003_geographic_locations.sql` adds optional paired latitude/longitude to donations and NGO profiles. Both must be absent or valid together (latitude -90 to 90, longitude -180 to 180). Written locations remain required. `matches.distance_km` stores the distance when suggestions are generated.
+
+Matching uses straight-line Haversine distance, not road routing. Distance scores are 100 within 2 km, 90 within 5 km, 75 within 10 km, 50 within 20 km, 25 within 30 km, and 0 beyond 30 km. These local-delivery bands are project assumptions. The existing 30/25/20/15/10 weights remain unchanged. Without both coordinate pairs, existing normalized-text scoring remains in use and distance_km stays null.
+
+Leaflet/react-leaflet displays OpenStreetMap tiles with attribution. Users manually select and confirm a point; the app does not request GPS permissions. Tile requests go to OpenStreetMap and reveal the displayed geographic area; no account data is sent with them. Maps show missing-coordinate and tile-failure messages.
+
+Existing donation and NGO ownership policies protect updates. Volunteers obtain receiving coordinates through get_pickup_destination only for their assigned task and its accepted NGO. This does not grant unrestricted access to NGO profiles.
+
+Run npm test, npm run lint, and npm run build. For a configured development Supabase project, node scripts/verify-phase10.mjs creates temporary Auth users and exercises coordinate constraints, RLS, matching, realtime, and the delivery workflow, then removes its test records. It needs the ignored .env server secret and must never run in the browser. Do not use real personal data for these checks.
