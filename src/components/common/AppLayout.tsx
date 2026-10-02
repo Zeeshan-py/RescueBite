@@ -8,21 +8,21 @@ import { NotificationBell } from '../notifications/NotificationBell'
 
 const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
   DONOR: [
-    { label: 'Dashboard', to: '/donor' }, { label: 'My donations', to: '/donor/donations' },
+    { label: 'Dashboard', to: '/donor' }, { label: 'Analytics', to: '/donor/analytics' }, { label: 'My donations', to: '/donor/donations' },
     { label: 'Create donation', to: '/donor/donations/new' },
     { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/profile' },
   ],
   NGO: [
-    { label: 'Dashboard', to: '/ngo' }, { label: 'Available donations', to: '/ngo/donations' },
+    { label: 'Dashboard', to: '/ngo' }, { label: 'Analytics', to: '/ngo/analytics' }, { label: 'Available donations', to: '/ngo/donations' },
     { label: 'Accepted donations', to: '/ngo/accepted' }, { label: 'Organization profile', to: '/ngo/setup' },
     { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/profile' },
   ],
   VOLUNTEER: [
-    { label: 'Dashboard', to: '/volunteer' }, { label: 'Pickup tasks', to: '/volunteer/pickups' },
+    { label: 'Dashboard', to: '/volunteer' }, { label: 'Analytics', to: '/volunteer/analytics' }, { label: 'Pickup tasks', to: '/volunteer/pickups' },
     { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/profile' },
   ],
   ADMIN: [
-    { label: 'Dashboard', to: '/admin' }, { label: 'Users', to: '/admin/users' },
+    { label: 'Dashboard', to: '/admin' }, { label: 'Analytics', to: '/admin/analytics' }, { label: 'Users', to: '/admin/users' },
     { label: 'Donations', to: '/admin/donations' }, { label: 'NGOs', to: '/admin/ngos' },
     { label: 'Volunteers', to: '/admin/volunteers' }, { label: 'Activity logs', to: '/admin/activity' },
   ],
@@ -85,7 +85,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-w-0">
         <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="min-w-0 truncate text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}<span className="hidden rounded-full border border-line px-3 py-1 text-xs text-muted sm:inline">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 11</span></footer>
+        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 12</span></footer>
       </div>
     </div>
   )

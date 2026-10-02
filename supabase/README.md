@@ -89,3 +89,6 @@ The existing activity_logs table records the audit view. Small triggers fill pre
 The dashboard service layer is src/services/dashboard. Summaries refresh through the existing personal notification provider, on window focus, or with Refresh. Admins use focus/manual refresh because operational notifications belong to participants; no broad realtime subscription was added. The personal notification service now explicitly filters by the authenticated user even when the account has administrative RLS access.
 
 Run node scripts/verify-phase11.mjs against the configured development Supabase project to check aggregates, filters, pagination, admin denial, ownership, and workflow regression. It uses temporary Auth users and removes only its own records, including audit and notification records. Connection settings remain in ignored .env. Run npm test, npm run lint, and npm run build for local validation.
+
+## Phase 12 aggregation
+202610020005_analytics_impact.sql adds get_my_impact(date,date), get_platform_impact(date,date), and a completed_at partial index. Both RPCs preserve RLS through SECURITY INVOKER; ownership and admin authorization are derived from the trusted profile. No tables or policies change. See ../docs/analytics.md for definitions, UTC dates, performance and schema limitations.

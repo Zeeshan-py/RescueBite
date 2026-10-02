@@ -173,3 +173,6 @@ Donation and NGO profiles now support optional confirmed coordinates alongside w
 ## Phase 11 dashboards
 
 All participant dashboards show database aggregates and bounded recent workflow records. The protected /admin dashboard provides read-only user, donation, NGO, volunteer, and activity views with server-side filters and pagination. See supabase/README.md for the authorization model, migration, count definitions, and live verification command. Existing matching, delivery, notification, and map workflows remain in use.
+
+## Phase 12 — Analytics and impact
+Role reports live at /admin/analytics, /donor/analytics, /ngo/analytics and /volunteer/analytics. Secure PostgreSQL aggregates report creation cohorts and actual completion-date impact, using confirmed meal portions. See [metric definitions and limitations](docs/analytics.md). Validate with npm test, npm run lint, npm run build and node scripts/verify-phase12.mjs. No export, deployment or later-phase features are included.

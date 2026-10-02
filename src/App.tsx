@@ -10,6 +10,7 @@ import type { UserRole } from './types/domain'
 const OverviewPage = lazy(() => import('./pages/OverviewPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
+const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminRecordsPage = lazy(() => import('./pages/admin/AdminRecordsPage'))
 const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
@@ -68,6 +69,7 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['DONOR']} />}>
         <Route element={<AuthenticatedLayout />}>
+          <Route path="/donor/analytics" element={<Page><AnalyticsPage /></Page>} />
           <Route path="/donor" element={<Page><DonorDashboardPage /></Page>} />
           <Route path="/donor/donations" element={<Page><DonationListPage /></Page>} />
           <Route path="/donor/donations/new" element={<Page><DonationFormPage /></Page>} />
@@ -78,6 +80,7 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['NGO']} />}>
         <Route element={<AuthenticatedLayout />}>
+          <Route path="/ngo/analytics" element={<Page><AnalyticsPage /></Page>} />
           <Route path="/ngo" element={<Page><NgoDashboardPage /></Page>} />
           <Route path="/ngo/setup" element={<Page><NgoSetupPage /></Page>} />
           <Route path="/ngo/donations" element={<Page><NgoDonationListPage /></Page>} />
@@ -88,6 +91,7 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['VOLUNTEER']} />}>
         <Route element={<AuthenticatedLayout />}>
+          <Route path="/volunteer/analytics" element={<Page><AnalyticsPage /></Page>} />
           <Route path="/volunteer" element={<Page><VolunteerDashboardPage /></Page>} />
           <Route path="/volunteer/pickups" element={<Page><PickupListPage /></Page>} />
           <Route path="/volunteer/pickups/:id" element={<Page><PickupDetailsPage /></Page>} />
@@ -96,6 +100,7 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
         <Route element={<AuthenticatedLayout />}>
+          <Route path="/admin/analytics" element={<Page><AnalyticsPage /></Page>} />
           <Route path="/admin" element={<Page><AdminDashboardPage /></Page>} />
           <Route path="/admin/users" element={<Page><AdminRecordsPage key="users" view="users" /></Page>} />
           <Route path="/admin/donations" element={<Page><AdminRecordsPage key="donations" view="donations" /></Page>} />

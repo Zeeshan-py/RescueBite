@@ -3,7 +3,7 @@ import { canRoleAccessPath, roleHomePath } from './route-access'
 
 describe('role route access', () => {
   it.each(['DONOR', 'NGO', 'VOLUNTEER'] as const)('denies %s every admin route', (role) => {
-    for (const path of ['/admin', '/admin/users', '/admin/donations', '/admin/ngos', '/admin/volunteers', '/admin/activity']) {
+    for (const path of ['/admin', '/admin/users', '/admin/donations', '/admin/ngos', '/admin/volunteers', '/admin/activity', '/admin/analytics']) {
       expect(canRoleAccessPath(role, path)).toBe(false)
       expect(canRoleAccessPath('ADMIN', path)).toBe(true)
     }
