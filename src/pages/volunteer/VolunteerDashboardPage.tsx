@@ -1,16 +1,23 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { LoadingState } from '../../components/common/LoadingState'
-import { getPickupTasks } from '../../services/pickups/pickup.service'
-import type { PickupTaskWithDonation } from '../../services/pickups/pickup.types'
-import { groupPickupTasks } from '../../services/pickups/pickup.utils'
+import { DashboardSection, DashboardView, SummaryCards } from '../../components/dashboard/DashboardView'
+import { PickupTaskCard } from '../../components/pickups/PickupTaskCard'
+import { PickupRouteMap } from '../../components/maps/PickupRouteMap'
+import { getVolunteerDashboard } from '../../services/dashboard/dashboard.service'
+import { isValidCoordinates } from '../../services/location/location.utils'
+import { useDashboardQuery } from '../../services/dashboard/useDashboardQuery'
 
 export default function VolunteerDashboardPage() {
-  const { profile, user } = useAuth()
-  const [tasks, setTasks] = useState<PickupTaskWithDonation[]>([]), [loading, setLoading] = useState(true), [error, setError] = useState<string | null>(null)
-  useEffect(() => { void getPickupTasks().then(setTasks).catch((e: Error) => setError(e.message)).finally(() => setLoading(false)) }, [])
-  const groups = useMemo(() => groupPickupTasks(tasks, user?.id ?? ''), [tasks, user?.id])
-  if (loading) return <LoadingState label="Loading your pickup workspace…" />
-  return <div><p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">Volunteer workspace</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">Hello, {profile?.name?.split(' ')[0] ?? 'there'}.</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-muted">Claim an available rescue, collect it before the deadline, and record delivery to the receiving NGO.</p>{error && <p role="alert" className="mt-7 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}{!error && <><div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[['Available pickups', groups.available.length], ['Assigned to me', groups.assigned.length], ['Ready to deliver', groups.collected.length], ['Delivered', groups.delivered.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-line bg-white p-5"><p className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</p><p className="mt-3 font-display text-4xl text-pine">{value}</p></div>)}</div><Link to="/volunteer/pickups" className="mt-7 inline-flex rounded-lg bg-pine px-5 py-3 text-sm font-semibold text-white">Open pickup tasks</Link></>}</div>
+  const { user } = useAuth()
+  const load = useCallback(() => getVolunteerDashboard(user!.id), [user])
+  const query = useDashboardQuery(load)
+  const current = query.data?.assigned[0]
+  return <DashboardView title="Volunteer workspace" description="Find available pickups, follow assigned rescues, and review your delivery history." {...query}>
+    {query.data && <><SummaryCards summary={query.data.summary} /><Link to="/volunteer/pickups" className="mt-6 inline-block rounded-lg bg-pine px-5 py-3 text-sm font-semibold text-white">Browse available pickups</Link>
+      <DashboardSection title="My assigned rescues" empty={!query.data.assigned.length ? 'No active assignments. Browse available pickups to help.' : undefined}>{query.data.assigned.map((task) => <div key={task.id}><PickupTaskCard task={task} /><Link to={`/volunteer/pickups/${task.id}`} className="mt-2 inline-block text-sm font-semibold text-forest underline">{task.status === 'ASSIGNED' ? 'View pickup and mark collected' : 'View delivery and mark delivered'} →</Link></div>)}</DashboardSection>
+      {current && <DashboardSection title="Current pickup and destination"><p className="text-sm text-muted">Receiving NGO: {query.data.destination?.organization_name ?? 'Destination details unavailable'}</p><PickupRouteMap pickup={isValidCoordinates(current.donation) ? current.donation : null} destination={isValidCoordinates(query.data.destination) ? query.data.destination : null} pickupLabel={current.pickup_location} destinationLabel={query.data.destination?.location ?? current.delivery_location} /></DashboardSection>}
+      <DashboardSection title="Available pickups · earliest deadlines" empty={!query.data.available.length ? 'No eligible pickups are currently available.' : undefined}>{query.data.available.map((task) => <PickupTaskCard key={task.id} task={task} />)}</DashboardSection>
+      <DashboardSection title="My recent history" empty={!query.data.history.length ? 'No completed or cancelled pickups yet.' : undefined}>{query.data.history.map((task) => <PickupTaskCard key={task.id} task={task} />)}</DashboardSection></>}
+  </DashboardView>
 }

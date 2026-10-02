@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { canRoleAccessPath, roleHomePath } from './route-access'
 
 describe('role route access', () => {
+  it.each(['DONOR', 'NGO', 'VOLUNTEER'] as const)('denies %s every admin route', (role) => {
+    for (const path of ['/admin', '/admin/users', '/admin/donations', '/admin/ngos', '/admin/volunteers', '/admin/activity']) {
+      expect(canRoleAccessPath(role, path)).toBe(false)
+      expect(canRoleAccessPath('ADMIN', path)).toBe(true)
+    }
+  })
   it('maps every role to its dashboard', () => {
     expect(roleHomePath).toEqual({ DONOR: '/donor', NGO: '/ngo', VOLUNTEER: '/volunteer', ADMIN: '/admin' })
   })

@@ -57,6 +57,8 @@ try {
  await clients.DONOR.removeChannel(channel);
  console.log(JSON.stringify(results,null,2)); if(Object.values(results).some(v=>v===false))throw new Error('A live check failed');
 } finally {
+ if(ids.users.length) await admin.from('activity_logs').delete().in('user_id',ids.users);
+
  if(ids.donation){await admin.from('activity_logs').delete().in('entity_id',[ids.donation,ids.pickup].filter(Boolean));await admin.from('notifications').delete().in('user_id',ids.users);await admin.from('pickup_tasks').delete().eq('donation_id',ids.donation);await admin.from('matches').delete().eq('donation_id',ids.donation);await admin.from('donations').delete().eq('id',ids.donation)}
  if(ids.ngo)await admin.from('ngos').delete().eq('id',ids.ngo); for(const id of ids.users.reverse())await admin.auth.admin.deleteUser(id);
 }

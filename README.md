@@ -169,3 +169,7 @@ and [Supabase client initialization](https://supabase.com/docs/reference/javascr
 ## Phase 10 location support
 
 Donation and NGO profiles now support optional confirmed coordinates alongside written addresses. Leaflet/OpenStreetMap maps show pickup and receiving locations; geographic matching uses Haversine distance when both locations are known and preserves text fallback otherwise. See supabase/README.md for the migration, scoring bands, privacy, and live verification command.
+
+## Phase 11 dashboards
+
+All participant dashboards show database aggregates and bounded recent workflow records. The protected /admin dashboard provides read-only user, donation, NGO, volunteer, and activity views with server-side filters and pagination. See supabase/README.md for the authorization model, migration, count definitions, and live verification command. Existing matching, delivery, notification, and map workflows remain in use.

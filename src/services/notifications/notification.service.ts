@@ -8,34 +8,41 @@ function throwIfError(error: { message: string } | null) {
   if (error) throw new Error(error.message)
 }
 
+async function myUserId(): Promise<string> {
+  const { data, error } = await getSupabaseClient().auth.getUser()
+  throwIfError(error)
+  if (!data.user) throw new Error('Sign in to view your notifications.')
+  return data.user.id
+}
+
 export async function getMyNotifications(limit = 50): Promise<Notification[]> {
   const { data, error } = await getSupabaseClient().from('notifications').select(selection)
-    .order('created_at', { ascending: false }).limit(limit)
+    .eq('user_id', await myUserId()).order('created_at', { ascending: false }).limit(limit)
   throwIfError(error)
   return (data ?? []) as Notification[]
 }
 
 export async function getUnreadNotifications(): Promise<Notification[]> {
   const { data, error } = await getSupabaseClient().from('notifications').select(selection)
-    .eq('is_read', false).order('created_at', { ascending: false })
+    .eq('user_id', await myUserId()).eq('is_read', false).order('created_at', { ascending: false })
   throwIfError(error)
   return (data ?? []) as Notification[]
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
   const { count, error } = await getSupabaseClient().from('notifications')
-    .select('id', { count: 'exact', head: true }).eq('is_read', false)
+    .select('id', { count: 'exact', head: true }).eq('user_id', await myUserId()).eq('is_read', false)
   throwIfError(error)
   return count ?? 0
 }
 
 export async function markNotificationAsRead(id: string): Promise<void> {
-  const { error } = await getSupabaseClient().from('notifications').update({ is_read: true }).eq('id', id)
+  const { error } = await getSupabaseClient().from('notifications').update({ is_read: true }).eq('user_id', await myUserId()).eq('id', id)
   throwIfError(error)
 }
 
 export async function markAllNotificationsAsRead(): Promise<void> {
-  const { error } = await getSupabaseClient().from('notifications').update({ is_read: true }).eq('is_read', false)
+  const { error } = await getSupabaseClient().from('notifications').update({ is_read: true }).eq('user_id', await myUserId()).eq('is_read', false)
   throwIfError(error)
 }
 

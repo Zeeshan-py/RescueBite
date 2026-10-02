@@ -73,3 +73,19 @@ Leaflet/react-leaflet displays OpenStreetMap tiles with attribution. Users manua
 Existing donation and NGO ownership policies protect updates. Volunteers obtain receiving coordinates through get_pickup_destination only for their assigned task and its accepted NGO. This does not grant unrestricted access to NGO profiles.
 
 Run npm test, npm run lint, and npm run build. For a configured development Supabase project, node scripts/verify-phase10.mjs creates temporary Auth users and exercises coordinate constraints, RLS, matching, realtime, and the delivery workflow, then removes its test records. It needs the ignored .env server secret and must never run in the browser. Do not use real personal data for these checks.
+
+## Phase 11: dashboards and administration
+
+`202610020004_admin_dashboards.sql` adds three RLS-preserving, SECURITY INVOKER RPCs. get_dashboard_summary derives the role from the trusted public profile and returns only that participant's counts. get_admin_dashboard and get_admin_records reject non-admin callers before querying administrative records. No client role parameter, service credential, new table, or public data policy is introduced.
+
+Dashboard counts use PostgreSQL COUNT/FILTER rather than downloading every record. Active donations are POSTED, MATCHED, ACCEPTED, PICKUP_ASSIGNED, COLLECTED, or DELIVERED; EXCEPTION is shown separately. Delivered pickups count completed volunteer deliveries, while completed donations require NGO receipt confirmation. Available pickups and pending NGO decisions exclude elapsed deadlines; persisted donation status totals reflect the stored state. NGO user count and completed organization profile count are separate values. The users table has no suspension/account-status field, so the interface shows profile creation and role rather than inventing an account status.
+
+Admin routes are /admin, /admin/users, /admin/donations, /admin/ngos, /admin/volunteers, and /admin/activity. The earlier /admin/activity-logs URL redirects to /admin/activity. These screens provide read-only visibility, not account deletion or arbitrary workflow changes. Restrictive UPDATE policies prevent authenticated admins from editing donations, matches, or pickup tasks directly; participant policies and secured transition RPCs remain in place.
+
+Admin lists use fixed 20-row pages, server-side literal search, and applicable role/status/food/action/entity/date filters. Date boundaries are inclusive UTC days. Existing relationship/status indexes are reused; a created_at/id index supports recent global audit ordering. Recent participant sections fetch at most five records per section. Administrators see relevant profile emails but no phone, password, Auth metadata, or precise coordinate listings.
+
+The existing activity_logs table records the audit view. Small triggers fill previously missing creation/match/expiry/exception events; acceptance, cancellation, pickup, delivery, and confirmation RPCs continue writing their existing events. Historical missing events are not backfilled or fabricated.
+
+The dashboard service layer is src/services/dashboard. Summaries refresh through the existing personal notification provider, on window focus, or with Refresh. Admins use focus/manual refresh because operational notifications belong to participants; no broad realtime subscription was added. The personal notification service now explicitly filters by the authenticated user even when the account has administrative RLS access.
+
+Run node scripts/verify-phase11.mjs against the configured development Supabase project to check aggregates, filters, pagination, admin denial, ownership, and workflow regression. It uses temporary Auth users and removes only its own records, including audit and notification records. Connection settings remain in ignored .env. Run npm test, npm run lint, and npm run build for local validation.

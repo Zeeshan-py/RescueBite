@@ -1,19 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { LoadingState } from '../../components/common/LoadingState'
-import { getNgoDonationMatches } from '../../services/ngo/ngo-workflow.service'
-import type { NgoDonationMatch } from '../../services/ngo/ngo-workflow.types'
-import { groupNgoMatches } from '../../services/ngo/ngo-workflow.utils'
+import { DashboardSection, DashboardView, SummaryCards } from '../../components/dashboard/DashboardView'
+import { NgoMatchCard } from '../../components/ngo/NgoMatchCard'
+import { getNgoDashboard } from '../../services/dashboard/dashboard.service'
+import { useDashboardQuery } from '../../services/dashboard/useDashboardQuery'
 
 export default function NgoDashboardPage() {
-  const { profile, ngoProfile } = useAuth()
-  const [items, setItems] = useState<NgoDonationMatch[]>([]), [loading, setLoading] = useState(true), [error, setError] = useState<string | null>(null)
-  useEffect(() => { void getNgoDonationMatches().then(setItems).catch((e: Error) => setError(e.message)).finally(() => setLoading(false)) }, [])
-  const groups = useMemo(() => groupNgoMatches(items), [items])
-  if (loading) return <LoadingState label="Loading your NGO workspace…" />
-  return <div><p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">NGO workspace</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">Hello, {profile?.name?.split(' ')[0] ?? 'there'}.</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-muted">Review suitable food donations for {ngoProfile?.organization_name ?? 'your organization'} and record a decision securely.</p>
-    {error && <p role="alert" className="mt-7 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-    {!error && <><div className="mt-10 grid gap-4 sm:grid-cols-3">{[['Awaiting decision', groups.actionable.length], ['Accepted', groups.accepted.length], ['Previous decisions', groups.history.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-line bg-white p-5"><p className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</p><p className="mt-3 font-display text-4xl text-pine">{value}</p></div>)}</div><div className="mt-7 flex flex-wrap gap-4"><Link to="/ngo/donations" className="rounded-lg bg-pine px-5 py-3 text-sm font-semibold text-white">Review donations</Link><Link to="/ngo/accepted" className="rounded-lg border border-line bg-white px-5 py-3 text-sm font-semibold text-forest">Accepted donations</Link></div></>}
-  </div>
+  const { ngoProfile } = useAuth()
+  const ngoId = ngoProfile?.id ?? null
+  const load = useCallback(() => getNgoDashboard(ngoId), [ngoId])
+  const query = useDashboardQuery(load)
+  return <DashboardView title="NGO workspace" description={`Review matches and receiving progress for ${ngoProfile?.organization_name ?? 'your organization'}.`} {...query}>
+    {query.data && <><SummaryCards summary={query.data.summary} />{!ngoProfile && <Link to="/ngo/setup" className="mt-6 block rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold text-amber-900">Complete your organization profile →</Link>}
+      <div className="mt-6 flex flex-wrap gap-3"><Link to="/ngo/donations" className="rounded-lg bg-pine px-5 py-3 text-sm font-semibold text-white">Review matches</Link><Link to="/ngo/accepted" className="rounded-lg border border-line bg-white px-5 py-3 text-sm font-semibold text-forest">View accepted donations</Link></div>
+      <DashboardSection title="Pending decisions · earliest deadlines" empty={!query.data.pending.length ? 'No pending matches for your organization.' : undefined}>{query.data.pending.map((item) => <NgoMatchCard key={item.id} item={item} />)}</DashboardSection>
+      <DashboardSection title="Recent accepted donations" empty={!query.data.accepted.length ? 'No accepted donations yet.' : undefined}>{query.data.accepted.map((item) => <NgoMatchCard key={item.id} item={item} />)}</DashboardSection>
+      <DashboardSection title="Recent deliveries" empty={!query.data.deliveries.length ? 'No deliveries to confirm yet.' : undefined}>{query.data.deliveries.map((item) => <div key={item.id}><NgoMatchCard item={item} />{item.donation.status === 'DELIVERED' && <Link to={`/ngo/donations/${item.id}`} className="mt-2 inline-block text-sm font-semibold text-forest underline">Review and confirm receipt →</Link>}</div>)}</DashboardSection></>}
+  </DashboardView>
 }

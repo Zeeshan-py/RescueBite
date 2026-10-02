@@ -10,8 +10,8 @@ import type { UserRole } from './types/domain'
 const OverviewPage = lazy(() => import('./pages/OverviewPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
-const RoleDashboardPage = lazy(() => import('./pages/dashboard/RoleDashboardPage'))
-const PlaceholderPage = lazy(() => import('./pages/dashboard/PlaceholderPage'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AdminRecordsPage = lazy(() => import('./pages/admin/AdminRecordsPage'))
 const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
 const NgoSetupPage = lazy(() => import('./pages/account/NgoSetupPage'))
 const AccountUnavailablePage = lazy(() => import('./pages/account/AccountUnavailablePage'))
@@ -96,12 +96,13 @@ export default function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
         <Route element={<AuthenticatedLayout />}>
-          <Route path="/admin" element={<Page><RoleDashboardPage /></Page>} />
-          <Route path="/admin/users" element={<Page><PlaceholderPage title="Users" description="Administrative user management will be implemented in a later phase." /></Page>} />
-          <Route path="/admin/donations" element={<Page><PlaceholderPage title="Donations" description="Administrative donation oversight will be implemented in a later phase." /></Page>} />
-          <Route path="/admin/ngos" element={<Page><PlaceholderPage title="NGOs" description="Organization management will be implemented in a later phase." /></Page>} />
-          <Route path="/admin/volunteers" element={<Page><PlaceholderPage title="Volunteers" description="Volunteer administration will be implemented in a later phase." /></Page>} />
-          <Route path="/admin/activity-logs" element={<Page><PlaceholderPage title="Activity logs" description="The database is protected for administrator access; the viewer comes in a later phase." /></Page>} />
+          <Route path="/admin" element={<Page><AdminDashboardPage /></Page>} />
+          <Route path="/admin/users" element={<Page><AdminRecordsPage key="users" view="users" /></Page>} />
+          <Route path="/admin/donations" element={<Page><AdminRecordsPage key="donations" view="donations" /></Page>} />
+          <Route path="/admin/ngos" element={<Page><AdminRecordsPage key="ngos" view="ngos" /></Page>} />
+          <Route path="/admin/volunteers" element={<Page><AdminRecordsPage key="volunteers" view="volunteers" /></Page>} />
+          <Route path="/admin/activity" element={<Page><AdminRecordsPage key="activity" view="activity" /></Page>} />
+          <Route path="/admin/activity-logs" element={<Navigate to="/admin/activity" replace />} />
         </Route>
       </Route>
       <Route path="*" element={<UnknownRoute />} />
