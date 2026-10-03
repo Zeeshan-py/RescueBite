@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { InformationLinks } from '../common/InformationLinks'
 
 export function AuthShell({ eyebrow, title, description, children }: { eyebrow: string; title: string; description: string; children: ReactNode }) {
   return (
@@ -28,6 +29,7 @@ export function AuthShell({ eyebrow, title, description, children }: { eyebrow: 
           <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{title}</h1>
           <p className="mt-4 max-w-lg text-sm leading-6 text-muted">{description}</p>
           <div className="mt-8">{children}</div>
+          <div className="mt-8 border-t border-line pt-5 text-xs text-muted"><InformationLinks /></div>
         </div>
       </main>
     </div>

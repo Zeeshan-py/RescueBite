@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/useAuth'
 import type { UserRole } from '../../types/domain'
 import { NotificationProvider } from '../../services/notifications/NotificationProvider'
 import { NotificationBell } from '../notifications/NotificationBell'
+import { InformationLinks } from './InformationLinks'
 
 const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
   DONOR: [
@@ -29,6 +30,8 @@ const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
 }
 
 function pageLabel(pathname: string, role: UserRole | null) {
+  const publicLabels: Record<string, string> = { '/about': 'About', '/faq': 'FAQ', '/contact': 'Contact', '/terms': 'Terms of Use', '/privacy': 'Privacy Policy', '/food-safety': 'Food safety' }
+  if (publicLabels[pathname]) return publicLabels[pathname]
   return role ? navigation[role].find((item) => item.to === pathname)?.label ?? 'Workspace' : 'Overview'
 }
 
@@ -87,7 +90,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-w-0">
         <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="min-w-0 truncate text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}<span className="hidden rounded-full border border-line px-3 py-1 text-xs text-muted sm:inline">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 13</span></footer>
+        <footer className="mx-auto max-w-6xl space-y-4 border-t border-line px-5 py-6 text-xs text-muted sm:px-10"><InformationLinks /><p>RescueBite · Food Rescue & Surplus Redistribution</p></footer>
       </div>
     </div>
   )

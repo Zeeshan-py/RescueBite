@@ -11,6 +11,7 @@ const OverviewPage = lazy(() => import('./pages/OverviewPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
 const GoogleCallbackPage = lazy(() => import('./pages/auth/GoogleCallbackPage'))
+const InformationPage = lazy(() => import('./pages/public/InformationPage'))
 const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminRecordsPage = lazy(() => import('./pages/admin/AdminRecordsPage'))
@@ -55,6 +56,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomeRoute />} />
+      {(['about', 'faq', 'contact', 'terms', 'privacy', 'food-safety'] as const).map((page) => <Route key={page} path={`/${page}`} element={<Page><InformationPage page={page} /></Page>} />)}
       <Route path="/auth/google/callback" element={<Page><GoogleCallbackPage /></Page>} />
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<Page><LoginPage /></Page>} />
