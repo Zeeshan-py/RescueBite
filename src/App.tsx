@@ -10,6 +10,7 @@ import type { UserRole } from './types/domain'
 const OverviewPage = lazy(() => import('./pages/OverviewPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
+const GoogleCallbackPage = lazy(() => import('./pages/auth/GoogleCallbackPage'))
 const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminRecordsPage = lazy(() => import('./pages/admin/AdminRecordsPage'))
@@ -54,6 +55,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomeRoute />} />
+      <Route path="/auth/google/callback" element={<Page><GoogleCallbackPage /></Page>} />
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<Page><LoginPage /></Page>} />
         <Route path="/register" element={<Page><RegisterPage /></Page>} />

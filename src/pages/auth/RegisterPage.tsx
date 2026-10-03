@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthShell } from '../../components/auth/AuthShell'
+import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { roleHomePath } from '../../auth/route-access'
 import { signUp } from '../../services/auth/auth.service'
@@ -67,6 +68,7 @@ export default function RegisterPage() {
 
   return (
     <AuthShell eyebrow="Join the network" title="Create your FoodBridge account." description="Choose how you participate. Administrator accounts are provisioned separately.">
+      <GoogleSignInButton />
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}
         <fieldset>

@@ -3,13 +3,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const { client, profileQuery } = vi.hoisted(() => {
   const profileQuery = { select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn(), abortSignal: vi.fn() }
   for (const method of ['select', 'eq', 'abortSignal'] as const) profileQuery[method].mockImplementation(() => profileQuery)
-  return { profileQuery, client: { from: vi.fn(() => profileQuery), auth: { signInWithPassword: vi.fn(), signOut: vi.fn(), getSession: vi.fn(), signUp: vi.fn() } } }
+  return { profileQuery, client: { from: vi.fn(() => profileQuery), auth: { signInWithPassword: vi.fn(), signInWithOAuth: vi.fn(), signOut: vi.fn(), getSession: vi.fn(), signUp: vi.fn() } } }
 })
 vi.mock('../../lib/supabase', () => ({ getSupabaseClient: () => client }))
-import { getCurrentSession, getProfile, signIn, signOut } from './auth.service'
+import { getCurrentSession, getProfile, signIn, signInWithGoogle, signOut } from './auth.service'
 
 describe('Supabase authentication boundary', () => {
   beforeEach(() => vi.clearAllMocks())
+  it('uses Supabase Google OAuth and the current origin callback', async () => {
+    vi.stubGlobal('window', { location: { origin: 'https://rescuebitee.netlify.app' } })
+    client.auth.signInWithOAuth.mockResolvedValue({ error: null })
+    try {
+      await signInWithGoogle()
+      expect(client.auth.signInWithOAuth).toHaveBeenCalledWith({ provider: 'google', options: { redirectTo: 'https://rescuebitee.netlify.app/auth/google/callback' } })
+    } finally { vi.unstubAllGlobals() }
+  })
+  it('sanitizes Google provider configuration failures', async () => {
+    vi.stubGlobal('window', { location: { origin: 'http://localhost:5173' } })
+    client.auth.signInWithOAuth.mockResolvedValue({ error: { message: 'internal provider secret details' } })
+    try { await expect(signInWithGoogle()).rejects.toThrow('Authentication could not be completed.') }
+    finally { vi.unstubAllGlobals() }
+  })
   it('normalizes email and loads the authoritative profile after login', async () => {
     client.auth.signInWithPassword.mockResolvedValue({ data: { user: { id: 'actor' }, session: { user: { id: 'actor' } } }, error: null })
     profileQuery.maybeSingle.mockResolvedValue({ data: { id: 'actor', role: 'DONOR' }, error: null })

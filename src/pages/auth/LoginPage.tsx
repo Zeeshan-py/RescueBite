@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthShell } from '../../components/auth/AuthShell'
+import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { signIn } from '../../services/auth/auth.service'
 import { validateLogin, type FieldErrors } from '../../services/auth/auth.validation'
@@ -37,6 +38,7 @@ export default function LoginPage() {
 
   return (
     <AuthShell eyebrow="Welcome back" title="Continue your rescue work." description="Sign in with the email connected to your FoodBridge account.">
+      <GoogleSignInButton />
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {logoutWarning && <p role="alert" className="text-sm text-amber-900">{logoutWarning}</p>}
         {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}

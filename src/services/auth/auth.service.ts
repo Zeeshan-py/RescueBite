@@ -78,6 +78,26 @@ export async function signOut(): Promise<void> {
   if (error) throw friendlyAuthError(error)
 }
 
+export async function signInWithGoogle(): Promise<void> {
+  const { error } = await getSupabaseClient().auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/auth/google/callback` },
+  })
+  if (error) throw friendlyAuthError(error)
+}
+
+export async function completeGoogleProfile(authUser: SupabaseUser, role: UserRole): Promise<void> {
+  if (!publicRoles.includes(role) || !authUser.email || !authUser.app_metadata.providers?.includes('google')) {
+    throw new AuthServiceError('Choose a valid account role for your Google account.')
+  }
+  const name = String(authUser.user_metadata.name ?? authUser.user_metadata.full_name ?? '').trim() || authUser.email.split('@')[0]
+  const { error } = await getSupabaseClient().from('users').insert({
+    id: authUser.id, name, email: authUser.email, role, phone: null, location: null,
+  })
+  // An existing profile is authoritative; never overwrite its role.
+  if (error && error.code !== '23505') throw new AuthServiceError('Your profile could not be created. Please try again.')
+}
+
 export async function getCurrentUser(): Promise<SupabaseUser | null> {
   const { data, error } = await getSupabaseClient().auth.getUser()
   if (error) throw friendlyAuthError(error)
