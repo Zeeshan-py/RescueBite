@@ -49,4 +49,10 @@ describe('authentication validation', () => {
   it('validates missing and malformed login fields', () => {
     expect(validateLogin('not-an-email', '')).toEqual({ email: 'Enter a valid email address.', password: 'Password is required.' })
   })
+  it('rejects oversized names and invalid NGO capacity integers', () => {
+    expect(validateRegistration({ ...registration(), name: 'x'.repeat(201) }, 'StrongPass1').name).toBeTruthy()
+    const input = registration('NGO')
+    input.ngo!.capacity = 1.5
+    expect(validateRegistration(input, input.password).capacity).toBeTruthy()
+  })
 })

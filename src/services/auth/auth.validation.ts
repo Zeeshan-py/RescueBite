@@ -31,6 +31,7 @@ export function validateLogin(email: string, password: string): FieldErrors {
 export function validateRegistration(input: SignUpInput, confirmPassword: string): FieldErrors {
   const errors: FieldErrors = {}
   if (!input.name.trim()) errors.name = 'Name is required.'
+  if (input.name.trim().length > 200) errors.name = 'Keep your name within 200 characters.'
   const emailError = validateEmail(input.email)
   if (emailError) errors.email = emailError
   const passwordError = validatePassword(input.password)
@@ -42,8 +43,8 @@ export function validateRegistration(input: SignUpInput, confirmPassword: string
   if (input.role === 'NGO') {
     if (!input.ngo?.organizationName.trim()) errors.organizationName = 'Organization name is required.'
     if (!input.ngo?.location.trim()) errors.ngoLocation = 'Organization location is required.'
-    if (input.ngo && (!Number.isFinite(input.ngo.capacity) || input.ngo.capacity < 0)) {
-      errors.capacity = 'Capacity must be zero or greater.'
+    if (input.ngo && (!Number.isInteger(input.ngo.capacity) || input.ngo.capacity < 0 || input.ngo.capacity > 2147483647)) {
+      errors.capacity = 'Capacity must be a whole number from 0 to 2147483647.'
     }
     if (!input.ngo?.acceptedFoodTypes.length) errors.acceptedFoodTypes = 'Add at least one accepted food type.'
     if (!input.ngo?.contactInformation.trim()) errors.contactInformation = 'Contact information is required.'

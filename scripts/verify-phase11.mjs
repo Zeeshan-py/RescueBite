@@ -91,7 +91,7 @@ try {
   const foreignNgo = await clients.otherNgo.client.from('ngos').update({ capacity: 0 }).eq('id', ngos[0]).select()
   ok(!foreignNgo.error && foreignNgo.data.length === 0, 'NGO ownership preserved')
   const rawAdmin = await administrator.from('donations').update({ status: 'MATCHED' }).eq('id', target.id).select()
-  ok(!rawAdmin.error && rawAdmin.data.length === 0, 'admin raw donation transitions blocked')
+  ok(rawAdmin.error?.code === '42501', 'admin raw donation transitions blocked by column privileges')
   ok(Boolean((await donor.rpc('mark_pickup_collected', { target_task_id: crypto.randomUUID() })).error), 'workflow role guard preserved')
   const matches = unwrap(await donor.rpc('store_donation_matches', { target_donation_id: target.id,
     match_candidates: [{ ngo_id: ngos[0], matching_score: 97.5, distance_score: 100, urgency_score: 95, compatibility_score: 100, capacity_score: 95, availability_score: 95 }] }))

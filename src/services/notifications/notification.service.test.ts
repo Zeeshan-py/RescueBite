@@ -20,4 +20,12 @@ describe('personal notifications with administrator RLS', () => {
     await run()
     expect(query.eq).toHaveBeenCalledWith('user_id', 'current-admin')
   })
+  it.each([[-1, 1], [1000000, 100], [NaN, 50], [2.8, 2]])('bounds requested history %s to %s', async (input, expected) => {
+    await getMyNotifications(input)
+    expect(query.limit).toHaveBeenCalledWith(expected)
+  })
+  it('does not expose raw backend details', async () => {
+    client.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-admin' } }, error: { message: 'SQL secret table internal stack' } } as never)
+    await expect(getMyNotifications()).rejects.toThrow('Notifications could not be updated or loaded.')
+  })
 })

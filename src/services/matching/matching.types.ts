@@ -1,5 +1,7 @@
 import type { Donation, Match, NGO } from '../../types/domain'
 
+export type MatchingNgo = Pick<NGO, 'id' | 'user_id' | 'organization_name' | 'location' | 'capacity' | 'accepted_food_types' | 'latitude' | 'longitude'>
+
 export interface MatchScores {
   distanceScore: number
   urgencyScore: number

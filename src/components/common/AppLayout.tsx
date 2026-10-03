@@ -35,7 +35,7 @@ function pageLabel(pathname: string, role: UserRole | null) {
 export function AppLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const { role, profile, isAuthenticated, logout } = useAuth()
+  const { user, role, profile, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const items = role ? navigation[role] : []
@@ -46,6 +46,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
     try {
       await logout()
       navigate('/login', { replace: true })
+    } catch {
+      navigate('/login', { replace: true, state: { logoutWarning: 'You are signed out on this device. Other sessions could not be revoked; check your connection.' } })
     } finally {
       setIsSigningOut(false)
     }
@@ -85,9 +87,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-w-0">
         <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="min-w-0 truncate text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}<span className="hidden rounded-full border border-line px-3 py-1 text-xs text-muted sm:inline">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 12</span></footer>
+        <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 pb-6 text-xs text-muted sm:px-10"><span>FoodBridge · Food Rescue & Surplus Redistribution</span><span>SE Lab · Phase 13</span></footer>
       </div>
     </div>
   )
-  return isAuthenticated ? <NotificationProvider>{layout}</NotificationProvider> : layout
+  return isAuthenticated ? <NotificationProvider key={user?.id}>{layout}</NotificationProvider> : layout
 }

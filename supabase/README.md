@@ -92,3 +92,7 @@ Run node scripts/verify-phase11.mjs against the configured development Supabase 
 
 ## Phase 12 aggregation
 202610020005_analytics_impact.sql adds get_my_impact(date,date), get_platform_impact(date,date), and a completed_at partial index. Both RPCs preserve RLS through SECURITY INVOKER; ownership and admin authorization are derived from the trusted profile. No tables or policies change. See ../docs/analytics.md for definitions, UTC dates, performance and schema limitations.
+
+## Phase 13 security hardening
+
+`202610020006_security_hardening.sql` narrows full NGO profiles to owners, administrators and donors with an existing match; matching discovery uses an owner-checked RPC that omits private contact and description fields. Notifications are recipient-only, including for administrator accounts. Donation and NGO client-write grants exclude server-owned IDs, roles, statuses and timestamps. The migration also rejects null workflow decisions/candidates and adds finite-value, text-bound, and pickup state/timestamp constraints. See `../docs/security.md` for the tested authorization model, live checks and known limits.

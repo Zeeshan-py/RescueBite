@@ -26,6 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(nextSession?.user ?? null)
     setIsLoading(true)
     setError(null)
+    setProfile(null)
+    setNgoProfile(null)
     if (!nextSession?.user) {
       setProfile(null)
       setNgoProfile(null)
@@ -54,15 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
     let mounted = true
+    let authEventSeen = false
     void getCurrentSession().then((currentSession) => {
-      if (mounted) void applySession(currentSession)
+      if (mounted && !authEventSeen) void applySession(currentSession)
     }).catch(() => {
-      if (mounted) {
+      if (mounted && !authEventSeen) {
         setError('The saved session could not be restored.')
         setIsLoading(false)
       }
     })
     const { data: { subscription } } = getSupabaseClient().auth.onAuthStateChange((_event, nextSession) => {
+      authEventSeen = true
       window.setTimeout(() => { if (mounted) void applySession(nextSession) }, 0)
     })
     return () => {
@@ -74,14 +78,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!user) return
-    const nextProfile = await loadProfile(user)
-    setProfile(nextProfile)
-    if (nextProfile?.role === 'NGO') setNgoProfile(await getNgoProfile(user.id))
+    const currentRequest = ++requestId.current
+    setIsLoading(true)
+    try {
+      const nextProfile = await loadProfile(user)
+      const nextNgoProfile = nextProfile?.role === 'NGO' ? await getNgoProfile(user.id) : null
+      if (currentRequest === requestId.current) {
+        setProfile(nextProfile)
+        setNgoProfile(nextNgoProfile)
+        setError(null)
+      }
+    } catch (reason) {
+      if (currentRequest === requestId.current) {
+        setProfile(null)
+        setNgoProfile(null)
+        setError('Your account profile could not be loaded. Please sign out and try again.')
+      }
+      throw reason
+    } finally {
+      if (currentRequest === requestId.current) setIsLoading(false)
+    }
   }, [user])
 
   const logout = useCallback(async () => {
-    await signOut()
-    await applySession(null)
+    // The Supabase SDK clears local storage even if remote token revocation fails.
+    try { await signOut() } finally { await applySession(null) }
   }, [applySession])
 
   const value = useMemo<AuthContextValue>(() => ({

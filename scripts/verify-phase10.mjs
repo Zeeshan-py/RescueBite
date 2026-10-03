@@ -61,5 +61,7 @@ try {
 
  if(ids.donation){await admin.from('activity_logs').delete().in('entity_id',[ids.donation,ids.pickup].filter(Boolean));await admin.from('notifications').delete().in('user_id',ids.users);await admin.from('pickup_tasks').delete().eq('donation_id',ids.donation);await admin.from('matches').delete().eq('donation_id',ids.donation);await admin.from('donations').delete().eq('id',ids.donation)}
  if(ids.ngo)await admin.from('ngos').delete().eq('id',ids.ngo); for(const id of ids.users.reverse())await admin.auth.admin.deleteUser(id);
+ for (const client of Object.values(clients)) await client.removeAllChannels();
+ await admin.removeAllChannels();
 }
 async function countUnread(c){const {count,error}=await c.from('notifications').select('*',{count:'exact',head:true}).eq('is_read',false);if(error)fail('count unread',error);return count??0}

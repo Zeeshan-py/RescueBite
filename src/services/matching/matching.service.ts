@@ -1,7 +1,7 @@
 import { getSupabaseClient } from '../../lib/supabase'
-import type { Match, NGO } from '../../types/domain'
+import type { Match } from '../../types/domain'
 import { getDonationById } from '../donations/donation.service'
-import type { MatchingResult, RankedMatch } from './matching.types'
+import type { MatchingNgo, MatchingResult, RankedMatch } from './matching.types'
 import { canGenerateMatches, rankEligibleNgos } from './matching.utils'
 
 export class MatchingServiceError extends Error {
@@ -20,13 +20,13 @@ function matchingFailure(error: { message: string }): MatchingServiceError {
   return new MatchingServiceError('Matches could not be generated. Please try again.')
 }
 
-async function loadNgos(): Promise<NGO[]> {
-  const { data, error } = await getSupabaseClient().from('ngos').select('*')
+async function loadNgos(donationId: string): Promise<MatchingNgo[]> {
+  const { data, error } = await getSupabaseClient().rpc('get_matching_ngos', { target_donation_id: donationId })
   if (error) throw matchingFailure(error)
-  return data as NGO[]
+  return data as MatchingNgo[]
 }
 
-function mergeStoredMatches(matches: Match[], ngos: NGO[]): RankedMatch[] {
+function mergeStoredMatches(matches: Match[], ngos: MatchingNgo[]): RankedMatch[] {
   const ngoById = new Map(ngos.map((ngo) => [ngo.id, ngo]))
   return matches.flatMap<RankedMatch>((match) => {
     const ngo = ngoById.get(match.ngo_id)
@@ -55,16 +55,16 @@ export async function getSuggestedMatches(donationId: string): Promise<MatchingR
   if (error) throw matchingFailure(error)
   const stored = data as Match[]
   if (!stored.length) return { donationId, matches: [] }
-  const { data: ngos, error: ngoError } = await getSupabaseClient().from('ngos').select('*').in('id', stored.map((match) => match.ngo_id))
+  const { data: ngos, error: ngoError } = await getSupabaseClient().from('ngos').select('id,user_id,organization_name,location,capacity,accepted_food_types,latitude,longitude').in('id', stored.map((match) => match.ngo_id))
   if (ngoError) throw matchingFailure(ngoError)
-  return { donationId, matches: mergeStoredMatches(stored, ngos as NGO[]) }
+  return { donationId, matches: mergeStoredMatches(stored, ngos as MatchingNgo[]) }
 }
 
 export async function generateMatches(donationId: string, now = new Date()): Promise<MatchingResult> {
   const donation = await getDonationById(donationId)
   if (!canGenerateMatches(donation.status)) throw new MatchingServiceError('This donation is not eligible for matching.', 'INELIGIBLE_DONATION')
   if (new Date(donation.collection_deadline) <= now) throw new MatchingServiceError('This donation has passed its collection deadline.', 'DEADLINE_PASSED')
-  const ngos = await loadNgos()
+  const ngos = await loadNgos(donationId)
   const ranked = rankEligibleNgos(donation, ngos, now)
   const candidates = ranked.map((match) => ({
     ngo_id: match.ngoId,

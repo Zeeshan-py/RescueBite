@@ -24,4 +24,9 @@ describe('notification reconciliation', () => {
   it('counts only unread records', () => {
     expect(unreadNotificationCount([record('one', '2026-10-02T10:00:00Z'), record('two', '2026-10-02T09:00:00Z', true)])).toBe(1)
   })
+
+  it('does not resurrect an unread badge from a delayed insert or stale fetch', () => {
+    const read = record('same', '2026-10-02T11:00:00Z', true)
+    expect(mergeNotifications([read], [{ ...read, is_read: false }])[0]!.is_read).toBe(true)
+  })
 })

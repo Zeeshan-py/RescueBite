@@ -17,7 +17,6 @@ export class AuthServiceError extends Error {
     this.name = 'AuthServiceError'
   }
 }
-
 function friendlyAuthError(error: AuthError | Error): AuthServiceError {
   const message = error.message.toLowerCase()
   if (message.includes('invalid login credentials')) return new AuthServiceError('The email or password is incorrect.', 'INVALID_CREDENTIALS')
@@ -92,7 +91,7 @@ export async function getCurrentSession(): Promise<Session | null> {
 }
 
 export async function getProfile(userId: string): Promise<User | null> {
-  const { data, error } = await getSupabaseClient().from('users').select('*').eq('id', userId).maybeSingle()
+  const { data, error } = await getSupabaseClient().from('users').select('*').eq('id', userId).abortSignal(AbortSignal.timeout(15000)).maybeSingle()
   if (error) throw new AuthServiceError('Your profile could not be loaded. Please try again.', 'PROFILE_LOAD_FAILED')
   return data as User | null
 }
@@ -133,7 +132,7 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput): 
 }
 
 export async function getNgoProfile(userId: string): Promise<NGO | null> {
-  const { data, error } = await getSupabaseClient().from('ngos').select('*').eq('user_id', userId).maybeSingle()
+  const { data, error } = await getSupabaseClient().from('ngos').select('*').eq('user_id', userId).abortSignal(AbortSignal.timeout(15000)).maybeSingle()
   if (error) throw new AuthServiceError('The NGO profile could not be loaded.', 'NGO_PROFILE_LOAD_FAILED')
   return data as NGO | null
 }
@@ -141,7 +140,6 @@ export async function getNgoProfile(userId: string): Promise<NGO | null> {
 export async function saveNgoProfile(userId: string, input: NgoRegistrationDetails): Promise<NGO> {
   const existing = await getNgoProfile(userId)
   const values = {
-    user_id: userId,
     organization_name: input.organizationName.trim(),
     description: input.description.trim() || null,
     location: input.location.trim(),
@@ -153,7 +151,7 @@ export async function saveNgoProfile(userId: string, input: NgoRegistrationDetai
   }
   const query = existing
     ? getSupabaseClient().from('ngos').update(values).eq('user_id', userId)
-    : getSupabaseClient().from('ngos').insert(values)
+    : getSupabaseClient().from('ngos').insert({ ...values, user_id: userId })
   const { data, error } = await query.select('*').single()
   if (error) throw new AuthServiceError('The NGO profile could not be saved. Review the fields and try again.', 'NGO_PROFILE_SAVE_FAILED')
   return data as NGO

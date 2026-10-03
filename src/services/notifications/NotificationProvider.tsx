@@ -24,14 +24,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!user) return
+    let active = true
+    let connected = false
     const channel = subscribeToMyNotifications(user.id, (record) => {
-      setNotifications((current) => mergeNotifications(current, [record]))
+      if (active && record.user_id === user.id) setNotifications((current) => mergeNotifications(current, [record]))
     }, (status) => {
+      if (!active) return
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setError('Live notification updates are reconnecting.')
-      if (status === 'SUBSCRIBED') setError(null)
+      if (status === 'SUBSCRIBED') {
+        if (connected) void refresh()
+        connected = true
+        setError(null)
+      }
     })
     const initialLoad = window.setTimeout(() => { void refresh() }, 0)
-    return () => { window.clearTimeout(initialLoad); void unsubscribeFromNotifications(channel) }
+    return () => { active = false; window.clearTimeout(initialLoad); void unsubscribeFromNotifications(channel) }
   }, [refresh, user])
 
   const markRead = useCallback(async (id: string) => {

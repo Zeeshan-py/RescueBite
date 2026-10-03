@@ -1,11 +1,11 @@
-import type { Donation, DonationStatus, NGO } from '../../types/domain'
+import type { Donation, DonationStatus } from '../../types/domain'
 import {
   BASIC_AVAILABILITY_SCORE,
   MATCHING_WEIGHTS,
   SAME_LOCATION_SCORE,
   UNKNOWN_DISTANCE_SCORE,
 } from './matching.constants'
-import type { MatchScores, RankedMatch } from './matching.types'
+import type { MatchingNgo, MatchScores, RankedMatch } from './matching.types'
 import { calculateDistanceKm, calculateDistanceScoreFromKm, isValidCoordinates } from '../location/location.utils'
 
 const wildcardFoodTypes = new Set(['all', 'any', 'all types', 'all food types'])
@@ -13,7 +13,6 @@ const wildcardFoodTypes = new Set(['all', 'any', 'all types', 'all food types'])
 function clamp(score: number): number {
   return Math.min(100, Math.max(0, score))
 }
-
 function roundScore(score: number): number {
   return Math.round(score * 100) / 100
 }
@@ -35,7 +34,7 @@ export function calculateDistanceScore(donationLocation: string, ngoLocation: st
   return donation && ngo && donation === ngo ? SAME_LOCATION_SCORE : UNKNOWN_DISTANCE_SCORE
 }
 
-export function calculateDistanceComponent(donation: Donation, ngo: NGO): Pick<RankedMatch, 'distanceKm' | 'distanceScore' | 'distanceSource'> {
+export function calculateDistanceComponent(donation: Donation, ngo: MatchingNgo): Pick<RankedMatch, 'distanceKm' | 'distanceScore' | 'distanceSource'> {
   const donationCoordinates = { latitude: donation.latitude, longitude: donation.longitude }
   const ngoCoordinates = { latitude: ngo.latitude, longitude: ngo.longitude }
   if (isValidCoordinates(donationCoordinates) && isValidCoordinates(ngoCoordinates)) {
@@ -90,14 +89,14 @@ export function canGenerateMatches(status: DonationStatus): boolean {
   return status === 'POSTED' || status === 'MATCHED'
 }
 
-export function isEligibleNgo(donation: Donation, ngo: NGO, now = new Date()): boolean {
+export function isEligibleNgo(donation: Donation, ngo: MatchingNgo, now = new Date()): boolean {
   return ngo.user_id !== donation.donor_id
     && ngo.capacity >= donation.meal_portions
     && calculateCompatibilityScore(donation.food_type, ngo.accepted_food_types) > 0
     && calculateUrgencyScore(donation.collection_deadline, now) > 0
 }
 
-export function scoreNgo(donation: Donation, ngo: NGO, now = new Date()): RankedMatch {
+export function scoreNgo(donation: Donation, ngo: MatchingNgo, now = new Date()): RankedMatch {
   const distance = calculateDistanceComponent(donation, ngo)
   const components = {
     distanceScore: distance.distanceScore,
@@ -118,7 +117,7 @@ export function scoreNgo(donation: Donation, ngo: NGO, now = new Date()): Ranked
   }
 }
 
-export function rankEligibleNgos(donation: Donation, ngos: NGO[], now = new Date()): RankedMatch[] {
+export function rankEligibleNgos(donation: Donation, ngos: MatchingNgo[], now = new Date()): RankedMatch[] {
   if (!canGenerateMatches(donation.status) || calculateUrgencyScore(donation.collection_deadline, now) === 0) return []
   const uniqueNgos = [...new Map(ngos.map((ngo) => [ngo.id, ngo])).values()]
   return uniqueNgos.filter((ngo) => isEligibleNgo(donation, ngo, now)).map((ngo) => scoreNgo(donation, ngo, now))

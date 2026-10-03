@@ -27,4 +27,10 @@ describe('donation validation', () => {
   it('requires the deadline to follow availability', () => {
     expect(validateDonation({ ...valid, collectionDeadline: valid.availableFrom }).collectionDeadline).toBeTruthy()
   })
+  it('rejects values larger than the database text limits', () => {
+    expect(validateDonation({ ...valid, location: 'x'.repeat(1001) }).location).toBeTruthy()
+    expect(validateDonation({ ...valid, description: 'x'.repeat(10001) }).description).toBeTruthy()
+    expect(validateDonation({ ...valid, safetyInformation: 'x'.repeat(10001) }).safetyInformation).toBeTruthy()
+    expect(validateDonation({ ...valid, foodType: 'Other', otherFoodType: 'x'.repeat(201) }).otherFoodType).toBeTruthy()
+  })
 })

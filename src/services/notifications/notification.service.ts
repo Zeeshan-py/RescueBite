@@ -4,8 +4,8 @@ import type { Notification } from '../../types/domain'
 
 const selection = 'id,user_id,title,message,type,is_read,entity_type,entity_id,event_key,created_at'
 
-function throwIfError(error: { message: string } | null) {
-  if (error) throw new Error(error.message)
+function throwIfError(error: { message: string; code?: string } | null) {
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to access these notifications.' : 'Notifications could not be updated or loaded. Check your connection and try again.')
 }
 
 async function myUserId(): Promise<string> {
@@ -17,14 +17,14 @@ async function myUserId(): Promise<string> {
 
 export async function getMyNotifications(limit = 50): Promise<Notification[]> {
   const { data, error } = await getSupabaseClient().from('notifications').select(selection)
-    .eq('user_id', await myUserId()).order('created_at', { ascending: false }).limit(limit)
+    .eq('user_id', await myUserId()).order('created_at', { ascending: false }).limit(Number.isFinite(limit) ? Math.max(1, Math.min(100, Math.trunc(limit))) : 50)
   throwIfError(error)
   return (data ?? []) as Notification[]
 }
 
 export async function getUnreadNotifications(): Promise<Notification[]> {
   const { data, error } = await getSupabaseClient().from('notifications').select(selection)
-    .eq('user_id', await myUserId()).eq('is_read', false).order('created_at', { ascending: false })
+    .eq('user_id', await myUserId()).eq('is_read', false).order('created_at', { ascending: false }).limit(100)
   throwIfError(error)
   return (data ?? []) as Notification[]
 }

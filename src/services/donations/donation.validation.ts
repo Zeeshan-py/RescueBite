@@ -5,9 +5,13 @@ export function validateDonation(input: DonationInput): DonationFieldErrors {
   const errors: DonationFieldErrors = {}
   if (!input.foodType || !FOOD_TYPES.includes(input.foodType)) errors.foodType = 'Choose a valid food type.'
   if (input.foodType === 'Other' && !input.otherFoodType.trim()) errors.otherFoodType = 'Describe the food type.'
+  if (resolvedFoodType(input).length > 200) errors.otherFoodType = 'Keep the food type within 200 characters.'
   if (!Number.isFinite(input.quantity) || input.quantity <= 0) errors.quantity = 'Quantity must be greater than zero.'
   if (!Number.isInteger(input.mealPortions) || input.mealPortions <= 0) errors.mealPortions = 'Meal portions must be a whole number greater than zero.'
   if (!input.location.trim()) errors.location = 'Enter the pickup address or location.'
+  if (input.location.trim().length > 1000) errors.location = 'Keep the pickup location within 1000 characters.'
+  if (input.description.trim().length > 10000) errors.description = 'Keep the description within 10000 characters.'
+  if (input.safetyInformation.trim().length > 10000) errors.safetyInformation = 'Keep safety information within 10000 characters.'
   if ((input.latitude !== null || input.longitude !== null) && !isValidCoordinates(input)) errors.latitude = 'Select a valid location on the map or clear it.'
 
   const available = new Date(input.availableFrom)
