@@ -10,6 +10,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', function (event) {
+        if (!event.target || !/^(SCRIPT|LINK)$/.test(event.target.tagName)) return
+        var root = document.getElementById('root')
+        if (!root || root.childElementCount) return
+        root.innerHTML = '<main style="max-width:32rem;margin:12vh auto;padding:2rem;font:16px system-ui;color:#10251b"><h1>RescueBite could not load</h1><p>A site file did not finish downloading. Check your connection and try again.</p><button onclick="location.reload()" style="padding:12px 20px;background:#10251b;color:white;border:0;border-radius:8px;cursor:pointer">Reload site</button></main>'
+      }, true)
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
