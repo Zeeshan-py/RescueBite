@@ -42,10 +42,10 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {logoutWarning && <p role="alert" className="text-sm text-amber-900">{logoutWarning}</p>}
         {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}
-        <FormField label="Email address" htmlFor="email" error={errors.email}>
+        <FormField label="Email address" required htmlFor="email" error={errors.email}>
           <TextInput id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} error={errors.email} placeholder="you@example.com" />
         </FormField>
-        <FormField label="Password" htmlFor="password" error={errors.password}>
+        <FormField label="Password" required htmlFor="password" error={errors.password}>
           <TextInput id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} error={errors.password} placeholder="Enter your password" />
         </FormField>
         <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center rounded-lg bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-pine disabled:cursor-wait disabled:opacity-65">

@@ -1,5 +1,8 @@
 import type { AdminRow, AdminView } from '../../services/dashboard/dashboard.types'
 import { formatAdminValue } from '../../services/dashboard/dashboard.utils'
+import { EmptyState } from '../common/EmptyState'
+import { StatusBadge } from '../common/StatusBadge'
+import type { DonationStatus, PickupTaskStatus } from '../../types/domain'
 
 const fields: Record<AdminView, Array<[string, string]>> = {
   users: [['email', 'Email'], ['role', 'Role'], ['created_at', 'Profile created']],
@@ -11,6 +14,6 @@ const fields: Record<AdminView, Array<[string, string]>> = {
 const titleField: Record<AdminView, string> = { users: 'name', donations: 'food_type', ngos: 'organization_name', volunteers: 'name', activity: 'action' }
 
 export function AdminRecordList({ view, rows }: { view: AdminView; rows: AdminRow[] }) {
-  if (!rows.length) return <p className="rounded-xl border border-dashed border-line bg-white p-6 text-sm text-muted">No records match these filters.</p>
-  return <div className="grid gap-4">{rows.map((row) => <article key={String(row.id)} className="min-w-0 rounded-xl border border-line bg-white p-5 sm:p-6"><h3 className="break-words text-base font-semibold">{formatAdminValue(row, titleField[view])}</h3><dl className="mt-4 grid min-w-0 gap-4 text-sm sm:grid-cols-2 xl:grid-cols-3">{fields[view].map(([field, label]) => <div key={field} className="min-w-0"><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 break-words [overflow-wrap:anywhere]">{formatAdminValue(row, field)}</dd></div>)}</dl></article>)}</div>
+  if (!rows.length) return <EmptyState title="No records match these filters." description="Try a broader search or reset the filters to review all available records." />
+  return <div className="grid gap-4">{rows.map((row) => <article key={String(row.id)} className="min-w-0 rounded-xl border border-line bg-white p-5 sm:p-6"><h2 className="break-words text-base font-semibold">{formatAdminValue(row, titleField[view])}</h2><dl className="mt-4 grid min-w-0 gap-4 text-sm sm:grid-cols-2 xl:grid-cols-3">{fields[view].map(([field, label]) => <div key={field} className="min-w-0"><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 break-words [overflow-wrap:anywhere]">{(field === 'status' || field === 'pickup_status') && row[field] ? <StatusBadge status={String(row[field]) as DonationStatus | PickupTaskStatus} /> : formatAdminValue(row, field)}</dd></div>)}</dl></article>)}</div>
 }

@@ -8,6 +8,7 @@ import { PickupSummary } from '../../components/pickups/PickupSummary'
 import { cancelDonation, getDonationById } from '../../services/donations/donation.service'
 import type { Donation } from '../../types/domain'
 import { subscribeToDonationStatus, unsubscribeFromWorkflow } from '../../services/realtime/workflow-realtime.service'
+import { ConfirmAction } from '../../components/common/ConfirmAction'
 import { LocationMap } from '../../components/maps/LocationMap'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
@@ -38,7 +39,7 @@ export default function DonationDetailsPage() {
     const channel = subscribeToDonationStatus(id, setDonation)
     return () => { void unsubscribeFromWorkflow(channel) }
   }, [id])
-  async function handleCancel() { if (!id || !window.confirm('Cancel this donation? The record will remain in your history.')) return; setCancelling(true); setError(null); try { setDonation(await cancelDonation(id)); setMessage('Donation cancelled. The record remains available in your history.') } catch (e) { setError(e instanceof Error ? e.message : 'The donation could not be cancelled.') } finally { setCancelling(false) } }
+  async function handleCancel() { if (!id) return; setCancelling(true); setError(null); try { setDonation(await cancelDonation(id)); setMessage('Donation cancelled. The record remains available in your history.') } catch (e) { setError(e instanceof Error ? e.message : 'The donation could not be cancelled.') } finally { setCancelling(false) } }
   if (loading) return <LoadingState label="Loading donation details…" />
   if (!donation) return <div><Link to="/donor/donations" className="text-sm font-semibold text-forest">← My donations</Link><div className="mt-8 rounded-xl border border-line bg-white p-8"><h1 className="font-display text-3xl">Donation unavailable</h1><p role="alert" className="mt-3 text-sm text-muted">{error ?? 'Donation not found or you do not have permission to view it.'}</p></div></div>
   const editable = donation.status === 'POSTED'
@@ -50,6 +51,6 @@ export default function DonationDetailsPage() {
     <section aria-labelledby="location-heading" className="mt-5 rounded-xl border border-line bg-white p-5 sm:p-6"><h2 id="location-heading" className="text-base font-semibold">Pickup map</h2><p className="mt-2 mb-5 text-sm text-muted">{donation.location}</p><LocationMap points={donation.latitude !== null && donation.longitude !== null ? [{ latitude: donation.latitude, longitude: donation.longitude, label: 'Donation pickup', description: donation.location }] : []} /></section>
     <SuggestedMatchesSection donation={donation} onStatusChange={(status) => setDonation((current) => current ? { ...current, status } : current)} />
     <PickupSummary donation={donation} />
-    {(editable || cancellable) && <div className="mt-6 flex flex-col gap-3 sm:flex-row">{editable && <Link to={`/donor/donations/${donation.id}/edit`} className="rounded-lg bg-pine px-5 py-3 text-center text-sm font-semibold text-white hover:bg-forest">Edit donation</Link>}{cancellable && <button type="button" onClick={() => void handleCancel()} disabled={cancelling} className="rounded-lg border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60">{cancelling ? 'Cancelling…' : 'Cancel donation'}</button>}</div>}
+    {(editable || cancellable) && <div className="mt-6 flex flex-col gap-3 sm:flex-row">{editable && <Link to={`/donor/donations/${donation.id}/edit`} className="rounded-lg bg-pine px-5 py-3 text-center text-sm font-semibold text-white hover:bg-forest">Edit donation</Link>}{cancellable && <ConfirmAction label="Cancel donation" title="Cancel this donation?" description="This stops the rescue and cancels any associated pickup. The record stays in your history. This action cannot be undone here." destructive disabled={cancelling} onConfirm={handleCancel} />}</div>}
   </div>
 }

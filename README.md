@@ -180,3 +180,8 @@ Role reports live at /admin/analytics, /donor/analytics, /ngo/analytics and /vol
 ## Phase 13 — Testing and security hardening
 
 The full platform now has a documented security audit, narrower NGO and notification privacy, protected client write columns, stronger timestamp/state constraints, fail-closed session handling, realtime reconciliation, and live cross-role/concurrency checks. See [the security model and verified limits](docs/security.md). The live Phase 13 script uses isolated temporary Supabase data and verifies its cleanup.
+
+## UI and accessibility
+
+Phase 14 presentation improvements and validation results are documented in [docs/ui-accessibility.md](docs/ui-accessibility.md).
+

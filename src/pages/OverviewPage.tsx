@@ -28,7 +28,7 @@ export default function OverviewPage() {
       </div>
 
       <section aria-labelledby="community-heading" className="mt-10">
-        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2"><h2 id="community-heading" className="font-display text-2xl">One purpose. Four ways to help.</h2><span className="text-xs text-muted">Planned workspaces</span></div>
+        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2"><h2 id="community-heading" className="font-display text-2xl">One purpose. Four ways to help.</h2><span className="text-xs text-muted">Connected workspaces</span></div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {roles.map((role, index) => (
             <article key={role.name} className="rounded-xl border border-line bg-white p-5">
@@ -44,7 +44,7 @@ export default function OverviewPage() {
       <section id="rescue-journey" aria-labelledby="journey-heading" className="mt-10 scroll-mt-6 rounded-xl border border-line bg-white p-6 sm:p-8">
         <p className="text-xs font-semibold tracking-widest text-forest uppercase">From surplus to support</p>
         <h2 id="journey-heading" className="mt-2 font-display text-2xl">Every rescue has a journey.</h2>
-        <p className="mt-2 text-sm leading-6 text-muted">The planned workflow follows each donation through to confirmed receipt.</p>
+        <p className="mt-2 text-sm leading-6 text-muted">Follow each donation from posting through to confirmed receipt.</p>
         <ol className="mt-7 grid gap-x-8 gap-y-5 sm:grid-cols-3">
           {steps.map((step, index) => (
             <li key={step} className="flex items-center gap-3 text-sm"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-soft text-xs font-semibold text-forest">{index + 1}</span>{step}</li>

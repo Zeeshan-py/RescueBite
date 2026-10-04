@@ -20,7 +20,30 @@
   button:not(:disabled), summary { cursor: pointer; }
   :focus-visible { outline: 3px solid #80b597; outline-offset: 4px; }
   ::selection { background: var(--color-lime); color: var(--color-pine); }
+  html { scroll-padding-top: 1.5rem; }
+  :where(main) { overflow-wrap: anywhere; }
+  :where(main) :where(input, select, textarea, fieldset) { min-width: 0; max-width: 100%; }
+  :where(main) :where(button, select, input:not([type="radio"]):not([type="checkbox"])) { min-height: 44px; }
+  :where(main) :where(h1) { font-size: clamp(1.875rem, 4vw, 3rem); line-height: 1.15; }
+  button:disabled { cursor: not-allowed; }
 }
+
+/* Keep the keyboard outline visible even on controls with focus:outline-none. */
+:is(a, button, summary, input, select, textarea):focus-visible { outline: 3px solid var(--color-forest); outline-offset: 3px; }
+aside :is(a, button, summary):focus-visible { outline-color: var(--color-lime); }
+main h1 { font-size: clamp(1.875rem, 4vw, 3rem); line-height: 1.15; }
+input:disabled { background: var(--color-canvas); color: var(--color-muted); }
+.button-primary, .button-secondary, .button-danger { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: .5rem; border: 1px solid transparent; border-radius: .5rem; padding: .75rem 1.25rem; font-size: .875rem; font-weight: 600; line-height: 1.4; text-align: center; }
+.button-primary { background: var(--color-forest); color: white; }
+.button-primary:hover { background: var(--color-pine); }
+.button-secondary { border-color: var(--color-line); background: white; color: var(--color-forest); }
+.button-secondary:hover { background: var(--color-soft); }
+.button-danger { border-color: #fecaca; background: #fff; color: #991b1b; }
+.button-danger:hover { background: #fef2f2; }
+:is(.button-primary, .button-secondary, .button-danger):disabled { opacity: .6; }
+.confirmation-dialog { margin: auto; width: min(32rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); overflow: auto; border: 1px solid var(--color-line); border-radius: 1rem; padding: 1.5rem; background: white; box-shadow: 0 24px 80px #10251b33; }
+.confirmation-dialog::backdrop { background: #10251b99; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 .leaflet-container { font-family: var(--font-sans); }
 .foodbridge-map-marker { display: grid; place-items: center; width: 28px; height: 28px; border: 3px solid white; border-radius: 999px; background: var(--color-forest); color: white; box-shadow: 0 2px 8px rgb(16 37 27 / 30%); font-size: 12px; font-weight: 700; }

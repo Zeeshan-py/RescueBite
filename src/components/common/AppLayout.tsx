@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { roleHomePath } from '../../auth/route-access'
 import { useAuth } from '../../auth/useAuth'
@@ -32,17 +32,28 @@ const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
 function pageLabel(pathname: string, role: UserRole | null) {
   const publicLabels: Record<string, string> = { '/about': 'About', '/faq': 'FAQ', '/contact': 'Contact', '/terms': 'Terms of Use', '/privacy': 'Privacy Policy', '/food-safety': 'Food safety' }
   if (publicLabels[pathname]) return publicLabels[pathname]
+  if (/\/donations\/[^/]+\/edit$/.test(pathname)) return 'Edit donation'
+  if (/\/donations\/[^/]+$/.test(pathname) && !pathname.endsWith('/new')) return 'Donation details'
+  if (/\/pickups\/[^/]+$/.test(pathname)) return 'Pickup details'
   return role ? navigation[role].find((item) => item.to === pathname)?.label ?? 'Workspace' : 'Overview'
 }
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuButton = useRef<HTMLButtonElement>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const { user, role, profile, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const items = role ? navigation[role] : []
   const homePath = role ? roleHomePath[role] : '/'
+  const activePath = [...items].sort((a, b) => b.to.length - a.to.length).find((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`))?.to
+  useEffect(() => {
+    if (!menuOpen) return
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus() } }
+    document.addEventListener('keydown', close)
+    return () => document.removeEventListener('keydown', close)
+  }, [menuOpen])
 
   async function handleLogout() {
     setIsSigningOut(true)
@@ -65,17 +76,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl bg-lime text-pine"><svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M19 4C8 3 3 8 6 15c7 4 13-1 13-11Z" /><path d="M4 21 15 10" /></svg></span>
             <span><span className="block font-display text-2xl">FoodBridge</span><span className="text-[11px] text-white/65">Surplus food. Shared purpose.</span></span>
           </Link>
-          <button className="rounded-lg border border-white/30 px-3 py-2 text-sm lg:hidden" aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'Close' : 'Menu'}</button>
+          <button ref={menuButton} type="button" className="min-h-11 rounded-lg border border-white/30 px-3 py-2 text-sm lg:hidden" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'Close' : 'Menu'}</button>
         </div>
         <nav id="main-navigation" aria-label="Main navigation" className={`${menuOpen ? 'block' : 'hidden'} px-4 py-7 lg:block`}>
           <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.2em] text-white/55 uppercase">{role ? `${role.toLowerCase()} workspace` : 'Welcome'}</p>
           {isAuthenticated && role ? items.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.to === homePath} onClick={() => setMenuOpen(false)} className={({ isActive }) => `mb-1 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${isActive ? 'bg-white/12 text-white' : 'text-white/68 hover:bg-white/7 hover:text-white'}`}>
+            <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={() => setMenuOpen(false)} className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${activePath === item.to ? 'bg-white/12 text-white ring-1 ring-white/20' : 'text-white/80 hover:bg-white/7 hover:text-white'}`}>
               <span aria-hidden="true" className="text-lime">•</span>{item.label}
-            </NavLink>
+            </Link>
           )) : (
             <>
-              <NavLink to="/" className="mb-2 flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-sm font-medium">Overview</NavLink>
+              <NavLink to="/" end className={({ isActive }) => `mb-2 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium ${isActive ? 'bg-white/10' : ''}`}>Overview</NavLink>
               <Link to="/login" className="mt-4 flex rounded-lg border border-white/20 px-3 py-3 text-sm font-medium hover:bg-white/10">Sign in</Link>
               <Link to="/register" className="mt-2 flex rounded-lg bg-lime px-3 py-3 text-sm font-semibold text-pine hover:bg-white">Create account</Link>
             </>
@@ -88,7 +99,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-5 sm:px-10"><p className="min-w-0 truncate text-sm text-muted">FoodBridge <span aria-hidden="true" className="mx-2 text-line">/</span> <span className="text-ink">{pageLabel(location.pathname, role)}</span></p><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}<span className="hidden rounded-full border border-line px-3 py-1 text-xs text-muted sm:inline">{role ? role[0] + role.slice(1).toLowerCase() : 'Public'}</span></div></header>
+        <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-4 sm:px-10"><nav aria-label="Breadcrumb" className="min-w-0 text-sm"><Link to={homePath} className="text-forest hover:underline">{role ? `${role === 'NGO' ? 'NGO' : role[0] + role.slice(1).toLowerCase()} workspace` : 'FoodBridge'}</Link><span aria-hidden="true" className="mx-2 text-muted">/</span><span aria-current="page" className="text-ink">{pageLabel(location.pathname, role)}</span></nav><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}</div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
         <footer className="mx-auto max-w-6xl space-y-4 border-t border-line px-5 py-6 text-xs text-muted sm:px-10"><InformationLinks /><p>RescueBite · Food Rescue & Surplus Redistribution</p></footer>
       </div>

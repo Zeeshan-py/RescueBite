@@ -43,7 +43,7 @@ export default function NgoSetupPage() {
     <div>
       <p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">NGO account</p>
       <h1 className="mt-3 font-display text-4xl sm:text-5xl">Organization profile</h1>
-      <p className="mt-4 max-w-2xl text-sm leading-7 text-muted">These details prepare your organization for matching and receiving workflows in later phases.</p>
+      <p className="mt-4 max-w-2xl text-sm leading-7 text-muted">Keep your location, capacity, and accepted food types current so donors can find suitable matches.</p>
       <form onSubmit={submit} className="mt-8 grid max-w-3xl gap-5 rounded-xl border border-line bg-white p-6 sm:grid-cols-2 sm:p-8">
         {message && <p role="status" className="rounded-lg bg-soft px-4 py-3 text-sm text-forest sm:col-span-2">{message}</p>}
         {error && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 sm:col-span-2">{error}</p>}

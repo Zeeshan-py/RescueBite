@@ -4,6 +4,7 @@ import type { DeliveryStatus } from '../../services/delivery/delivery.types'
 import { canConfirmReceipt } from '../../services/delivery/delivery.utils'
 import type { Donation } from '../../types/domain'
 import { PickupStatusBadge } from './PickupStatusBadge'
+import { ConfirmAction } from '../common/ConfirmAction'
 import { PickupRouteMap } from '../maps/PickupRouteMap'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
@@ -35,6 +36,6 @@ export function PickupSummary({ donation, canConfirm = false, onDonationChange }
       <div><dt className="text-xs text-muted">Completed</dt><dd className="mt-1 font-medium">{donation.completed_at ? formatDate(donation.completed_at) : 'Awaiting NGO confirmation'}</dd></div>
     </dl>
     <div className="mt-6"><PickupRouteMap pickup={donation.latitude !== null && donation.longitude !== null ? { latitude: donation.latitude, longitude: donation.longitude } : null} destination={delivery.receivingNgo?.latitude !== null && delivery.receivingNgo?.latitude !== undefined && delivery.receivingNgo.longitude !== null ? { latitude: delivery.receivingNgo.latitude, longitude: delivery.receivingNgo.longitude } : null} pickupLabel={donation.location} destinationLabel={delivery.receivingNgo?.location ?? task?.delivery_location ?? 'Receiving NGO'} /></div>
-    {canConfirm && canConfirmReceipt(donation, task) && <button type="button" disabled={working} onClick={() => void handleConfirm()} className="mt-6 rounded-lg bg-pine px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">{working ? 'Confirming receipt…' : 'Confirm Receipt'}</button>}
+    {canConfirm && canConfirmReceipt(donation, task) && <div className="mt-6"><ConfirmAction label="Confirm receipt" title="Complete this rescue?" description="Confirm that your organization has received the delivery. This marks the donation completed and includes it in confirmed impact totals. It cannot be undone here." disabled={working} onConfirm={handleConfirm} /></div>}
   </section>
 }

@@ -12,7 +12,7 @@ function MapSelection({ selection, onSelect }: { selection: Coordinates | null; 
   const map = useMap()
   useMapEvents({ click: (event) => onSelect({ latitude: event.latlng.lat, longitude: event.latlng.lng }) })
   useEffect(() => { if (selection) map.panTo([selection.latitude, selection.longitude]) }, [map, selection])
-  return selection ? <Marker position={[selection.latitude, selection.longitude]} icon={pin} /> : null
+  return selection ? <Marker position={[selection.latitude, selection.longitude]} title="Selected map position" alt="Selected map position" icon={pin} /> : null
 }
 
 export function LocationPicker({ value, onChange, label = 'Select location on map' }: { value: Coordinates | null; onChange: (coordinates: Coordinates | null) => void; label?: string }) {
@@ -20,9 +20,9 @@ export function LocationPicker({ value, onChange, label = 'Select location on ma
   const [ready, setReady] = useState(false)
   const [tileError, setTileError] = useState(false)
   return <MapErrorBoundary><section aria-label={label} className="overflow-hidden rounded-xl border border-line bg-canvas">
-    <div className="flex flex-col gap-2 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-sm font-semibold">{label}</h3><p className="mt-1 text-xs text-muted">Click the map to place or move the marker.</p></div><p className="font-mono text-xs text-muted">{selection ? formatCoordinates(selection) : 'No coordinates selected'}</p></div>
+    <div className="flex flex-col gap-2 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-sm font-semibold">{label}</h3><p className="mt-1 text-xs text-muted">Click the map to place or move the marker, then confirm. Map position is optional; you can use the written address.</p></div><p className="font-mono text-xs text-muted">{selection ? formatCoordinates(selection) : 'No coordinates selected'}</p></div>
     <div className="relative isolate">
-      {!ready && <div className="absolute inset-0 z-[500] grid place-items-center bg-canvas text-sm text-muted">Loading map…</div>}
+      {!ready && <div role="status" className="absolute inset-0 z-[500] grid place-items-center bg-canvas text-sm text-muted">Loading map…</div>}
       {tileError && <p role="alert" className="relative z-[501] bg-amber-50 p-3 text-xs text-amber-900">Map tiles could not load. Check your connection; written locations and coordinates remain available.</p>}
     <MapContainer center={selection ? [selection.latitude, selection.longitude] : DEFAULT_CENTER} zoom={selection ? 14 : 12} scrollWheelZoom={false} className="h-72 w-full sm:h-80" whenReady={() => setReady(true)}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" eventHandlers={{ tileerror: () => setTileError(true) }} />
