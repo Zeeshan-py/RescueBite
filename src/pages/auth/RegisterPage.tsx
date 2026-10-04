@@ -68,7 +68,7 @@ export default function RegisterPage() {
 
   return (
     <AuthShell eyebrow="Join the network" title="Create your RescueBite account." description="Choose how you participate. Administrator accounts are provisioned separately.">
-      <GoogleSignInButton />
+      <GoogleSignInButton mode="register" />
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}
         <fieldset>
