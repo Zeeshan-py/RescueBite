@@ -1,4 +1,4 @@
-export function LoadingState({ label = 'Loading FoodBridge…', fullScreen = false }: { label?: string; fullScreen?: boolean }) {
+export function LoadingState({ label = 'Loading RescueBite…', fullScreen = false }: { label?: string; fullScreen?: boolean }) {
   return (
     <div role="status" aria-live="polite" className={`flex items-center justify-center gap-3 px-5 text-center text-sm text-muted ${fullScreen ? 'min-h-screen bg-canvas' : 'min-h-64'}`}>
       <span aria-hidden="true" className="size-5 animate-spin rounded-full border-2 border-line border-t-forest motion-reduce:animate-none" />

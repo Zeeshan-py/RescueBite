@@ -72,9 +72,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:p-3">Skip to content</a>
       <aside className="bg-pine text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-6 sm:px-6">
-          <Link to={homePath} className="flex items-center gap-3" aria-label="FoodBridge home" onClick={() => setMenuOpen(false)}>
+          <Link to={homePath} className="flex items-center gap-3" aria-label="RescueBite home" onClick={() => setMenuOpen(false)}>
             <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl bg-lime text-pine"><svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M19 4C8 3 3 8 6 15c7 4 13-1 13-11Z" /><path d="M4 21 15 10" /></svg></span>
-            <span><span className="block font-display text-2xl">FoodBridge</span><span className="text-[11px] text-white/65">Surplus food. Shared purpose.</span></span>
+            <span><span className="block font-display text-2xl">RescueBite</span><span className="text-[11px] text-white/65">Surplus food. Shared purpose.</span></span>
           </Link>
           <button ref={menuButton} type="button" className="min-h-11 rounded-lg border border-white/30 px-3 py-2 text-sm lg:hidden" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'Close' : 'Menu'}</button>
         </div>
@@ -94,12 +94,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
         <div className="mt-auto border-t border-white/10 p-5 sm:p-6">
           {isAuthenticated ? (
-            <div><p className="truncate text-sm font-semibold">{profile?.name ?? 'FoodBridge member'}</p><p className="mt-1 text-xs text-white/55">{role}</p><button onClick={() => void handleLogout()} disabled={isSigningOut} className="mt-4 text-xs font-semibold text-lime hover:text-white disabled:opacity-60">{isSigningOut ? 'Signing out…' : 'Sign out'}</button></div>
+            <div><p className="truncate text-sm font-semibold">{profile?.name ?? 'RescueBite member'}</p><p className="mt-1 text-xs text-white/55">{role}</p><button onClick={() => void handleLogout()} disabled={isSigningOut} className="mt-4 text-xs font-semibold text-lime hover:text-white disabled:opacity-60">{isSigningOut ? 'Signing out…' : 'Sign out'}</button></div>
           ) : <p className="text-sm text-lime">A little less waste.<br />A little more possibility.</p>}
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-4 sm:px-10"><nav aria-label="Breadcrumb" className="min-w-0 text-sm"><Link to={homePath} className="text-forest hover:underline">{role ? `${role === 'NGO' ? 'NGO' : role[0] + role.slice(1).toLowerCase()} workspace` : 'FoodBridge'}</Link><span aria-hidden="true" className="mx-2 text-muted">/</span><span aria-current="page" className="text-ink">{pageLabel(location.pathname, role)}</span></nav><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}</div></header>
+        <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-4 sm:px-10"><nav aria-label="Breadcrumb" className="min-w-0 text-sm"><Link to={homePath} className="text-forest hover:underline">{role ? `${role === 'NGO' ? 'NGO' : role[0] + role.slice(1).toLowerCase()} workspace` : 'RescueBite'}</Link><span aria-hidden="true" className="mx-2 text-muted">/</span><span aria-current="page" className="text-ink">{pageLabel(location.pathname, role)}</span></nav><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}</div></header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
         <footer className="mx-auto max-w-6xl space-y-4 border-t border-line px-5 py-6 text-xs text-muted sm:px-10"><InformationLinks /><p>RescueBite · Food Rescue & Surplus Redistribution</p></footer>
       </div>

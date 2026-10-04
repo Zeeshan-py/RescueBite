@@ -12,8 +12,10 @@ export function DashboardView({ title, description, loading, error, refresh, chi
   </div>
 }
 export function SummaryCards({ summary }: { summary: DashboardSummary }) {
-  return <dl className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{summaryCards(summary).map(({ key, label, value }) => <div key={key} className="rounded-xl border border-line bg-white p-5"><dt className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</dt><dd className="mt-3 font-display text-4xl text-pine">{value}</dd></div>)}</dl>
+  const cards = summaryCards(summary).filter(({ value }) => value > 0)
+  if (!cards.length) return null
+  return <dl className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{cards.map(({ key, label, value }) => <div key={key} className="rounded-xl border border-line bg-white p-5"><dt className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</dt><dd className="mt-3 font-display text-4xl text-pine">{value}</dd></div>)}</dl>
 }
 export function DashboardSection({ title, children, empty }: { title: string; children?: ReactNode; empty?: string }) {
-  return <section className="mt-8"><h2 className="mb-4 text-lg font-semibold">{title}</h2>{empty ? <EmptyState title={empty} description="Use the workspace actions above to review available opportunities or start your next rescue." /> : <div className="grid gap-4">{children}</div>}</section>
+  return <section className="mt-8"><h2 className="mb-4 text-lg font-semibold">{title}</h2>{empty ? <EmptyState title={empty} /> : <div className="grid gap-4">{children}</div>}</section>
 }

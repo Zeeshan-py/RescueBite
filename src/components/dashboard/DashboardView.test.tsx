@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { DashboardSection, DashboardView } from './DashboardView'
+import { DashboardSection, DashboardView, SummaryCards } from './DashboardView'
 
 describe('dashboard states', () => {
   it('renders loading without stale records', () => {
@@ -16,5 +16,14 @@ describe('dashboard states', () => {
   })
   it('shows an informative empty section', () => {
     expect(renderToStaticMarkup(<DashboardSection title="Recent donations" empty="No donations yet." />)).toContain('No donations yet.')
+  })
+  it('does not fill an empty dashboard with zero-valued cards', () => {
+    const html = renderToStaticMarkup(<SummaryCards summary={{ role: 'DONOR', counts: { total_donations: 0, active: 0 }, statuses: {} }} />)
+    expect(html).toBe('')
+  })
+  it('shows actual nonzero counts without unrelated zero cards', () => {
+    const html = renderToStaticMarkup(<SummaryCards summary={{ role: 'ADMIN', counts: { total_users: 1, donors: 1 }, statuses: {} }} />)
+    expect(html).toContain('Total users')
+    expect(html).not.toContain('Total donations')
   })
 })

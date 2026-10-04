@@ -11,7 +11,7 @@ function failure(error: { message: string }): PickupServiceError {
   if (message.includes('only volunteer') || message.includes('another volunteer') || message.includes('row-level security')) return new PickupServiceError('You do not have permission to perform this pickup action.', 'UNAUTHORIZED')
   if (message.includes('deadline')) return new PickupServiceError('This pickup can no longer be claimed because its collection deadline has passed.', 'EXPIRED')
   if (message.includes('no longer') || message.includes('only an assigned') || message.includes('not ready')) return new PickupServiceError('This pickup is no longer available for that action.', 'INVALID_STATUS')
-  if (message.includes('fetch') || message.includes('network')) return new PickupServiceError('FoodBridge could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
+  if (message.includes('fetch') || message.includes('network')) return new PickupServiceError('RescueBite could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
   return new PickupServiceError('The pickup workflow could not be completed. Please try again.')
 }
 

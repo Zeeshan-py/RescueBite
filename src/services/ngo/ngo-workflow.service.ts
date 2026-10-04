@@ -13,7 +13,7 @@ function failure(error: { message: string }): NgoWorkflowError {
   if (message.includes('only ngo') || message.includes('not authorized') || message.includes('row-level security')) return new NgoWorkflowError('You do not have permission to perform this NGO action.', 'UNAUTHORIZED')
   if (message.includes('deadline')) return new NgoWorkflowError('This donation has passed its collection deadline.', 'EXPIRED')
   if (message.includes('no longer') || message.includes('current state')) return new NgoWorkflowError('This donation opportunity is no longer available.', 'NOT_ACTIONABLE')
-  if (message.includes('fetch') || message.includes('network')) return new NgoWorkflowError('FoodBridge could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
+  if (message.includes('fetch') || message.includes('network')) return new NgoWorkflowError('RescueBite could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
   return new NgoWorkflowError('The NGO workflow could not be completed. Please try again.')
 }
 

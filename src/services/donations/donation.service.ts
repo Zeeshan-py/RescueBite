@@ -36,7 +36,7 @@ function values(input: DonationInput) {
 function friendlyFailure(action: string, error: { message: string; code?: string }): DonationServiceError {
   const message = error.message.toLowerCase()
   if (error.code === 'PGRST116') return new DonationServiceError('Donation not found or you do not have permission to view it.', 'NOT_FOUND')
-  if (message.includes('fetch') || message.includes('network')) return new DonationServiceError('FoodBridge could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
+  if (message.includes('fetch') || message.includes('network')) return new DonationServiceError('RescueBite could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
   if (message.includes('donation can only') || message.includes('posted')) return new DonationServiceError('This donation can no longer be edited or cancelled.', 'INVALID_STATUS')
   return new DonationServiceError(`The donation could not be ${action}. Please try again.`)
 }

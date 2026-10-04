@@ -12,7 +12,7 @@ function failure(error: { message: string }): DeliveryServiceError {
   if (message.includes('only ngo') || message.includes('only volunteer') || message.includes('another volunteer') || message.includes('not assigned') || message.includes('row-level security')) return new DeliveryServiceError('You do not have permission to perform this delivery action.', 'UNAUTHORIZED')
   if (message.includes('already') || message.includes('only a delivered') || message.includes('only a collected') || message.includes('not in collected')) return new DeliveryServiceError('This delivery action is no longer available in its current state.', 'INVALID_STATUS')
   if (message.includes('not found')) return new DeliveryServiceError('The delivery record could not be found.', 'NOT_FOUND')
-  if (message.includes('fetch') || message.includes('network')) return new DeliveryServiceError('FoodBridge could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
+  if (message.includes('fetch') || message.includes('network')) return new DeliveryServiceError('RescueBite could not reach the server. Check your connection and try again.', 'NETWORK_ERROR')
   return new DeliveryServiceError('The delivery workflow could not be completed. Please try again.')
 }
 

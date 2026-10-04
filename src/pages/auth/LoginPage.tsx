@@ -37,7 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell eyebrow="Welcome back" title="Continue your rescue work." description="Sign in with the email connected to your FoodBridge account.">
+    <AuthShell eyebrow="Welcome back" title="Continue your rescue work." description="Sign in with the email connected to your RescueBite account.">
       <GoogleSignInButton />
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {logoutWarning && <p role="alert" className="text-sm text-amber-900">{logoutWarning}</p>}
@@ -52,7 +52,7 @@ export default function LoginPage() {
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-muted">New to FoodBridge? <Link to="/register" className="font-semibold text-forest underline-offset-4 hover:underline">Create an account</Link></p>
+      <p className="mt-6 text-center text-sm text-muted">New to RescueBite? <Link to="/register" className="font-semibold text-forest underline-offset-4 hover:underline">Create an account</Link></p>
     </AuthShell>
   )
 }

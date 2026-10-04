@@ -4,7 +4,7 @@
 
 [Live website](https://rescuebitee.netlify.app/) · [GitHub repository](https://github.com/Zeeshan-py/RescueBite)
 
-RescueBite connects people with surplus food to NGOs that can receive it and volunteers who can deliver it. A donor posts an offer, the platform recommends suitable NGOs, an NGO accepts, a volunteer completes the pickup, and the NGO confirms receipt. The same records power notifications, accountability, and impact reports. Some parts of the interface use the **FoodBridge** name.
+RescueBite connects people with surplus food to NGOs that can receive it and volunteers who can deliver it. A donor posts an offer, the platform recommends suitable NGOs, an NGO accepts, a volunteer completes the pickup, and the NGO confirms receipt. The same records power notifications, accountability, and impact reports.
 
 Built for a Software Engineering Lab project, this is a working end-to-end prototype. It demonstrates coordination; it does not claim that software alone guarantees a real-world food rescue.
 
@@ -128,6 +128,22 @@ Open the [live app](https://rescuebitee.netlify.app/). A full walkthrough uses s
 5. Return to the **NGO** to confirm receipt. Inspect the completed donation, notifications, and analytics.
 
 Use test descriptions and locations for a software demonstration. Matching requires an eligible NGO to exist when suggestions are generated. Google login may require an allowed test account while its OAuth consent screen is in testing.
+
+## Administrator access
+
+The admin panel is at [`/admin`](https://rescuebitee.netlify.app/admin). It requires an authenticated account whose **`public.users.role` is `ADMIN`**. Admin is intentionally absent from public registration and cannot be gained by editing the browser or Auth metadata.
+
+To provision a dedicated administrator, register a **separate** donor account through the website and confirm its email. In the Supabase project's SQL Editor, while signed in as the project owner, replace the address below with that new account's email and run:
+
+```sql
+update public.users
+set role = 'ADMIN'
+where email = 'new-admin-account@example.com'
+  and role = 'DONOR'
+returning email, role;
+```
+
+Confirm that exactly one row is returned with `ADMIN`. Then sign out of that account and sign in again. Open `/admin`, or use the Admin navigation shown after sign-in. Keep the original donor account separate if you need to demonstrate donor actions. The panel provides read-only operational records and analytics; it does not offer an admin sign-up or full record editing interface.
 
 ## Run and verify locally
 
