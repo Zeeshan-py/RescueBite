@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { supabaseConfigurationError } from '../lib/supabase'
 
 const roles = [
   { name: 'Donors', description: 'Give surplus food a second purpose.', detail: 'Share food availability and follow its journey.' },
@@ -52,10 +51,6 @@ export default function OverviewPage() {
         </ol>
       </section>
 
-      <details className="my-8 rounded-lg border border-line px-5 py-4 text-xs text-muted">
-        <summary className="cursor-pointer font-medium text-ink">Development setup</summary>
-        <p className="mt-3 leading-6">{supabaseConfigurationError ?? 'Supabase authentication and protected profile access are configured.'}</p>
-      </details>
     </div>
   )
 }

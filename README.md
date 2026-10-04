@@ -1,187 +1,175 @@
 # RescueBite
 
-Food Rescue & Surplus Redistribution Platform — Software Engineering Lab, Semester 5.
+**Food Rescue & Surplus Redistribution Platform**
 
-## Phase 1 scope
+[Live website](https://rescuebitee.netlify.app/) · [GitHub repository](https://github.com/Zeeshan-py/RescueBite)
 
-This repository contains the frontend foundation only: React, TypeScript, Vite,
-Tailwind CSS, a responsive application shell, loading/error boundaries, ERD domain
-types, and an environment-based Supabase client factory.
+RescueBite connects people with surplus food to NGOs that can receive it and volunteers who can deliver it. A donor posts an offer, the platform recommends suitable NGOs, an NGO accepts, a volunteer completes the pickup, and the NGO confirms receipt. The same records power notifications, accountability, and impact reports. Some parts of the interface use the **FoodBridge** name.
 
-The overview explains the planned rescue journey. It contains no sample donation
-records or fabricated statistics. Future navigation items are visibly disabled.
-Authentication, database tables/RLS, CRUD, matching, maps, notifications, reports,
-and AI have not been implemented. The core workflow will remain independent of AI.
+Built for a Software Engineering Lab project, this is a working end-to-end prototype. It demonstrates coordination; it does not claim that software alone guarantees a real-world food rescue.
 
-## Install
+## The problem
 
-Use Node.js 22.18.0 (recorded in `.nvmrc`) and npm. Compatible later Node 22
-releases are allowed by `package.json`.
+Surplus food may be discarded while community organizations need it. A useful handover needs more than a listing: participants need food and safety details, location, a collection deadline, a receiving organization, a transporter, and confirmation that the food arrived. RescueBite puts those decisions into one traceable workflow.
+
+| Role | What the workspace provides |
+| --- | --- |
+| **Donor** | Post and manage donations, generate NGO suggestions, follow progress, and view personal impact. |
+| **NGO** | Set up an organization profile, capacity, location, and accepted foods; review suggestions; accept or reject; confirm receipt; view organization impact. |
+| **Volunteer** | See available tasks, claim one, record collection and delivery, and review personal activity. |
+| **Admin** | Read platform totals, filter and inspect users, donations, NGOs, volunteers, and activity, and view platform analytics. |
+
+Public registration offers donor, NGO, and volunteer accounts. Administrators are provisioned separately.
+
+## The rescue journey
+
+```mermaid
+flowchart LR
+    A[Donor posts surplus] --> B[Platform ranks eligible NGOs]
+    B --> C{NGO decision}
+    C -->|Accept| D[Pickup task available]
+    C -->|Reject| B
+    D --> E[Volunteer claims task]
+    E --> F[Food collected]
+    F --> G[Food delivered]
+    G --> H[NGO confirms receipt]
+    H --> I[Donation completed]
+    I --> J[Impact and activity reports]
+```
+
+1. **Post:** A donor enters food type, quantity, estimated meal portions, pickup location, availability, collection deadline, and safety information. Optional map coordinates improve distance matching.
+2. **Suggest:** Ineligible NGOs are filtered out; eligible ones receive explainable scores. One donation can have several candidates.
+3. **Accept:** An NGO decides whether it can receive the food. An atomic database function expires competing suggestions and creates a pickup task. A suggestion is not a food-safety certificate.
+4. **Transport:** A volunteer claims the task. Only the assigned volunteer can record collection and delivery.
+5. **Confirm:** Delivery and completion are separate. The receiving NGO confirms receipt before the donation becomes complete.
+6. **Review:** Recipient-specific notifications and role-scoped reports show the recorded outcome.
+
+The main donation states are `POSTED → MATCHED → ACCEPTED → PICKUP_ASSIGNED → COLLECTED → DELIVERED → COMPLETED`. The database also supports `CANCELLED`, `EXPIRED`, and `EXCEPTION`. Matches and pickup tasks have their own controlled status values.
+
+## Explainable smart matching
+
+Matching uses deterministic rules, **not generative AI**. Eligible NGOs must accept the food category, have sufficient capacity for the estimated portions, and be within the collection deadline.
+
+| Component | Weight | Meaning |
+| --- | ---: | --- |
+| Distance | 30% | Haversine distance when both places have coordinates; otherwise a documented text-location fallback. |
+| Urgency | 25% | Less time until the deadline yields a higher score; past-deadline donations are ineligible. |
+| Food compatibility | 20% | Whether the NGO accepts the donation's food category. |
+| Capacity | 15% | Whether the NGO has enough capacity, with headroom rewarded. |
+| Availability | 10% | A fixed baseline because volunteer schedules are not recorded. |
+
+**Total =** `0.30 × distance + 0.25 × urgency + 0.20 × compatibility + 0.15 × capacity + 0.10 × availability`.
+
+If coordinates are missing, identical normalized location text scores 100 for the distance component and other text scores 50. That fallback is **not** a physical distance estimate. Score components are visible for review. The database validates ownership, compatibility, capacity, score bounds, and the weighted total before storing candidates.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    UI[React + TypeScript browser app] --> Auth[Supabase Auth]
+    UI --> Services[Role-scoped domain services]
+    Services --> DB[Supabase API and secured PostgreSQL functions]
+    DB --> RLS[Seven application tables with RLS]
+    DB --> Events[Activity and notification triggers]
+    Events --> Realtime[Supabase Realtime]
+    Realtime --> UI
+    UI --> Maps[Leaflet + OpenStreetMap tiles]
+    Netlify[Netlify static hosting] --> UI
+```
+
+The frontend uses **React 19, TypeScript, Vite, Tailwind CSS, and React Router**. Supabase supplies authentication, PostgreSQL, secured database functions, and realtime updates. Leaflet displays OpenStreetMap maps; geographic scoring uses the Haversine formula when coordinates exist. Netlify serves the static build and rewrites direct application routes to `index.html`.
+
+Important workflow transitions run through guarded database functions rather than trusting direct browser status updates. Row locks prevent competing acceptance or task-claim requests from both succeeding. Notifications are written in the same transaction as successful transitions; realtime refreshes visible statuses.
+
+### Data relationships
+
+```mermaid
+erDiagram
+    AUTH_USERS ||--|| USERS : "same UUID"
+    USERS ||--o| NGOS : owns
+    USERS ||--o{ DONATIONS : donates
+    DONATIONS ||--o{ MATCHES : has_candidates
+    NGOS ||--o{ MATCHES : receives
+    DONATIONS ||--o{ PICKUP_TASKS : creates
+    USERS ||--o{ PICKUP_TASKS : volunteers
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ ACTIVITY_LOGS : acts
+```
+
+`auth.users` owns authentication; `public.users` stores profile information under the same UUID and never stores passwords. Seven application tables hold users, NGOs, donations, matches, pickup tasks, notifications, and activity logs. The schema and later workflow/security changes are versioned in [`supabase/migrations/`](supabase/migrations/). See the [database guide](supabase/README.md).
+
+## Security and privacy
+
+- **Row Level Security (RLS)** protects every application table. Participants can access their own records or those needed for their authorized workflow; ordinary users cannot browse admin logs.
+- PostgreSQL validates roles and statuses. Frontend route guards help navigation, while database policies and secured functions enforce access.
+- Critical actions check role, ownership, deadline, and current state. The browser does not need a service-role key or database password.
+- Notifications are recipient-specific. Realtime uses the same row permissions.
+- `.env`, `.env.*` (except `.env.example`), and the private `Instruction/` folder are ignored by Git. Only public Supabase configuration belongs in `VITE_` variables, which are visible to browsers.
+- Google sign-in UI uses Supabase OAuth. Its availability depends on external Google/Supabase provider settings; see the [OAuth guide](docs/google-sign-in.md).
+
+Public [privacy](https://rescuebitee.netlify.app/privacy), [terms](https://rescuebitee.netlify.app/terms), and [food safety](https://rescuebitee.netlify.app/food-safety) pages explain data use and participant responsibilities. Receiving organizations remain responsible for assessing food condition and applying local handling requirements.
+
+## Dashboards, locations, and impact
+
+Each participant dashboard displays real database aggregates and recent records. The admin workspace offers read-only records with server-side filters and pagination. Maps display donation, NGO, and pickup locations when coordinates are present; written addresses remain available otherwise.
+
+Role-based analytics cover donation creation and status, matching and acceptance, pickup and delivery, completed estimated portions, and time trends. Reports distinguish the date a donation was **created** from the date it was **completed**. SQL aggregation happens in PostgreSQL, so the browser does not download the whole dataset to compute platform totals. See [metric definitions](docs/analytics.md).
+
+**Impact is estimated from entered meal portions and recorded events.** The system does not measure kilograms rescued, emissions avoided, actual meals consumed, or individual recipients. This README intentionally reports no invented impact totals.
+
+## Demo walkthrough
+
+Open the [live app](https://rescuebitee.netlify.app/). A full walkthrough uses separate donor, NGO, and volunteer accounts; admin access is provisioned separately.
+
+1. Register an **NGO**, then complete its profile with an accepted food category and enough capacity.
+2. Register a **donor**, post a donation of that category with a future deadline, then generate and review suggestions.
+3. Sign in as the **NGO** and accept the suggestion.
+4. Sign in as a **volunteer**, claim the available task, then record collection and delivery.
+5. Return to the **NGO** to confirm receipt. Inspect the completed donation, notifications, and analytics.
+
+Use test descriptions and locations for a software demonstration. Matching requires an eligible NGO to exist when suggestions are generated. Google login may require an allowed test account while its OAuth consent screen is in testing.
+
+## Run and verify locally
+
+Use **Node.js 22.18.0 or a later Node 22 release** (`.nvmrc`). From the repository root:
 
 ```sh
-npm install
+npm ci
 ```
 
-Commit `package-lock.json` with the source. On a fresh checkout, `npm ci` installs
-the exact locked dependencies.
-
-## Environment
-
-The preview works with no environment variables. To prepare Supabase configuration,
-copy the template in PowerShell:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Then fill in these values from your Supabase project settings:
-
-```dotenv
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
-
-Use the project's public anon key. All `VITE_` variables are exposed to the browser:
-never put a service-role key, database password, or private API key here.
-Local environment files are ignored by Git. Restart Vite after changing them.
-
-`src/lib/supabase.ts` validates configuration and exposes `getSupabaseClient()`.
-It creates one shared client only when requested by a future service; the shell
-does not initialize authentication, query the database, or claim to verify a
-connection. Missing/invalid configuration is explained in the overview's
-Development setup disclosure, and client access throws a useful error.
-
-## Run
+Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to your project's **public** values. Do not put a service-role key or database password in frontend settings. Then:
 
 ```sh
 npm run dev
-```
-
-Open the address Vite prints, normally http://127.0.0.1:5173. The server binds to
-loopback. The mobile menu, overview link, and rescue-journey anchor work; the
-remaining navigation is reserved for future phases.
-
-## Validate and build
-
-```sh
+npm test
 npm run lint
 npm run build
-npm run preview
 ```
 
-Build runs strict TypeScript checks before generating `dist/`. Preview serves the
-production build locally, normally at http://127.0.0.1:4173.
+Vite normally serves the site at `http://127.0.0.1:5173`. Build runs TypeScript checks and writes `dist/`. Migration commands and database setup are in the [database guide](supabase/README.md). Live integration scripts under `scripts/` need an authorized test project; a passing local build alone does not prove external OAuth or hosting settings.
 
-## Phase 5 matching assumptions
+## Repository map
 
-The first matching engine is deterministic TypeScript logic using the documented weights: distance 30%, urgency 25%, food compatibility 20%, capacity 15%, and pickup availability 10%. Location records do not yet include coordinates, so exact normalized location text scores 100 and all other locations receive a neutral 50 rather than an invented physical distance. Eligible NGOs must accept the food category and have capacity for the donation's meal portions. Availability uses a documented score of 70 until volunteer scheduling exists. These two isolated scoring functions can be replaced when coordinates and schedules are added.
+| Path | Purpose |
+| --- | --- |
+| `src/auth/` | Session, profile, role, and route access. |
+| `src/pages/` | Public and role-specific workspaces. |
+| `src/components/` | Layout, forms, maps, notifications, progress, and status UI. |
+| `src/services/` | Donations, matching, workflow, dashboards, analytics, and realtime. |
+| `src/types/domain.ts` | Shared entities and status types. |
+| `supabase/migrations/` | Versioned PostgreSQL schema, RLS, functions, and triggers. |
+| `scripts/` | Targeted live verification and temporary test fixtures. |
+| `docs/` | Analytics, security, OAuth, and accessibility details. |
+| `public/_redirects` | Netlify route-refresh rewrite. |
 
-## Phase 6 NGO workflow
+## Validation and known limits
 
-NGOs can review only matches associated with their organization, accept one atomically, or preserve a declined suggestion as history. The database locks the donation during a decision, expires competing suggestions after acceptance, restores `POSTED` when the final actionable suggestion is declined, and records NGO decisions in `activity_logs`. Pickup, delivery, notifications, and realtime behavior remain outside this phase.
+The Phase 14 validation recorded **134 passing unit/component tests**, passing lint and production build, and **127 live security/workflow checks** using temporary data that was removed afterward. The production bundle also rendered locally in headless Chrome. See the [security audit](docs/security.md) and [UI/accessibility report](docs/ui-accessibility.md) for exact coverage.
 
-## Phase 7 volunteer pickup workflow
+Current limits: volunteer availability is a baseline rather than a schedule; matching does not certify food safety; map-point selection requires a pointer (text entry is available); reported portions are estimates; and Google login depends on provider settings. Browser visual and keyboard checks across all roles are incomplete, so no formal accessibility certification is claimed.
 
-Accepting an NGO match creates one `AVAILABLE` pickup task using the donation and NGO text locations. Volunteers can view shared available tasks, atomically claim one, and mark only their own assigned task `COLLECTED`. Claim and collection also move the donation to `PICKUP_ASSIGNED` and `COLLECTED`. Delivery, completion, maps, and realtime tracking remain outside this phase.
+## Links
 
-## Phase 8 delivery and completion workflow
-
-An assigned volunteer can atomically move a collected pickup and donation to `DELIVERED`, recording `delivered_at`. Only the NGO with the accepted match can then confirm receipt, moving the donation to `COMPLETED` and recording `completed_at`. Both actions use secured database functions, row locks, guarded status transitions, and activity logs. Donors can follow the seven-step rescue journey and view the receiving NGO without seeing private volunteer details. Notifications, realtime updates, maps, proof of delivery, analytics, and administration remain outside this phase.
-
-## Phase 9 notifications and realtime
-
-Workflow changes now create persistent, recipient-specific notifications inside the same database transaction. Stable event keys prevent duplicate alerts, and RLS permits users to read and mark only their own records. The application header includes a live unread badge and responsive notification panel, while the full notification history supports individual and bulk read actions. Supabase Realtime also keeps visible donation and pickup statuses current through narrowly filtered subscriptions.
-
-## Project structure
-
-```text
-Instruction/              Original requirements and prototype, preserved unchanged
-src/
-  components/
-    common/               AppLayout, ErrorBoundary, LoadingState
-    forms/                Reserved
-    dashboard/            Reserved
-    maps/                 Reserved
-  pages/
-    OverviewPage.tsx       Foundation overview, not a dashboard
-    auth/ donor/ ngo/ volunteer/ admin/   Reserved role pages
-  services/
-    auth/ donations/ matching/ ngos/ volunteers/ notifications/ reports/
-                          Reserved service boundaries; no stub APIs
-  hooks/                  Reserved
-  types/domain.ts         Seven ERD entity interfaces and status unions
-  utils/                  Reserved
-  lib/supabase.ts         Lazy shared Supabase client factory
-  routes/                 Reserved until there are actual routes
-  App.tsx                 Shell and lazy page loading
-  main.tsx                React entry point and error boundary
-  index.css               Tailwind import and shared visual tokens
-```
-
-Empty reserved directories contain `.gitkeep` so Git retains the requested
-structure. There is one page, so a router, state library, forms library, map
-library, and separate backend are unnecessary at this stage.
-
-## Source documents and interpretation
-
-Read before implementation:
-
-- `Instruction/Food_Rescue_Problem_Statement.docx`
-- `Instruction/Food_Rescue_SRS.docx`
-- `Instruction/PRD.md`
-- `Instruction/Architecture.md`
-- `Instruction/APIDesign.md`
-- `Instruction/ERD.md`
-- `Instruction/TechStack.md`
-
-The supplied HTML prototype informed the FoodBridge name, green palette, and
-sidebar layout. Its simulated dashboards and actions are not incorporated.
-
-The planned workflow remains: donor creates donation → smart matching → NGO
-accepts → volunteer pickup → collection → delivery → NGO receipt confirmation →
-completion → impact recorded.
-
-Implementation decisions:
-
-- The API document explicitly allows Supabase-generated APIs. Future service
-  modules will organize those calls; its example localhost:3000 API does not
-  require a custom backend in this foundation.
-- Roles and entity fields follow the detailed ERD tables, including uppercase
-  roles, despite lowercase roles in API examples. Types are application record
-  shapes, not a generated or deployed database schema.
-- UUIDs and timestamps are strings; numeric fields are numbers; accepted food
-  types use the ERD's array option. Unassigned volunteers and pickup/collection/
-  delivery times allow `null` for events that have not occurred. Other database
-  nullability rules remain to be finalized with the schema.
-- The ERD distinguishes `DELIVERED` from `COMPLETED` after NGO confirmation.
-  The SRS wording around delivery confirmation needs reconciliation when status
-  transitions are implemented; no transition logic is introduced here.
-- API confirmation payload fields such as `received_meal_portions` and location
-  coordinates needed for distance matching are not in the ERD. They are not
-  invented in these interfaces and need design decisions in a later phase.
-
-## Tooling references
-
-Configuration follows the official [Vite guide](https://vite.dev/guide/),
-[Tailwind Vite integration](https://tailwindcss.com/docs/installation/using-vite),
-and [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing).
-
-## Phase 10 location support
-
-Donation and NGO profiles now support optional confirmed coordinates alongside written addresses. Leaflet/OpenStreetMap maps show pickup and receiving locations; geographic matching uses Haversine distance when both locations are known and preserves text fallback otherwise. See supabase/README.md for the migration, scoring bands, privacy, and live verification command.
-
-## Phase 11 dashboards
-
-All participant dashboards show database aggregates and bounded recent workflow records. The protected /admin dashboard provides read-only user, donation, NGO, volunteer, and activity views with server-side filters and pagination. See supabase/README.md for the authorization model, migration, count definitions, and live verification command. Existing matching, delivery, notification, and map workflows remain in use.
-
-## Phase 12 — Analytics and impact
-Role reports live at /admin/analytics, /donor/analytics, /ngo/analytics and /volunteer/analytics. Secure PostgreSQL aggregates report creation cohorts and actual completion-date impact, using confirmed meal portions. See [metric definitions and limitations](docs/analytics.md). Validate with npm test, npm run lint, npm run build and node scripts/verify-phase12.mjs. No export, deployment or later-phase features are included.
-
-## Phase 13 — Testing and security hardening
-
-The full platform now has a documented security audit, narrower NGO and notification privacy, protected client write columns, stronger timestamp/state constraints, fail-closed session handling, realtime reconciliation, and live cross-role/concurrency checks. See [the security model and verified limits](docs/security.md). The live Phase 13 script uses isolated temporary Supabase data and verifies its cleanup.
-
-## UI and accessibility
-
-Phase 14 presentation improvements and validation results are documented in [docs/ui-accessibility.md](docs/ui-accessibility.md).
-
+- [Live app](https://rescuebitee.netlify.app/)
+- [Source code](https://github.com/Zeeshan-py/RescueBite)
+- [About](https://rescuebitee.netlify.app/about) · [FAQ](https://rescuebitee.netlify.app/faq) · [Contact](https://rescuebitee.netlify.app/contact)
