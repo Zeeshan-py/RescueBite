@@ -14,7 +14,7 @@ Food may be discarded while people and community organizations nearby need it. A
 
 | Role | What they can do |
 | --- | --- |
-| **Donor** | Complete a business profile and phone verification, post food, select NGO/individual eligibility, review requests, arrange pickup, and follow outcomes. |
+| **Donor** | Complete a business profile and confirm email, post food, select NGO/individual eligibility, review requests, arrange pickup, and follow outcomes. An optional mobile number supports direct contact after acceptance. |
 | **NGO** | Maintain organization information, receive suggestions after administrator verification, accept a donation, and confirm collection. |
 | **Individual recipient** | Register independently, provide a general area, browse eligible meals, request food, review status and collection details, cancel pending requests, and confirm collection. |
 | **Administrator** | Review records, verify NGOs, restrict or restore accounts, cancel unsuitable donations, and inspect audit history. |
@@ -98,7 +98,7 @@ erDiagram
 - RLS limits profiles, requests, donations, matches, notifications, and collection records to authorized participants. React route checks aid navigation; database rules enforce access.
 - Public registration can choose only the three non-admin roles. NGO verification and account restrictions are controlled by an administrator and audited.
 - Individual meal browsing excludes exact pickup details and donor contact. A matched NGO may view donation details needed for an acceptance decision; donor contact is supplied for an accepted collection.
-- Email/phone verification, request quotas, unique allocation, row locks, and guarded state transitions reduce misuse and duplicate claims. Moderation reasons are stored in the audit trail.
+- Email confirmation, request quotas, unique allocation, row locks, and guarded state transitions reduce misuse and duplicate claims. Mobile numbers are optional, self-provided contact details shown only to accepted donation participants and authorized administrators. Moderation reasons are stored in the audit trail.
 - Only public Supabase values may be used as `VITE_` browser variables. `.env` files and `Instruction/` are ignored by Git. Service-role keys and database passwords must never enter the frontend or repository.
 - Food and portion counts are donor-reported. Receiving participants remain responsible for suitability and local handling requirements. Read the public [food-safety](https://rescuebitee.netlify.app/food-safety), [privacy](https://rescuebitee.netlify.app/privacy), and [terms](https://rescuebitee.netlify.app/terms) pages.
 
@@ -110,10 +110,10 @@ Role-specific pages show authorized records and database aggregates. Donors trac
 
 ## Demo walkthrough
 
-Use a development Supabase project with email confirmation, SMS phone verification for donors, and all migrations applied.
+Use a development Supabase project with email confirmation and all migrations applied. SMS or phone authentication is not required.
 
 1. Register an NGO, complete its profile, and have an administrator verify it.
-2. Register a donor, complete its business profile, verify the phone, and post an offer for NGOs, individuals, or both.
+2. Register a donor, confirm email, complete its business profile, optionally add a mobile number, and post an offer for NGOs, individuals, or both.
 3. For an NGO rescue, generate suggestions and accept as the NGO. For an individual rescue, register a recipient, save a general-area profile, request the food, and approve the request as donor.
 4. The donor arranges collection. The accepted recipient opens Collection Details and confirms after the handover.
 5. Review notifications, donation status, request history, audit records, and impact reports.
@@ -124,10 +124,10 @@ The admin panel lives at `/admin`. Create an administrator through a trusted Sup
 
 Use Node.js 22.18+ on the Node 22 line. Run `npm ci`, set public Supabase values from `.env.example` in ignored `.env.local`, and run `npm test`, `npm run lint`, and `npm run build`. `npm run dev` starts Vite. Build includes TypeScript checking and produces `dist/`.
 
-Apply the three `20261010` migrations **before** deploying this frontend. Review and test them in a separate Supabase project, configure Auth email/SMS and NGO verification, then apply through the Supabase CLI. Netlify builds from the connected repository with public Supabase environment variables. A frontend-only deploy against the old schema will fail. See the [deployment checklist](docs/recipient-redesign.md).
+Apply the four `20261010` migrations **before** deploying this frontend. Review and test them in a separate Supabase project, configure Auth email confirmation and NGO verification, then apply through the Supabase CLI. Netlify builds from the connected repository with public Supabase environment variables. A frontend-only deploy against the old schema will fail. See the [deployment checklist](docs/recipient-redesign.md).
 
-For a disposable local PostgreSQL check, [`scripts/local-auth-bootstrap.sql`](scripts/local-auth-bootstrap.sql) supplies test-only Auth stubs and [`scripts/verify-recipient-schema.sql`](scripts/verify-recipient-schema.sql) exercises RLS and both workflows. Never apply the bootstrap to Supabase. Local checks do **not** prove hosted OAuth, SMS delivery, or deployment.
+For a disposable local PostgreSQL check, [`scripts/local-auth-bootstrap.sql`](scripts/local-auth-bootstrap.sql) supplies test-only Auth stubs and [`scripts/verify-recipient-schema.sql`](scripts/verify-recipient-schema.sql) exercises RLS, contact privacy, and both workflows. Never apply the bootstrap to Supabase. Local checks do **not** prove hosted OAuth or deployment.
 
-**Current limits:** Whole-donation allocation does not split portions. The platform does not dispatch transport. Donor phone verification depends on Supabase SMS setup, and NGO verification needs an administrator. Geographic matching uses straight-line distance or text fallback, not route time. Rider workflows are retired but historical records remain. Software does not certify food safety.
+**Current limits:** Whole-donation allocation does not split portions. The platform does not dispatch transport. Mobile numbers are not verified by SMS, and NGO verification needs an administrator. Geographic matching uses straight-line distance or text fallback, not route time. Rider workflows are retired but historical records remain. Software does not certify food safety.
 
 See the [database guide](supabase/README.md), [recipient deployment guide](docs/recipient-redesign.md), [OAuth guide](docs/google-sign-in.md), and [security notes](docs/security.md) for details.

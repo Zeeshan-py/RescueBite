@@ -1,6 +1,6 @@
 # Production release status — 10 October 2026
 
-Status: blocked before database migration and frontend publication. The currently
+Historical preflight: this note was written before the optional mobile contact change. Its SMS requirement below is superseded by `202610100004_direct_contact_without_sms.sql` and the updated [recipient release guide](recipient-redesign.md). Status: blocked before database migration and frontend publication. The currently
 deployed site remains in place. Local checks do not establish production readiness.
 
 ## Verified
@@ -33,9 +33,8 @@ deployed site remains in place. Local checks do not establish production readine
    host or put credentials in Git.
 2. No authenticated Supabase or Netlify CLI session was found. Browser automation
    could not initialize, so dashboard settings could not be inspected or changed.
-3. Donor posting requires a verified phone. Configure a supported SMS provider and
-   enable phone authentication before release; do not remove the verification guard.
-4. Hosted staging Auth/SMS/OAuth and both collection workflows remain unverified.
+3. Superseded: donor posting previously required SMS. It now requires a confirmed email and business profile; no SMS provider is required.
+4. Hosted staging Auth/OAuth and both collection workflows remain unverified.
 
 ## Resume sequence
 
@@ -44,11 +43,11 @@ deployed site remains in place. Local checks do not establish production readine
    the release in a separate Supabase test project as described in
    [recipient-redesign.md](recipient-redesign.md).
 3. Review the pending migration list. Commit the enum migration separately from
-   statements using its new values, then apply the recipient and reporting
-   migrations in their documented order through Supabase migration tooling.
+   statements using its new values, then apply the recipient, reporting, and
+   direct-contact migrations in their documented order through Supabase migration tooling.
 4. Verify tables, constraints, RLS, function grants, migration history, preserved
    historical rows, and restricted access with representative test accounts.
-5. Verify email confirmation, SMS delivery, Google OAuth and production redirect
+5. Verify email confirmation, optional contact visibility, Google OAuth and production redirect
    URLs. Netlify needs only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for
    this frontend; never expose server credentials as browser build variables.
 6. Push the validated release to GitHub `main`, verify the Netlify deployment

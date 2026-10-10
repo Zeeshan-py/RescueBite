@@ -85,7 +85,7 @@ export default function RegisterPage() {
         </fieldset>
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField label="Full name" required htmlFor="name" error={errors.name}><TextInput id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} /></FormField>
-          <FormField label="Phone" htmlFor="phone" hint="Optional"><TextInput id="phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} /></FormField>
+          <FormField label="Mobile number" htmlFor="phone" hint="Optional · shared after a donation is accepted" error={errors.phone}><TextInput id="phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} /></FormField>
         </div>
         <FormField label="Email address" required htmlFor="email" error={errors.email}><TextInput id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} /></FormField>
         <div className="grid gap-5 sm:grid-cols-2">

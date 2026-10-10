@@ -8,6 +8,7 @@ import type {
   SignUpInput,
   SignUpResult,
 } from './auth.types'
+import { validateContactPhone } from './auth.validation'
 
 const publicRoles: UserRole[] = ['DONOR', 'NGO', 'RECIPIENT']
 
@@ -132,6 +133,8 @@ export async function loadProfile(authUser: SupabaseUser): Promise<User | null> 
 }
 
 export async function updateProfile(userId: string, input: ProfileUpdateInput): Promise<User> {
+  const phoneError = validateContactPhone(input.phone ?? '')
+  if (phoneError) throw new AuthServiceError(phoneError, 'INVALID_PHONE')
   const { data, error } = await getSupabaseClient()
     .from('users')
     .update({ name: input.name.trim(), phone: input.phone?.trim() || null, location: input.location?.trim() || null })

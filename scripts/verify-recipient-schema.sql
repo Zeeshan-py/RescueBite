@@ -13,13 +13,12 @@ do $$ begin
 end $$;
 
 insert into auth.users(id,email,phone,email_confirmed_at,phone_confirmed_at,raw_user_meta_data) values
-('10000000-0000-0000-0000-000000000001','donor@example.test','+15550000001',now(),now(),'{"role":"DONOR","name":"Test Donor"}'),
+('10000000-0000-0000-0000-000000000001','donor@example.test',null,now(),null,'{"role":"DONOR","name":"Test Donor"}'),
 ('10000000-0000-0000-0000-000000000002','ngo@example.test',null,now(),null,'{"role":"NGO","name":"Test NGO"}'),
 ('10000000-0000-0000-0000-000000000003','recipient@example.test',null,now(),null,'{"role":"RECIPIENT","name":"Test Recipient"}'),
 ('10000000-0000-0000-0000-000000000004','other@example.test',null,now(),null,'{"role":"RECIPIENT","name":"Other Recipient"}'),
 ('10000000-0000-0000-0000-000000000005','admin@example.test',null,now(),null,'{}');
 insert into public.users(id,name,email,role) values ('10000000-0000-0000-0000-000000000005','Test Admin','admin@example.test','ADMIN');
-update public.users set phone='+15550000001' where id='10000000-0000-0000-0000-000000000001';
 insert into public.donor_profiles(user_id,business_name,business_type,pickup_address,general_area,pickup_hours) values
 ('10000000-0000-0000-0000-000000000001','Test Bakery','BAKERY','10 Private Street, Lahore','Lahore','09:00-18:00');
 insert into public.recipient_profiles(user_id,general_area) values
@@ -29,10 +28,38 @@ insert into public.ngos(id,user_id,organization_name,location,capacity,accepted_
 
 set role authenticated;
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000001';
-do $$ begin if (public.get_profile_verification()->>'phone_verified')::boolean is not true then raise exception 'Donor phone not verified'; end if; end $$;
+do $$ declare verification jsonb; begin
+  verification:=public.get_profile_verification();
+  if (verification->>'email_verified')::boolean is not true or verification ? 'phone_verified' then
+    raise exception 'Donor verification still depends on SMS or lacks email confirmation';
+  end if;
+end $$;
+reset role;
+update auth.users set email_confirmed_at=null where id='10000000-0000-0000-0000-000000000001';
+set role authenticated;
+do $$ begin
+  begin
+    insert into public.donations(donor_id,food_type,quantity,meal_portions,location,available_from,collection_deadline,recipient_scope,public_area)
+    values ('10000000-0000-0000-0000-000000000001','Bakery',1,1,'Private pickup',now(),now()+interval '2 hours','NGO_ONLY','');
+    raise exception 'Unconfirmed donor posted food';
+  exception when others then
+    if sqlerrm<>'Confirm your email before posting' then raise; end if;
+  end;
+end $$;
+reset role;
+update auth.users set email_confirmed_at=now() where id='10000000-0000-0000-0000-000000000001';
+set role authenticated;
 insert into public.donations(donor_id,food_type,quantity,meal_portions,location,available_from,collection_deadline,recipient_scope,public_area)
 values ('10000000-0000-0000-0000-000000000001','Bakery',1,1,'10 Private Street, Lahore',now()-interval '1 hour',now()+interval '2 hours','NGO_ONLY','');
 reset role;
+-- Contact numbers are self-provided; no auth.users phone confirmation is needed.
+update public.users set phone='+92 (300) 123-4567' where id='10000000-0000-0000-0000-000000000001';
+update public.users set phone='+92 300 987-6543' where id='10000000-0000-0000-0000-000000000002';
+update public.users set phone='+92 300 555-0100' where id='10000000-0000-0000-0000-000000000003';
+do $$ begin
+  begin update public.users set phone='not a number' where id='10000000-0000-0000-0000-000000000003'; raise exception 'Invalid phone accepted';
+  exception when check_violation then null; end;
+end $$;
 insert into public.donations(id,donor_id,food_type,quantity,meal_portions,location,available_from,collection_deadline,recipient_scope,public_area)
 values ('30000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','Bakery',10,10,'10 Private Street, Lahore',now()-interval '1 hour',now()+interval '2 hours','BOTH','Lahore'),
 ('30000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','Bakery',12,12,'10 Private Street, Lahore',now()-interval '1 hour',now()+interval '2 hours','NGO_ONLY','Lahore');
@@ -41,7 +68,12 @@ set role authenticated;
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000003';
 do $$ declare payload jsonb; begin
   payload:=public.browse_available_meals();
-  if (payload->>'total')::int<>1 or (payload->'rows'->0 ? 'location') then raise exception 'Browse result leaked pickup data or NGO-only food'; end if;
+  if (payload->>'total')::int<>1 or (payload->'rows'->0 ? 'location') or (payload->'rows'->0 ? 'contact_phone') then raise exception 'Browse result leaked pickup or contact data'; end if;
+  if exists(select 1 from public.users where id='10000000-0000-0000-0000-000000000001') then raise exception 'Recipient read donor profile directly'; end if;
+  begin
+    update public.users set phone='+92 300 000-0000' where id='10000000-0000-0000-0000-000000000001';
+    if found then raise exception 'Recipient edited donor phone'; end if;
+  exception when sqlstate '42501' then null; end;
   begin perform public.get_collection_details('30000000-0000-0000-0000-000000000001'); raise exception 'Unaccepted recipient saw private data'; exception when sqlstate '42501' then null; end;
   begin perform public.admin_moderate('USER','10000000-0000-0000-0000-000000000004','RESTRICTED','Unauthorized moderation'); raise exception 'Recipient moderated a user'; exception when sqlstate '42501' then null; end;
 end $$;
@@ -52,6 +84,7 @@ do $$ begin
 end $$;
 
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000004';
+update public.users set phone='+92 300 000-0004' where id='10000000-0000-0000-0000-000000000004';
 select public.request_food('30000000-0000-0000-0000-000000000001');
 do $$ begin
   if exists(select 1 from public.food_requests where recipient_id='10000000-0000-0000-0000-000000000003') then raise exception 'Another recipient request visible'; end if;
@@ -60,7 +93,20 @@ do $$ begin
 end $$;
 
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000001';
+do $$ begin if exists(select 1 from public.users where id='10000000-0000-0000-0000-000000000003') then raise exception 'Donor read recipient profile directly'; end if; end $$;
+do $$ declare requests jsonb; begin
+  requests:=public.get_food_requests('30000000-0000-0000-0000-000000000001');
+  if requests::text like '%+92%' or requests::text like '%recipient_phone%' then
+    raise exception 'Pending requests leaked recipient phone';
+  end if;
+end $$;
 select public.respond_to_food_request((select id from public.food_requests where recipient_id='10000000-0000-0000-0000-000000000003'),'ACCEPT');
+do $$ declare details jsonb; begin
+  details:=public.get_collection_details('30000000-0000-0000-0000-000000000001');
+  if details->>'recipient_phone'<>'+92 300 555-0100' or details->>'recipient_email'<>'recipient@example.test' then
+    raise exception 'Donor lacks accepted recipient contact';
+  end if;
+end $$;
 do $$ begin if (select count(*) from public.food_requests where donation_id='30000000-0000-0000-0000-000000000001' and status='ACCEPTED')<>1 or
   (select status from public.food_requests where recipient_id='10000000-0000-0000-0000-000000000004')<>'REJECTED' then raise exception 'Whole donation was allocated more than once'; end if; end $$;
 select public.arrange_collection('30000000-0000-0000-0000-000000000001',now()+interval '1 second','Bring your confirmation message.');
@@ -68,7 +114,12 @@ select public.arrange_collection('30000000-0000-0000-0000-000000000001',now()+in
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000004';
 do $$ begin begin perform public.get_collection_details('30000000-0000-0000-0000-000000000001'); raise exception 'Rejected recipient saw private data'; exception when sqlstate '42501' then null; end; end $$;
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000003';
-do $$ begin if (public.get_collection_details('30000000-0000-0000-0000-000000000001')->>'pickup_address')<>'10 Private Street, Lahore' then raise exception 'Accepted recipient lacks collection details'; end if; end $$;
+do $$ declare details jsonb; begin
+  details:=public.get_collection_details('30000000-0000-0000-0000-000000000001');
+  if details->>'pickup_address'<>'10 Private Street, Lahore' or details->>'contact_phone'<>'+92 (300) 123-4567' then
+    raise exception 'Accepted recipient lacks donor contact or collection details';
+  end if;
+end $$;
 select pg_sleep(1.1);
 select public.confirm_donation_receipt('30000000-0000-0000-0000-000000000001');
 do $$ begin if (select status from public.donations where id='30000000-0000-0000-0000-000000000001')<>'COMPLETED' then raise exception 'Recipient confirmation failed'; end if; end $$;
@@ -78,6 +129,12 @@ set request.jwt.claim.sub='10000000-0000-0000-0000-000000000001';
 select public.store_donation_matches('30000000-0000-0000-0000-000000000002',jsonb_build_array(jsonb_build_object('ngo_id','20000000-0000-0000-0000-000000000001','distance_score',50,'urgency_score',100,'compatibility_score',100,'capacity_score',100,'availability_score',100,'matching_score',85)));
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000002';
 select public.respond_to_donation_match((select id from public.matches where donation_id='30000000-0000-0000-0000-000000000002'),'ACCEPT');
+do $$ declare details jsonb; begin
+  details:=public.get_collection_details('30000000-0000-0000-0000-000000000002');
+  if details->>'contact_phone'<>'+92 (300) 123-4567' or details->>'recipient_phone'<>'+92 300 987-6543' then
+    raise exception 'Accepted NGO lacks contact details';
+  end if;
+end $$;
 set request.jwt.claim.sub='10000000-0000-0000-0000-000000000001';
 select public.arrange_collection('30000000-0000-0000-0000-000000000002',now()+interval '1 second','Collect at reception.');
 select pg_sleep(1.1);

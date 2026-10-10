@@ -1,7 +1,7 @@
 import { getSupabaseClient } from '../../lib/supabase'
 
 export interface DonorBusinessProfile { user_id: string; business_name: string; business_type: 'RESTAURANT' | 'BAKERY' | 'CATERER' | 'GROCERY' | 'OTHER'; pickup_address: string; general_area: string; pickup_hours: string; description: string | null; latitude: number | null; longitude: number | null }
-export interface ProfileVerification { phone_verified: boolean; email_verified: boolean; account_status: 'ACTIVE' | 'RESTRICTED'; daily_request_limit: number | null }
+export interface ProfileVerification { email_verified: boolean; account_status: 'ACTIVE' | 'RESTRICTED'; daily_request_limit: number | null }
 export async function getBusinessProfile(userId: string): Promise<DonorBusinessProfile | null> {
   const { data, error } = await getSupabaseClient().from('donor_profiles').select('*').eq('user_id', userId).maybeSingle()
   if (error) throw Error(error.message)
@@ -18,12 +18,4 @@ export async function getProfileVerification(): Promise<ProfileVerification> {
   const { data, error } = await getSupabaseClient().rpc('get_profile_verification')
   if (error) throw Error(error.message)
   return data as ProfileVerification
-}
-export async function startPhoneVerification(phone: string): Promise<void> {
-  const { error } = await getSupabaseClient().auth.updateUser({ phone: phone.trim() })
-  if (error) throw Error(error.message)
-}
-export async function confirmPhoneVerification(phone: string, token: string): Promise<void> {
-  const { error } = await getSupabaseClient().auth.verifyOtp({ phone: phone.trim(), token: token.trim(), type: 'phone_change' })
-  if (error) throw Error(error.message)
 }

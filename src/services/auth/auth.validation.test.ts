@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PublicRegistrationRole, SignUpInput } from './auth.types'
-import { validateLogin, validateRegistration } from './auth.validation'
+import { validateContactPhone, validateLogin, validateRegistration } from './auth.validation'
 
 function registration(role: PublicRegistrationRole = 'DONOR'): SignUpInput {
   return {
@@ -54,5 +54,13 @@ describe('authentication validation', () => {
     const input = registration('NGO')
     input.ngo!.capacity = 1.5
     expect(validateRegistration(input, input.password).capacity).toBeTruthy()
+  })
+  it('accepts omitted contact numbers and validates supplied international numbers', () => {
+    expect(validateContactPhone('')).toBeNull()
+    expect(validateContactPhone('+92 (300) 123-4567')).toBeNull()
+    expect(validateContactPhone('123')).toBeTruthy()
+    expect(validateContactPhone('1234567890123456')).toBeTruthy()
+    expect(validateContactPhone('1234567;DROP TABLE users')).toBeTruthy()
+    expect(validateRegistration({ ...registration('RECIPIENT'), phone: '123' }, 'StrongPass1').phone).toBeTruthy()
   })
 })

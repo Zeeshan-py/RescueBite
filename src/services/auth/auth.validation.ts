@@ -20,6 +20,16 @@ export function validatePassword(password: string): string | null {
   return null
 }
 
+export function validateContactPhone(phone: string): string | null {
+  const value = phone.trim()
+  if (!value) return null
+  const digits = value.replace(/[^0-9]/g, '')
+  if (value.length > 30 || !/^[+0-9(). -]+$/.test(value) || digits.length < 7 || digits.length > 15) {
+    return 'Use 7–15 digits with an optional country code; spaces, hyphens and parentheses are allowed.'
+  }
+  return null
+}
+
 export function validateLogin(email: string, password: string): FieldErrors {
   const errors: FieldErrors = {}
   const emailError = validateEmail(email)
@@ -36,6 +46,8 @@ export function validateRegistration(input: SignUpInput, confirmPassword: string
   if (emailError) errors.email = emailError
   const passwordError = validatePassword(input.password)
   if (passwordError) errors.password = passwordError
+  const phoneError = validateContactPhone(input.phone)
+  if (phoneError) errors.phone = phoneError
   if (!confirmPassword) errors.confirmPassword = 'Confirm your password.'
   else if (confirmPassword !== input.password) errors.confirmPassword = 'Passwords do not match.'
   if (!publicRoles.includes(input.role)) errors.role = 'Choose a valid account type.'

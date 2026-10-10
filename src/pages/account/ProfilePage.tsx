@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/useAuth'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { updateProfile } from '../../services/auth/auth.service'
-import { confirmPhoneVerification, getBusinessProfile, getProfileVerification, saveBusinessProfile, startPhoneVerification, type DonorBusinessProfile, type ProfileVerification } from '../../services/auth/business-profile.service'
+import { getBusinessProfile, getProfileVerification, saveBusinessProfile, type DonorBusinessProfile, type ProfileVerification } from '../../services/auth/business-profile.service'
 
 const emptyBusiness = (userId: string): DonorBusinessProfile => ({ user_id: userId, business_name: '', business_type: 'RESTAURANT', pickup_address: '', general_area: '', pickup_hours: '', description: '', latitude: null, longitude: null })
 
@@ -16,7 +16,6 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [business, setBusiness] = useState<DonorBusinessProfile | null>(null)
   const [verification, setVerification] = useState<ProfileVerification | null>(null)
-  const [otp, setOtp] = useState('')
   useEffect(() => {
     if (!user) return
     let active = true
@@ -47,14 +46,14 @@ export default function ProfilePage() {
     <div>
       <p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">Account</p>
       <h1 className="mt-3 font-display text-4xl sm:text-5xl">Your profile</h1>
-      <p className="mt-4 text-sm text-muted">Update the contact details connected to your account.</p>
+      <p className="mt-4 text-sm text-muted">Update your contact details. Your optional mobile number is shared with participants in an accepted donation and administrators.</p>
       <form onSubmit={submit} className="mt-8 max-w-2xl space-y-5 rounded-xl border border-line bg-white p-6 sm:p-8">
         {message && <p role="status" className="rounded-lg bg-soft px-4 py-3 text-sm text-forest">{message}</p>}
         {error && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
         <FormField label="Full name" htmlFor="profile-name"><TextInput id="profile-name" value={name} onChange={(event) => setName(event.target.value)} /></FormField>
         <FormField label="Email" htmlFor="profile-email" hint="Email changes are managed through Supabase Auth."><TextInput id="profile-email" value={profile?.email ?? ''} disabled /></FormField>
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField label="Phone" htmlFor="profile-phone"><TextInput id="profile-phone" value={phone} onChange={(event) => setPhone(event.target.value)} /></FormField>
+          <FormField label="Mobile number" htmlFor="profile-phone" hint="Optional · 7–15 digits, with country code when possible"><TextInput id="profile-phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(event) => setPhone(event.target.value)} /></FormField>
           <FormField label="Location" htmlFor="profile-location"><TextInput id="profile-location" value={location} onChange={(event) => setLocation(event.target.value)} /></FormField>
         </div>
         <button disabled={saving} className="rounded-lg bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-pine disabled:opacity-60">{saving ? 'Saving…' : 'Save profile'}</button>
@@ -64,7 +63,7 @@ export default function ProfilePage() {
         <label className="text-sm font-medium">Business type<select value={business.business_type} onChange={event => setBusiness({...business,business_type:event.target.value as DonorBusinessProfile['business_type']})} className="mt-2 w-full rounded-lg border border-line p-3">{['RESTAURANT','BAKERY','CATERER','GROCERY','OTHER'].map(type=><option key={type}>{type}</option>)}</select></label>
         <label className="text-sm font-medium">Public description (optional)<textarea maxLength={2000} value={business.description??''} onChange={event => setBusiness({...business,description:event.target.value})} className="mt-2 w-full rounded-lg border border-line p-3" /></label>
         <button disabled={saving} className="min-h-11 rounded-lg bg-forest px-5 text-white sm:col-span-2">Save business profile</button></form>
-        <div className="mt-7 border-t border-line pt-5"><h3 className="font-semibold">Contact phone verification</h3><p className="mt-2 text-sm text-muted">{verification?.phone_verified ? 'Verified' : 'Unverified. SMS verification must be enabled in Supabase to post new donations.'}</p>{!verification?.phone_verified && <div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={saving || !phone.trim()} onClick={() => { if (!user) return; setSaving(true); setError(null); void updateProfile(user.id,{name,phone,location}).then(()=>startPhoneVerification(phone)).then(()=>setMessage('Verification code sent to your phone.')).catch(caught=>setError(caught.message)).finally(()=>setSaving(false)) }} className="min-h-11 rounded-lg border border-line px-4 text-sm">Send verification code</button><input inputMode="numeric" autoComplete="one-time-code" aria-label="SMS verification code" placeholder="SMS code" value={otp} onChange={event=>setOtp(event.target.value)} className="rounded-lg border border-line p-3" /><button type="button" disabled={saving || !otp.trim()} onClick={() => { setSaving(true); setError(null); void confirmPhoneVerification(phone,otp).then(getProfileVerification).then(next=>{setVerification(next);setMessage('Phone verified.')}).catch(caught=>setError(caught.message)).finally(()=>setSaving(false)) }} className="min-h-11 rounded-lg bg-forest px-4 text-sm text-white">Verify phone</button></div>}</div>
+        <p className="mt-7 border-t border-line pt-5 text-sm text-muted">{verification?.email_verified ? 'Email confirmed.' : 'Confirm your email to post donations.'} Mobile contact is optional and does not require a text message.</p>
       </section>}
     </div>
   )
