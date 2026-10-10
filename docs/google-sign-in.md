@@ -4,7 +4,7 @@ The login and registration pages use Supabase OAuth. Google credentials belong
 in the Supabase provider settings, never in frontend environment variables or Git.
 The Supabase SDK restores the returned session; the existing AuthProvider loads
 the authoritative application profile. New Google users choose DONOR, NGO, or
-VOLUNTEER on the callback page. NGO users then complete their existing NGO setup.
+RECIPIENT on the callback page. NGO users then complete their existing NGO setup.
 Existing users keep their database role; ADMIN is never offered for registration.
 
 ## Google Cloud

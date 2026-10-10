@@ -11,5 +11,5 @@ const styles: Record<Status, string> = {
   EXPIRED: 'bg-amber-50 text-amber-900', EXCEPTION: 'bg-red-50 text-red-800',
 }
 export function StatusBadge({ status }: { status: Status }) {
-  return <span className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] font-semibold leading-5 ${styles[status]}`}><span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-current opacity-70" />{status.charAt(0) + status.slice(1).toLowerCase().replaceAll('_', ' ')}</span>
+  return <span className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold leading-5 ${styles[status]}`}><span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-current opacity-70" />{status.charAt(0) + status.slice(1).toLowerCase().replaceAll('_', ' ')}</span>
 }

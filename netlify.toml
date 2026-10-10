@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22.18.0"
+
+# Public Supabase build variables are configured in the Netlify dashboard.
+# Database passwords and server-side Supabase keys must never be VITE_* values.
