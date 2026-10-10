@@ -1,20 +1,20 @@
 # RescueBite database
 
-This folder contains the version-controlled PostgreSQL schema for RescueBite. The initial migration creates the seven entities specified by `Instruction/ERD.md`: users, NGOs, donations, matches, pickup tasks, notifications, and activity logs.
+This folder contains the version-controlled PostgreSQL schema for RescueBite. The initial migration created the seven entities specified by the original ERD. The current recipient redesign adds donor profiles, individual recipient profiles, food requests, and collection arrangements. Older phase sections below describe the historical evolution; the [current release guide](../docs/recipient-redesign.md) explains the active workflow and rollout.
 
 ## Authentication and profiles
 
 Supabase Auth owns authentication records in `auth.users`. `public.users` stores only application profile data, uses the same UUID as the Auth user, and never stores passwords or authentication secrets. A signed-in user can create their own non-admin profile. Administrative profiles must be provisioned through a trusted backend or SQL administration workflow.
 
-The application roles are `DONOR`, `NGO`, `VOLUNTEER`, and `ADMIN`. PostgreSQL enum types validate roles and workflow statuses. Database triggers also ensure NGO profiles, donations, and pickup assignments reference users with the correct role.
+The active application roles are `DONOR`, `NGO`, `RECIPIENT`, and `ADMIN`. The PostgreSQL enum still contains `VOLUNTEER` for historical compatibility, but public signup cannot create it and existing volunteer profiles migrate to recipient profiles. Enum/check constraints validate roles and workflow statuses. No client may create an admin role or mark an NGO verified.
 
 ## Row Level Security
 
-RLS is enabled on all seven application tables. Policies restrict profiles and notifications to their owners, donations and workflow records to participating users, NGO profiles to their owner for writes, pickup tasks to authorized volunteers, and activity logs to administrators. Private `SECURITY DEFINER` helper functions perform role and ownership checks without recursively invoking policies on `public.users`.
+RLS is enabled on all application tables, including the four added by the recipient redesign. Policies restrict profiles and notifications to their owners, donations and workflow records to participants, requests and collection details to authorized users, and activity logs to administrators. Old pickup tasks remain readable for authorized historical review; their rider action RPCs are retired. Private `SECURITY DEFINER` helpers perform role and ownership checks without recursive policies on `public.users`.
 
 Frontend role checks are only for user experience; RLS is the actual data boundary. Secured database functions and triggers create workflow notifications; browser users cannot insert or delete them and can update only their own `is_read` value. The Supabase `service_role` remains reserved for trusted backend processes and must never be exposed in browser code.
 
-The Phase 4 donation migration requires positive quantities and meal portions. Its update trigger limits donors to editing a `POSTED` donation or moving it to `CANCELLED`; later workflow transitions remain reserved for trusted future services and administrators.
+The original Phase 4 donation migration required positive quantities and meal portions. New direct-collection transitions run through guarded workflow RPCs; donors may edit only posted donations with no pending individual requests.
 
 Phase 5 stores rule-based suggestions through `store_donation_matches`. This narrow `SECURITY DEFINER` function verifies donation ownership, candidate NGO compatibility/capacity, score ranges, the weighted total, and duplicate keys before it writes. It is also the only donor-accessible path that can move a donation between `POSTED` and `MATCHED`; the frontend never receives the service-role key.
 
@@ -58,7 +58,7 @@ Development users should be created through Supabase Auth. No seed file is inclu
 
 ## Registration and administrator accounts
 
-The Phase 3 Auth trigger creates a `public.users` profile from validated signup metadata for `DONOR`, `NGO`, and `VOLUNTEER` registrations. It intentionally rejects `ADMIN` as a public registration role. With email confirmation enabled, this lets the profile be created before the user has an authenticated browser session.
+The current Auth trigger creates a `public.users` profile from validated signup metadata for `DONOR`, `NGO`, and `RECIPIENT`. It rejects `ADMIN` and `VOLUNTEER` as public registration roles. Google accounts without an application profile use an authenticated `complete_registration` RPC with the same non-admin allowlist. Email confirmation remains a requirement for individual food requests.
 
 Provision an administrator separately: create the authentication account through the Supabase dashboard or another trusted server-side administration process, then insert its matching UUID and profile details into `public.users` with role `ADMIN` from the SQL editor. Never expose the service-role key in the browser or add an admin option to the public registration form.
 
@@ -70,7 +70,7 @@ Matching uses straight-line Haversine distance, not road routing. Distance score
 
 Leaflet/react-leaflet displays OpenStreetMap tiles with attribution. Users manually select and confirm a point; the app does not request GPS permissions. Tile requests go to OpenStreetMap and reveal the displayed geographic area; no account data is sent with them. Maps show missing-coordinate and tile-failure messages.
 
-Existing donation and NGO ownership policies protect updates. Volunteers obtain receiving coordinates through get_pickup_destination only for their assigned task and its accepted NGO. This does not grant unrestricted access to NGO profiles.
+Existing donation and NGO ownership policies protect updates. The historical volunteer destination function is no longer executable by authenticated clients; direct recipients obtain collection details only after acceptance through `get_collection_details`.
 
 Run npm test, npm run lint, and npm run build. For a configured development Supabase project, node scripts/verify-phase10.mjs creates temporary Auth users and exercises coordinate constraints, RLS, matching, realtime, and the delivery workflow, then removes its test records. It needs the ignored .env server secret and must never run in the browser. Do not use real personal data for these checks.
 
@@ -78,9 +78,9 @@ Run npm test, npm run lint, and npm run build. For a configured development Supa
 
 `202610020004_admin_dashboards.sql` adds three RLS-preserving, SECURITY INVOKER RPCs. get_dashboard_summary derives the role from the trusted public profile and returns only that participant's counts. get_admin_dashboard and get_admin_records reject non-admin callers before querying administrative records. No client role parameter, service credential, new table, or public data policy is introduced.
 
-Dashboard counts use PostgreSQL COUNT/FILTER rather than downloading every record. Active donations are POSTED, MATCHED, ACCEPTED, PICKUP_ASSIGNED, COLLECTED, or DELIVERED; EXCEPTION is shown separately. Delivered pickups count completed volunteer deliveries, while completed donations require NGO receipt confirmation. Available pickups and pending NGO decisions exclude elapsed deadlines; persisted donation status totals reflect the stored state. NGO user count and completed organization profile count are separate values. The users table has no suspension/account-status field, so the interface shows profile creation and role rather than inventing an account status.
+Dashboard counts use PostgreSQL COUNT/FILTER rather than downloading every record. Active donations include posted, matched, and accepted offers; exceptions are shown separately. Completed donations require confirmation by the accepted NGO or individual. Recipient dashboard counts include available meals and request states. The `20261010` redesign adds `account_status` and audited moderation.
 
-Admin routes are /admin, /admin/users, /admin/donations, /admin/ngos, /admin/volunteers, and /admin/activity. The earlier /admin/activity-logs URL redirects to /admin/activity. These screens provide read-only visibility, not account deletion or arbitrary workflow changes. Restrictive UPDATE policies prevent authenticated admins from editing donations, matches, or pickup tasks directly; participant policies and secured transition RPCs remain in place.
+Current admin routes are `/admin`, `/admin/users`, `/admin/donations`, `/admin/ngos`, `/admin/recipients`, and `/admin/activity`. Administrators can verify NGOs, restrict or restore non-admin accounts, and cancel eligible donations through `admin_moderate`; they cannot make arbitrary direct status changes. Moderation reasons are audited.
 
 Admin lists use fixed 20-row pages, server-side literal search, and applicable role/status/food/action/entity/date filters. Date boundaries are inclusive UTC days. Existing relationship/status indexes are reused; a created_at/id index supports recent global audit ordering. Recent participant sections fetch at most five records per section. Administrators see relevant profile emails but no phone, password, Auth metadata, or precise coordinate listings.
 

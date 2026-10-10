@@ -9,8 +9,8 @@ function labelDate(date: string, bucket: string) {
       : { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
 }
 
-export function ActivityChart({ trends, bucket, volunteer = false }: {
-  trends: ImpactTrend[]; bucket: 'day' | 'month' | 'year'; volunteer?: boolean
+export function ActivityChart({ trends, bucket }: {
+  trends: ImpactTrend[]; bucket: 'day' | 'month' | 'year'
 }) {
   const [mode, setMode] = useState<'activity' | 'impact'>('activity')
   const [selected, setSelected] = useState<number | null>(null)
@@ -27,8 +27,7 @@ export function ActivityChart({ trends, bucket, volunteer = false }: {
   const impact = mode === 'impact'
   const series: Array<{ key: keyof Omit<ImpactTrend, 'date'>; label: string; color: string }> = impact
     ? [{ key: 'portions', label: 'Redistributed portions', color: '#176b4d' }]
-    : volunteer ? [{ key: 'collected', label: 'Collected', color: '#627f72' }, { key: 'delivered', label: 'Delivered', color: '#176b4d' }]
-      : [{ key: 'posted', label: 'Created', color: '#627f72' }, { key: 'completed', label: 'Completed', color: '#176b4d' }]
+    : [{ key: 'posted', label: 'Created', color: '#627f72' }, { key: 'completed', label: 'Completed', color: '#176b4d' }]
   const rawMax = Math.max(1, ...trends.flatMap(row => series.map(s => row[s.key])))
   const magnitude = 10 ** Math.floor(Math.log10(rawMax))
   const max = Math.ceil(rawMax / magnitude / 2) * magnitude * 2
@@ -43,8 +42,8 @@ export function ActivityChart({ trends, bucket, volunteer = false }: {
   const ticks = [...new Set(width < 420 ? [0, Math.round((trends.length - 1) / 2), trends.length - 1]
     : [0, Math.round((trends.length - 1) / 3), Math.round(2 * (trends.length - 1) / 3), trends.length - 1])].filter(i => i >= 0)
   return <section className="surface trend-panel" aria-labelledby={`${gradientId}-heading`}>
-    <div className="panel-heading"><div><p className="eyebrow">PROGRESS OVER TIME</p><h2 id={`${gradientId}-heading`}>{volunteer ? 'Your delivery activity' : 'Rescue activity'}</h2></div>
-      {!volunteer && <div className="segmented-control" aria-label="Chart metric"><button type="button" aria-pressed={!impact} onClick={() => { setMode('activity'); setSelected(null) }}>Donations</button><button type="button" aria-pressed={impact} onClick={() => { setMode('impact'); setSelected(null) }}>Food impact</button></div>}
+    <div className="panel-heading"><div><p className="eyebrow">PROGRESS OVER TIME</p><h2 id={`${gradientId}-heading`}>Rescue activity</h2></div>
+      <div className="segmented-control" aria-label="Chart metric"><button type="button" aria-pressed={!impact} onClick={() => { setMode('activity'); setSelected(null) }}>Donations</button><button type="button" aria-pressed={impact} onClick={() => { setMode('impact'); setSelected(null) }}>Food impact</button></div>
     </div>
     <div className="chart-legend">{series.map(s => <span key={s.key}><i style={{ background: s.color }} />{s.label}</span>)}<span className="chart-granularity">{bucket === 'day' ? 'Daily' : bucket === 'month' ? 'Monthly' : 'Yearly'} totals · UTC</span></div>
     {!hasValues ? <div className="chart-empty"><Icon name="chart" width="30" height="30" /><strong>No {impact ? 'confirmed redistribution' : 'activity'} in this period</strong><p>Choose a longer reporting period to explore earlier rescues.</p></div> : <>
@@ -66,7 +65,7 @@ export function ActivityChart({ trends, bucket, volunteer = false }: {
       </div>
       <div className="chart-readout" aria-live="polite"><span>{current ? labelDate(current.date, bucket) : 'No period selected'}</span>{current && series.map(s => <span key={s.key}><i style={{ background: s.color }} /><strong>{number.format(current[s.key])}</strong> {s.label.toLowerCase()}</span>)}<span className="chart-hint">Hover or use arrow keys</span></div>
     </>}
-    <p className="panel-footnote">{volunteer ? 'Collections and deliveries are counted on the date each event occurred.' : 'Created and completed totals use their respective event dates. Food impact counts confirmed portions.'}</p>
+    <p className="panel-footnote">Created and completed totals use their respective event dates. Food impact counts confirmed portions.</p>
   </section>
 }
 

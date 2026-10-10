@@ -1,5 +1,7 @@
 # Security model and Phase 13 audit
 
+This audit is a historical Phase 13 snapshot. The individual-recipient release adds four protected tables, replaces active Volunteer access, and introduces verified NGOs, account restrictions, direct-collection RPCs, and request controls. See [recipient redesign](recipient-redesign.md) for the current authorization model and its local test scope. The prior live verification figures below do not verify the new hosted release.
+
 This document describes the controls verified on 3 October 2026 against the configured development Supabase project. It records tested boundaries, not a claim that the system is fully secure.
 
 ## Authentication and roles

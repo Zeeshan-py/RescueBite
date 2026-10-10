@@ -1,5 +1,5 @@
 /** ERD.md record shapes. UUIDs and ISO timestamps are serialized as strings. */
-export type UserRole = 'DONOR' | 'NGO' | 'VOLUNTEER' | 'ADMIN'
+export type UserRole = 'DONOR' | 'NGO' | 'RECIPIENT' | 'ADMIN'
 export type DonationStatus =
   | 'POSTED' | 'MATCHED' | 'ACCEPTED' | 'PICKUP_ASSIGNED' | 'COLLECTED'
   | 'DELIVERED' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED' | 'EXCEPTION'
@@ -17,6 +17,7 @@ export interface User {
   email: string
   phone: string | null
   role: UserRole
+  account_status: 'ACTIVE' | 'RESTRICTED'
   location: string | null
   created_at: string
 }
@@ -32,6 +33,9 @@ export interface NGO {
   capacity: number
   accepted_food_types: string[]
   contact_information: string | null
+  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED'
+  service_area: string | null
+  registration_reference: string | null
   created_at: string
 }
 
@@ -49,6 +53,8 @@ export interface Donation {
   safety_information: string | null
   description: string | null
   status: DonationStatus
+  recipient_scope: 'NGO_ONLY' | 'INDIVIDUAL_ONLY' | 'BOTH'
+  public_area: string
   completed_at: string | null
   created_at: string
   updated_at: string

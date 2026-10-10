@@ -1,9 +1,11 @@
 import type { DonationStatus } from '../../types/domain'
 import { StatusBadge } from '../common/StatusBadge'
 
-const journey: DonationStatus[] = ['POSTED', 'MATCHED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'COLLECTED', 'DELIVERED', 'COMPLETED']
+const directJourney: DonationStatus[] = ['POSTED', 'MATCHED', 'ACCEPTED', 'COMPLETED']
+const legacyJourney: DonationStatus[] = ['POSTED', 'MATCHED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'COLLECTED', 'DELIVERED', 'COMPLETED']
 
 export function DonationProgress({ status }: { status: DonationStatus }) {
+  const journey = ['PICKUP_ASSIGNED','COLLECTED','DELIVERED'].includes(status) ? legacyJourney : directJourney
   const current = journey.indexOf(status)
   if (current < 0) return <div className="mt-4 space-y-3"><StatusBadge status={status} /><p className="text-sm text-muted">{status === 'EXCEPTION' ? 'This rescue needs attention. Review the latest workflow information.' : 'This rescue is no longer progressing. Its history remains available.'}</p></div>
   return <ol aria-label="Donation progress" className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">

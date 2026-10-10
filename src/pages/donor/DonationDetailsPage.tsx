@@ -10,6 +10,8 @@ import type { Donation } from '../../types/domain'
 import { subscribeToDonationStatus, unsubscribeFromWorkflow } from '../../services/realtime/workflow-realtime.service'
 import { ConfirmAction } from '../../components/common/ConfirmAction'
 import { LocationMap } from '../../components/maps/LocationMap'
+import { DirectCollection } from '../../components/donations/DirectCollection'
+import { FoodRequestInbox } from '../../components/donations/FoodRequestInbox'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
 export default function DonationDetailsPage() {
@@ -49,7 +51,9 @@ export default function DonationDetailsPage() {
     <section aria-labelledby="details-heading" className="mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8"><h2 id="details-heading" className="text-lg font-semibold">Donation information</h2><dl className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label} className="border-b border-line pb-4"><dt className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</dt><dd className="mt-2 break-words text-sm">{value}</dd></div>)}</dl><div className="mt-6 grid gap-6 sm:grid-cols-2"><div><h3 className="text-sm font-semibold">Food safety information</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{donation.safety_information || 'No additional safety information supplied.'}</p><p className="mt-3 text-xs text-muted">This information is donor reported. RescueBite does not inspect or certify donated food.</p></div><div><h3 className="text-sm font-semibold">Description</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{donation.description || 'No additional description supplied.'}</p></div></div></section>
     <section aria-labelledby="status-heading" className="mt-5 rounded-xl border border-line bg-white p-5 sm:p-6"><h2 id="status-heading" className="text-base font-semibold">Rescue progress</h2><p className="mt-2 text-xs text-muted">Last updated {formatDate(donation.updated_at)}</p><DonationProgress status={donation.status} /></section>
     <section aria-labelledby="location-heading" className="mt-5 rounded-xl border border-line bg-white p-5 sm:p-6"><h2 id="location-heading" className="text-base font-semibold">Pickup map</h2><p className="mt-2 mb-5 text-sm text-muted">{donation.location}</p><LocationMap points={donation.latitude !== null && donation.longitude !== null ? [{ latitude: donation.latitude, longitude: donation.longitude, label: 'Donation pickup', description: donation.location }] : []} /></section>
-    <SuggestedMatchesSection donation={donation} onStatusChange={(status) => setDonation((current) => current ? { ...current, status } : current)} />
+    {donation.recipient_scope!=='INDIVIDUAL_ONLY' && <SuggestedMatchesSection donation={donation} onStatusChange={(status) => setDonation((current) => current ? { ...current, status } : current)} />}
+    {donation.recipient_scope!=='NGO_ONLY' && <FoodRequestInbox donationId={donation.id} onAccepted={() => void getDonationById(donation.id).then(setDonation)} />}
+    <DirectCollection donation={donation} />
     <PickupSummary donation={donation} />
     {(editable || cancellable) && <div className="mt-6 flex flex-col gap-3 sm:flex-row">{editable && <Link to={`/donor/donations/${donation.id}/edit`} className="rounded-lg bg-pine px-5 py-3 text-center text-sm font-semibold text-white hover:bg-forest">Edit donation</Link>}{cancellable && <ConfirmAction label="Cancel donation" title="Cancel this donation?" description="This stops the rescue and cancels any associated pickup. The record stays in your history. This action cannot be undone here." destructive disabled={cancelling} onConfirm={handleCancel} />}</div>}
   </div>

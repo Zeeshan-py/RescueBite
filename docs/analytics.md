@@ -1,5 +1,7 @@
 # Analytics and impact (Phase 12)
 
+This page documents the earlier Phase 12 metric design. The individual-recipient release adds `/recipient/analytics`, recipient request counts, and direct collection. For the current rollout and limits, see [recipient redesign](recipient-redesign.md); historical volunteer task measures below apply only to retained records.
+
 Routes: `/admin/analytics`, `/donor/analytics`, `/ngo/analytics`, `/volunteer/analytics`.
 The existing dashboard navigation links to each role's report. No export or new realtime system is added.
 

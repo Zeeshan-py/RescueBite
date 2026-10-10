@@ -5,7 +5,7 @@ import type { DonationInput } from './donation.types'
 const valid: DonationInput = {
   foodType: 'Cooked Food', otherFoodType: '', quantity: 12.5, mealPortions: 25,
   location: 'Main Street, Lahore', latitude: null, longitude: null, availableFrom: '2026-09-27T12:00',
-  collectionDeadline: '2026-09-27T15:00', safetyInformation: 'Kept covered.', description: '',
+  collectionDeadline: '2026-09-27T15:00', safetyInformation: 'Kept covered.', description: '', recipientScope: 'NGO_ONLY', publicArea: '',
 }
 
 describe('donation validation', () => {

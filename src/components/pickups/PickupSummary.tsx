@@ -14,7 +14,7 @@ export function PickupSummary({ donation, canConfirm = false, onDonationChange }
   const [working, setWorking] = useState(false), [error, setError] = useState<string | null>(null), [message, setMessage] = useState<string | null>(null)
   useEffect(() => { let active = true; void getDeliveryStatus(donation.id).then((value) => { if (active) setDelivery(value) }).catch(() => undefined); return () => { active = false } }, [donation.id])
   const task = delivery.pickup
-  if (!task && !delivery.receivingNgo) return null
+  if (!task) return null
 
   async function handleConfirm() {
     setWorking(true); setError(null); setMessage(null)
@@ -27,7 +27,7 @@ export function PickupSummary({ donation, canConfirm = false, onDonationChange }
   }
 
   return <section aria-labelledby="pickup-heading" className="mt-5 rounded-xl border border-line bg-white p-5 sm:p-6">
-    <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="pickup-heading" className="text-base font-semibold">Delivery progress</h2>{task && <PickupStatusBadge status={task.status} />}</div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="pickup-heading" className="text-base font-semibold">Historical delivery record</h2>{task && <PickupStatusBadge status={task.status} />}</div>
     {message && <p role="status" className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900">{message}</p>}
     {error && <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
     <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">

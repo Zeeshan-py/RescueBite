@@ -9,6 +9,8 @@ export function validateDonation(input: DonationInput): DonationFieldErrors {
   if (!Number.isFinite(input.quantity) || input.quantity <= 0) errors.quantity = 'Quantity must be greater than zero.'
   if (!Number.isInteger(input.mealPortions) || input.mealPortions <= 0) errors.mealPortions = 'Meal portions must be a whole number greater than zero.'
   if (!input.location.trim()) errors.location = 'Enter the pickup address or location.'
+  if (!['NGO_ONLY','INDIVIDUAL_ONLY','BOTH'].includes(input.recipientScope)) errors.recipientScope = 'Choose who can receive this donation.'
+  if (input.recipientScope !== 'NGO_ONLY' && (input.publicArea.trim().length < 2 || input.publicArea.trim().length > 200)) errors.publicArea = 'Enter a general area of 2–200 characters. Never include the pickup address.'
   if (input.location.trim().length > 1000) errors.location = 'Keep the pickup location within 1000 characters.'
   if (input.description.trim().length > 10000) errors.description = 'Keep the description within 10000 characters.'
   if (input.safetyInformation.trim().length > 10000) errors.safetyInformation = 'Keep safety information within 10000 characters.'

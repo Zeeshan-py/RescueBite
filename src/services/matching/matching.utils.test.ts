@@ -13,8 +13,8 @@ import {
 } from './matching.utils'
 
 const now = new Date('2026-09-28T10:00:00Z')
-const donation: Donation = { id: 'd1', donor_id: 'donor', food_type: 'Cooked Food', quantity: 20, meal_portions: 40, location: 'Gulberg, Lahore', latitude: null, longitude: null, available_from: '2026-09-28T09:00:00Z', collection_deadline: '2026-09-28T14:00:00Z', safety_information: null, description: null, status: 'POSTED', completed_at: null, created_at: now.toISOString(), updated_at: now.toISOString() }
-const ngo = (overrides: Partial<NGO> = {}): NGO => ({ id: 'n1', user_id: 'ngo-user', organization_name: 'Community Support', description: null, location: 'Gulberg, Lahore', latitude: null, longitude: null, capacity: 80, accepted_food_types: ['Cooked Food'], contact_information: null, created_at: now.toISOString(), ...overrides })
+const donation: Donation = { id: 'd1', donor_id: 'donor', food_type: 'Cooked Food', quantity: 20, meal_portions: 40, location: 'Gulberg, Lahore', latitude: null, longitude: null, available_from: '2026-09-28T09:00:00Z', collection_deadline: '2026-09-28T14:00:00Z', safety_information: null, description: null, status: 'POSTED', recipient_scope: 'NGO_ONLY', public_area: '', completed_at: null, created_at: now.toISOString(), updated_at: now.toISOString() }
+const ngo = (overrides: Partial<NGO> = {}): NGO => ({ id: 'n1', user_id: 'ngo-user', organization_name: 'Community Support', description: null, location: 'Gulberg, Lahore', latitude: null, longitude: null, capacity: 80, accepted_food_types: ['Cooked Food'], contact_information: null, verification_status: 'VERIFIED', service_area: null, registration_reference: null, created_at: now.toISOString(), ...overrides })
 
 describe('matching scores', () => {
   it('uses the documented weights', () => expect(calculateMatchingScore({ distanceScore: 80, urgencyScore: 90, compatibilityScore: 100, capacityScore: 90, availabilityScore: 80 })).toBe(88))

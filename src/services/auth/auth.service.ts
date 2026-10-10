@@ -9,7 +9,7 @@ import type {
   SignUpResult,
 } from './auth.types'
 
-const publicRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER']
+const publicRoles: UserRole[] = ['DONOR', 'NGO', 'RECIPIENT']
 
 export class AuthServiceError extends Error {
   constructor(message: string, public readonly code = 'AUTH_ERROR') {
@@ -91,9 +91,7 @@ export async function completeGoogleProfile(authUser: SupabaseUser, role: UserRo
     throw new AuthServiceError('Choose a valid account role for your Google account.')
   }
   const name = String(authUser.user_metadata.name ?? authUser.user_metadata.full_name ?? '').trim() || authUser.email.split('@')[0]
-  const { error } = await getSupabaseClient().from('users').insert({
-    id: authUser.id, name, email: authUser.email, role, phone: null, location: null,
-  })
+  const { error } = await getSupabaseClient().rpc('complete_registration', { selected_role: role, display_name: name })
   // An existing profile is authoritative; never overwrite its role.
   if (error && error.code !== '23505') throw new AuthServiceError('Your profile could not be created. Please try again.')
 }
@@ -124,14 +122,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   const name = String(authUser.user_metadata.name ?? authUser.user_metadata.full_name ?? '').trim()
   if (!publicRoles.includes(role) || !name || !authUser.email) return null
 
-  const { error } = await getSupabaseClient().from('users').insert({
-    id: authUser.id,
-    name,
-    email: authUser.email,
-    phone: authUser.user_metadata.phone || null,
-    role,
-    location: null,
-  })
+  const { error } = await getSupabaseClient().rpc('complete_registration', { selected_role: role, display_name: name })
   if (error && error.code !== '23505') throw new AuthServiceError('Your profile could not be created. Please contact support.', 'PROFILE_CREATE_FAILED')
   return getProfile(authUser.id)
 }
@@ -168,6 +159,8 @@ export async function saveNgoProfile(userId: string, input: NgoRegistrationDetai
     capacity: input.capacity,
     accepted_food_types: input.acceptedFoodTypes,
     contact_information: input.contactInformation.trim() || null,
+    service_area: input.serviceArea?.trim() || null,
+    registration_reference: input.registrationReference?.trim() || null,
   }
   const query = existing
     ? getSupabaseClient().from('ngos').update(values).eq('user_id', userId)

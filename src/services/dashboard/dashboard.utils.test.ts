@@ -3,7 +3,7 @@ import { adminQuery, emptyAdminFilters, formatAdminValue, summaryCards } from '.
 import type { UserRole } from '../../types/domain'
 
 describe('dashboard summaries', () => {
-  it.each(['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN'] as UserRole[])('renders real %s counts, including empty records', (role) => {
+  it.each(['DONOR', 'NGO', 'RECIPIENT', 'ADMIN'] as UserRole[])('renders real %s counts, including empty records', (role) => {
     const cards = summaryCards({ role, counts: {}, statuses: {} })
     expect(cards.length).toBeGreaterThan(0)
     expect(cards.every((card) => card.value === 0)).toBe(true)

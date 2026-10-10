@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 
 const steps = [
   { title: 'Post a donation', detail: 'Share food type, portions, pickup location, and collection deadline.' },
-  { title: 'Connect with an NGO', detail: 'Review suitable organizations; an NGO chooses whether to accept.' },
-  { title: 'Complete the handover', detail: 'A volunteer collects and delivers the food, then the NGO confirms receipt.' },
+  { title: 'Choose who can receive', detail: 'Offer meals to verified NGOs, individual recipients, or both.' },
+  { title: 'Arrange collection', detail: 'An NGO accepts or a donor approves an individual request. The recipient collects and confirms receipt.' },
 ]
 
 export default function OverviewPage() {
@@ -11,7 +11,7 @@ export default function OverviewPage() {
     <section className="overview-hero rounded-2xl border border-line bg-soft px-6 py-10 sm:px-10 sm:py-14" aria-labelledby="welcome-heading">
       <p className="overview-eyebrow text-xs font-semibold tracking-[0.16em] text-forest uppercase">Food rescue, coordinated</p>
       <h1 id="welcome-heading" className="mt-4 max-w-2xl font-display text-4xl leading-tight sm:text-5xl">Move surplus food to the people who need it.</h1>
-      <p className="mt-5 max-w-2xl text-base leading-7 text-muted">Connect with donors, NGOs, and volunteers to share surplus food.</p>
+      <p className="mt-5 max-w-2xl text-base leading-7 text-muted">Connect food providers with verified NGOs and individuals who can collect surplus meals.</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link to="/register" className="inline-flex min-h-11 items-center rounded-lg bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-pine">Create an account</Link>
         <Link to="/login" className="inline-flex min-h-11 items-center rounded-lg border border-forest/25 bg-white px-5 py-3 text-sm font-semibold text-forest hover:bg-soft">Sign in</Link>
@@ -27,7 +27,7 @@ export default function OverviewPage() {
           <p className="mt-2 text-sm leading-6 text-muted">{step.detail}</p>
         </li>)}
       </ol>
-      <p className="mt-5 text-sm text-muted">Donors offer food, NGOs confirm suitability, and volunteers handle transport. Every handover is recorded.</p>
+      <p className="mt-5 text-sm text-muted">Pickup is arranged directly with the accepted recipient. Every handover is recorded.</p>
     </section>
   </div>
 }

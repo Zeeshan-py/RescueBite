@@ -7,7 +7,7 @@ const { rpc, abortSignal, result } = vi.hoisted(()=>{
 vi.mock('../../lib/supabase',()=>({getSupabaseClient:()=>({rpc})}))
 import { getImpact } from './analytics.service'
 beforeEach(()=>{vi.clearAllMocks();result.data={role:'DONOR'};result.error=null})
-it.each(['DONOR','NGO','VOLUNTEER'] as const)('requests %s own analytics without an owner identifier',async role=>{
+it.each(['DONOR','NGO','RECIPIENT'] as const)('requests %s own analytics without an owner identifier',async role=>{
   result.data={role};await getImpact(role,{from_date:null,to_date:null})
   expect(rpc).toHaveBeenCalledWith('get_my_impact',{from_date:null,to_date:null});expect(abortSignal).toHaveBeenCalled()
 })

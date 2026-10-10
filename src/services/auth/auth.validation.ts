@@ -3,7 +3,7 @@ import type { PublicRegistrationRole, SignUpInput } from './auth.types'
 export type FieldErrors = Record<string, string>
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const publicRoles: PublicRegistrationRole[] = ['DONOR', 'NGO', 'VOLUNTEER']
+const publicRoles: PublicRegistrationRole[] = ['DONOR', 'NGO', 'RECIPIENT']
 
 export function validateEmail(email: string): string | null {
   if (!email.trim()) return 'Email is required.'

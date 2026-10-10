@@ -12,6 +12,8 @@ export interface NgoRegistrationDetails {
   capacity: number
   acceptedFoodTypes: string[]
   contactInformation: string
+  serviceArea?: string
+  registrationReference?: string
 }
 
 export interface SignUpInput {

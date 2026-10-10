@@ -50,18 +50,25 @@ function mergeStoredMatches(matches: Match[], ngos: MatchingNgo[]): RankedMatch[
 }
 
 export async function getSuggestedMatches(donationId: string): Promise<MatchingResult> {
-  await getDonationById(donationId)
+  const donation = await getDonationById(donationId)
+  if (donation.recipient_scope === 'INDIVIDUAL_ONLY') return { donationId, matches: [] }
   const { data, error } = await getSupabaseClient().from('matches').select('*').eq('donation_id', donationId)
   if (error) throw matchingFailure(error)
   const stored = data as Match[]
   if (!stored.length) return { donationId, matches: [] }
-  const { data: ngos, error: ngoError } = await getSupabaseClient().from('ngos').select('id,user_id,organization_name,location,capacity,accepted_food_types,latitude,longitude').in('id', stored.map((match) => match.ngo_id))
-  if (ngoError) throw matchingFailure(ngoError)
-  return { donationId, matches: mergeStoredMatches(stored, ngos as MatchingNgo[]) }
+  const acceptedIds = stored.filter((match) => match.status === 'ACCEPTED').map((match) => match.ngo_id)
+  if (!['POSTED', 'MATCHED'].includes(donation.status) && !acceptedIds.length) return { donationId, matches: [] }
+  const ngos = ['POSTED', 'MATCHED'].includes(donation.status) ? await loadNgos(donationId) : await (async () => {
+    const { data, error: ngoError } = await getSupabaseClient().from('ngos').select('id,user_id,organization_name,location,capacity,accepted_food_types,latitude,longitude').in('id', acceptedIds)
+    if (ngoError) throw matchingFailure(ngoError)
+    return data as MatchingNgo[]
+  })()
+  return { donationId, matches: mergeStoredMatches(stored, ngos) }
 }
 
 export async function generateMatches(donationId: string, now = new Date()): Promise<MatchingResult> {
   const donation = await getDonationById(donationId)
+  if (donation.recipient_scope === 'INDIVIDUAL_ONLY') throw new MatchingServiceError('This donation is for individuals.', 'INELIGIBLE_DONATION')
   if (!canGenerateMatches(donation.status)) throw new MatchingServiceError('This donation is not eligible for matching.', 'INELIGIBLE_DONATION')
   if (new Date(donation.collection_deadline) <= now) throw new MatchingServiceError('This donation has passed its collection deadline.', 'DEADLINE_PASSED')
   const ngos = await loadNgos(donationId)

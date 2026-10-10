@@ -10,7 +10,7 @@ import { Icon, type IconName } from './Icon'
 
 const navigationIcons: Record<string, IconName> = {
   Dashboard: 'grid', Analytics: 'chart', Users: 'users', Donations: 'box', NGOs: 'building',
-  Volunteers: 'truck', 'Activity logs': 'activity', 'My donations': 'box', 'Create donation': 'plus',
+  Recipients: 'users', 'Available Meals': 'box', 'My Requests': 'activity', 'Activity logs': 'activity', 'My donations': 'box', 'Create donation': 'plus',
   'Available donations': 'box', 'Accepted donations': 'check', 'Organization profile': 'building',
   Notifications: 'bell', Profile: 'user', 'Pickup tasks': 'truck',
 }
@@ -26,14 +26,14 @@ const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
     { label: 'Accepted donations', to: '/ngo/accepted' }, { label: 'Organization profile', to: '/ngo/setup' },
     { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/profile' },
   ],
-  VOLUNTEER: [
-    { label: 'Dashboard', to: '/volunteer' }, { label: 'Analytics', to: '/volunteer/analytics' }, { label: 'Pickup tasks', to: '/volunteer/pickups' },
-    { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/profile' },
+  RECIPIENT: [
+    { label: 'Available Meals', to: '/recipient' }, { label: 'My Requests', to: '/recipient/requests' }, { label: 'Analytics', to: '/recipient/analytics' },
+    { label: 'Notifications', to: '/notifications' }, { label: 'Profile', to: '/recipient/profile' },
   ],
   ADMIN: [
     { label: 'Dashboard', to: '/admin' }, { label: 'Analytics', to: '/admin/analytics' }, { label: 'Users', to: '/admin/users' },
     { label: 'Donations', to: '/admin/donations' }, { label: 'NGOs', to: '/admin/ngos' },
-    { label: 'Volunteers', to: '/admin/volunteers' }, { label: 'Activity logs', to: '/admin/activity' },
+    { label: 'Recipients', to: '/admin/recipients' }, { label: 'Activity logs', to: '/admin/activity' },
   ],
 }
 
@@ -42,7 +42,7 @@ function pageLabel(pathname: string, role: UserRole | null) {
   if (publicLabels[pathname]) return publicLabels[pathname]
   if (/\/donations\/[^/]+\/edit$/.test(pathname)) return 'Edit donation'
   if (/\/donations\/[^/]+$/.test(pathname) && !pathname.endsWith('/new')) return 'Donation details'
-  if (/\/pickups\/[^/]+$/.test(pathname)) return 'Pickup details'
+  if (/\/recipient\/collection\/[^/]+$/.test(pathname)) return 'Collection details'
   return role ? navigation[role].find((item) => item.to === pathname)?.label ?? 'Workspace' : 'Overview'
 }
 

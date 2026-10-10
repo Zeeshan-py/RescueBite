@@ -1,16 +1,30 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/useAuth'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { updateProfile } from '../../services/auth/auth.service'
+import { confirmPhoneVerification, getBusinessProfile, getProfileVerification, saveBusinessProfile, startPhoneVerification, type DonorBusinessProfile, type ProfileVerification } from '../../services/auth/business-profile.service'
+
+const emptyBusiness = (userId: string): DonorBusinessProfile => ({ user_id: userId, business_name: '', business_type: 'RESTAURANT', pickup_address: '', general_area: '', pickup_hours: '', description: '', latitude: null, longitude: null })
 
 export default function ProfilePage() {
-  const { user, profile, refreshProfile } = useAuth()
+  const { user, profile, role, refreshProfile } = useAuth()
   const [name, setName] = useState(profile?.name ?? '')
   const [phone, setPhone] = useState(profile?.phone ?? '')
   const [location, setLocation] = useState(profile?.location ?? '')
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [business, setBusiness] = useState<DonorBusinessProfile | null>(null)
+  const [verification, setVerification] = useState<ProfileVerification | null>(null)
+  const [otp, setOtp] = useState('')
+  useEffect(() => {
+    if (!user) return
+    let active = true
+    void Promise.all([getProfileVerification(),role==='DONOR' ? getBusinessProfile(user.id) : Promise.resolve(null)])
+      .then(([nextVerification,nextBusiness]) => { if (active) { setVerification(nextVerification); if (role==='DONOR') setBusiness(nextBusiness ?? emptyBusiness(user.id)) } })
+      .catch(caught => { if (active) setError(caught instanceof Error ? caught.message : 'Profile details unavailable.') })
+    return () => { active=false }
+  }, [user,role])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -45,6 +59,13 @@ export default function ProfilePage() {
         </div>
         <button disabled={saving} className="rounded-lg bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-pine disabled:opacity-60">{saving ? 'Saving…' : 'Save profile'}</button>
       </form>
+      {role==='DONOR' && business && <section className="mt-6 max-w-2xl rounded-xl border border-line bg-white p-6 sm:p-8"><h2 className="text-xl font-semibold">Business and pickup profile</h2><p className="mt-2 text-sm text-muted">Your pickup address and contact details are shared only with an accepted recipient.</p><form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={event => { event.preventDefault(); if (!business.business_name.trim() || !business.pickup_address.trim() || !business.general_area.trim() || !business.pickup_hours.trim()) { setError('Complete all required business fields.'); return } setSaving(true); setError(null); void saveBusinessProfile(business).then(() => setMessage('Business profile saved.')).catch(caught => setError(caught.message)).finally(() => setSaving(false)) }}>
+        {([['business_name','Business name'],['pickup_address','Pickup address'],['general_area','General area'],['pickup_hours','Pickup hours']] as const).map(([key,label]) => <label key={key} className="text-sm font-medium">{label}<input required maxLength={key==='pickup_address'?1000:300} value={business[key]} onChange={event => setBusiness({...business,[key]:event.target.value})} className="mt-2 w-full rounded-lg border border-line p-3" /></label>)}
+        <label className="text-sm font-medium">Business type<select value={business.business_type} onChange={event => setBusiness({...business,business_type:event.target.value as DonorBusinessProfile['business_type']})} className="mt-2 w-full rounded-lg border border-line p-3">{['RESTAURANT','BAKERY','CATERER','GROCERY','OTHER'].map(type=><option key={type}>{type}</option>)}</select></label>
+        <label className="text-sm font-medium">Public description (optional)<textarea maxLength={2000} value={business.description??''} onChange={event => setBusiness({...business,description:event.target.value})} className="mt-2 w-full rounded-lg border border-line p-3" /></label>
+        <button disabled={saving} className="min-h-11 rounded-lg bg-forest px-5 text-white sm:col-span-2">Save business profile</button></form>
+        <div className="mt-7 border-t border-line pt-5"><h3 className="font-semibold">Contact phone verification</h3><p className="mt-2 text-sm text-muted">{verification?.phone_verified ? 'Verified' : 'Unverified. SMS verification must be enabled in Supabase to post new donations.'}</p>{!verification?.phone_verified && <div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={saving || !phone.trim()} onClick={() => { if (!user) return; setSaving(true); setError(null); void updateProfile(user.id,{name,phone,location}).then(()=>startPhoneVerification(phone)).then(()=>setMessage('Verification code sent to your phone.')).catch(caught=>setError(caught.message)).finally(()=>setSaving(false)) }} className="min-h-11 rounded-lg border border-line px-4 text-sm">Send verification code</button><input inputMode="numeric" autoComplete="one-time-code" aria-label="SMS verification code" placeholder="SMS code" value={otp} onChange={event=>setOtp(event.target.value)} className="rounded-lg border border-line p-3" /><button type="button" disabled={saving || !otp.trim()} onClick={() => { setSaving(true); setError(null); void confirmPhoneVerification(phone,otp).then(getProfileVerification).then(next=>{setVerification(next);setMessage('Phone verified.')}).catch(caught=>setError(caught.message)).finally(()=>setSaving(false)) }} className="min-h-11 rounded-lg bg-forest px-4 text-sm text-white">Verify phone</button></div>}</div>
+      </section>}
     </div>
   )
 }

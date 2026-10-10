@@ -18,12 +18,6 @@ describe('analytics chart data and accessibility', () => {
     expect(html).not.toContain('<polyline')
     expect(html).not.toContain('NaN')
   })
-  it('uses collection and delivery events for volunteer charts', () => {
-    const html = renderToStaticMarkup(<ActivityChart trends={[day]} bucket="day" volunteer />)
-    expect(html).toContain('Collected: 3 across the reporting period')
-    expect(html).toContain('Delivered: 2 across the reporting period')
-    expect(html).not.toContain('Created: 5')
-  })
   it('keeps delivery awaiting receipt separate from completed donations', () => {
     const html = renderToStaticMarkup(<OutcomeChart statuses={{ COMPLETED: 4, DELIVERED: 3, POSTED: 2, CANCELLED: 1, EXPIRED: 2, EXCEPTION: 1 }} />)
     expect(html).toContain('Completed: 4, In progress: 5, Cancelled or expired: 3, Needs attention: 1')

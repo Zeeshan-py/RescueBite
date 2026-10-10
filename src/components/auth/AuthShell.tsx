@@ -16,7 +16,7 @@ export function AuthShell({ eyebrow, title, description, children }: { eyebrow: 
         <div className="relative my-auto max-w-lg py-16">
           <p className="text-xs font-semibold tracking-[0.18em] text-lime uppercase">A shared rescue network</p>
           <blockquote className="mt-6 font-display text-5xl leading-[1.12]">Good food deserves somewhere to go.</blockquote>
-          <p className="mt-7 max-w-md text-sm leading-7 text-white/65">One secure account connects donors, receiving organizations, volunteers, and platform administrators.</p>
+          <p className="mt-7 max-w-md text-sm leading-7 text-white/65">One secure account connects donors, receiving organizations, individual recipients, and platform administrators.</p>
         </div>
         <p className="relative text-xs text-white/45">Food Rescue & Surplus Redistribution Platform</p>
       </aside>

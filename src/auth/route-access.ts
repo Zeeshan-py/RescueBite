@@ -3,14 +3,14 @@ import type { UserRole } from '../types/domain'
 export const roleHomePath: Record<UserRole, string> = {
   DONOR: '/donor',
   NGO: '/ngo',
-  VOLUNTEER: '/volunteer',
+  RECIPIENT: '/recipient',
   ADMIN: '/admin',
 }
 
 const protectedPrefixes: Array<[string, UserRole]> = [
   ['/donor', 'DONOR'],
   ['/ngo', 'NGO'],
-  ['/volunteer', 'VOLUNTEER'],
+  ['/recipient', 'RECIPIENT'],
   ['/admin', 'ADMIN'],
 ]
 

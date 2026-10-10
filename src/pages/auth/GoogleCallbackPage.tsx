@@ -33,7 +33,7 @@ export default function GoogleCallbackPage() {
       <p className="text-sm text-muted">Choose how you participate. NGO accounts complete their organization details next.</p>
       <label className="block text-sm font-semibold">Account role
         <select value={selectedRole} onChange={(event) => setSelectedRole(event.target.value as PublicRegistrationRole)} className="mt-2 block w-full rounded-lg border border-line bg-white p-3">
-          <option value="DONOR">Donor</option><option value="NGO">NGO</option><option value="VOLUNTEER">Volunteer</option>
+          <option value="DONOR">Donor</option><option value="NGO">NGO</option><option value="RECIPIENT">Individual recipient</option>
         </select>
       </label>
       {saveError && <p role="alert" className="text-sm text-red-800">{saveError}</p>}

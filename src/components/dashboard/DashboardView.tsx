@@ -19,7 +19,7 @@ export function SummaryCards({ summary }: { summary: DashboardSummary }) {
   if (!cards.length) return null
   const priority = summary.role === 'ADMIN' ? ['total_donations', 'active', 'completed', 'active_pickups']
     : summary.role === 'DONOR' ? ['total_donations', 'active', 'completed', 'awaiting_pickup']
-      : summary.role === 'NGO' ? ['suggested', 'accepted', 'completed', 'awaiting_confirmation'] : ['available', 'assigned', 'delivered', 'completed']
+      : summary.role === 'NGO' ? ['suggested', 'accepted', 'completed', 'awaiting_confirmation'] : ['available', 'total_requests', 'accepted', 'completed']
   const ordered = [...cards].sort((a, b) => (priority.indexOf(a.key) < 0 ? 99 : priority.indexOf(a.key)) - (priority.indexOf(b.key) < 0 ? 99 : priority.indexOf(b.key)))
   const icons: IconName[] = ['box', 'activity', 'check', 'truck']
   return <><dl className="metrics-grid dashboard-metrics">{ordered.slice(0, 4).map(({ key, label, value }, i) => <MetricCard key={key} label={label} value={value} icon={icons[i]} accent={i === 2} />)}</dl>{ordered.length > 4 && <dl className="summary-strip">{ordered.slice(4).map(({ key, label, value }) => <div key={key}><dd>{value.toLocaleString()}</dd><dt>{label}</dt></div>)}</dl>}</>

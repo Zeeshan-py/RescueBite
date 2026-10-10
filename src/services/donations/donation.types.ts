@@ -14,11 +14,13 @@ export interface DonationInput {
   collectionDeadline: string
   safetyInformation: string
   description: string
+  recipientScope: 'NGO_ONLY' | 'INDIVIDUAL_ONLY' | 'BOTH'
+  publicArea: string
 }
 
 export type DonationFieldErrors = Partial<Record<keyof DonationInput, string>>
 
 export const EMPTY_DONATION_INPUT: DonationInput = {
   foodType: '', otherFoodType: '', quantity: 0, mealPortions: 0, location: '', latitude: null, longitude: null,
-  availableFrom: '', collectionDeadline: '', safetyInformation: '', description: '',
+  availableFrom: '', collectionDeadline: '', safetyInformation: '', description: '', recipientScope: 'NGO_ONLY', publicArea: '',
 }

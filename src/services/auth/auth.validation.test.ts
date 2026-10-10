@@ -21,7 +21,7 @@ function registration(role: PublicRegistrationRole = 'DONOR'): SignUpInput {
 }
 
 describe('authentication validation', () => {
-  it.each(['DONOR', 'NGO', 'VOLUNTEER'] as PublicRegistrationRole[])('accepts a valid %s registration', (role) => {
+  it.each(['DONOR', 'NGO', 'RECIPIENT'] as PublicRegistrationRole[])('accepts a valid %s registration', (role) => {
     expect(validateRegistration(registration(role), 'StrongPass1')).toEqual({})
   })
 

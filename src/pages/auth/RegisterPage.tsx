@@ -11,7 +11,7 @@ import { validateRegistration, type FieldErrors } from '../../services/auth/auth
 const roles: Array<{ value: PublicRegistrationRole; label: string; description: string }> = [
   { value: 'DONOR', label: 'Donor', description: 'Share surplus food.' },
   { value: 'NGO', label: 'NGO', description: 'Receive and distribute food.' },
-  { value: 'VOLUNTEER', label: 'Volunteer', description: 'Help with pickup and delivery.' },
+  { value: 'RECIPIENT', label: 'Individual recipient', description: 'Request available meals for yourself.' },
 ]
 
 const initialNgo = { organizationName: '', description: '', location: '', capacity: 0, acceptedFoodTypes: [] as string[], contactInformation: '' }

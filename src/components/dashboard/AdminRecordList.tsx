@@ -7,20 +7,20 @@ import { Fragment, useId, useRef, useState } from 'react'
 import { Icon, type IconName } from '../common/Icon'
 
 const fields: Record<AdminView, Array<[string, string]>> = {
-  users: [['email', 'Email'], ['role', 'Role'], ['created_at', 'Profile created']],
-  donations: [['donor_name', 'Donor'], ['quantity', 'Quantity'], ['meal_portions', 'Portions'], ['location', 'Pickup location'], ['status', 'Donation status'], ['organization_name', 'Receiving NGO'], ['pickup_status', 'Pickup status'], ['collection_deadline', 'Collection deadline'], ['created_at', 'Created']],
-  ngos: [['user_name', 'Associated user'], ['accepted_food_types', 'Accepted food types'], ['capacity', 'Capacity (portions)'], ['location', 'Location'], ['has_coordinates', 'Map position'], ['accepted_count', 'Accepted donations'], ['created_at', 'Created']],
-  volunteers: [['pickup_count', 'Pickup count'], ['active_count', 'Active assignments'], ['collected_count', 'Collected pickups'], ['delivered_count', 'Delivered pickups'], ['created_at', 'Profile created']],
-  activity: [['actor_name', 'Actor'], ['entity_type', 'Entity type'], ['entity_id', 'Related record'], ['created_at', 'Occurred']],
+  users: [['email', 'Email'], ['role', 'Role'], ['account_status','Account status'], ['created_at', 'Profile created']],
+  donations: [['donor_name', 'Donor'], ['quantity', 'Quantity'], ['meal_portions', 'Portions'], ['location', 'Pickup location'], ['status', 'Donation status'], ['organization_name', 'Receiving NGO'], ['pickup_status', 'Legacy pickup status'], ['collection_deadline', 'Collection deadline'], ['created_at', 'Created']],
+  ngos: [['user_name', 'Associated user'], ['verification_status','Verification'], ['registration_reference','Registration reference'], ['service_area','Service area'], ['accepted_food_types', 'Accepted food types'], ['capacity', 'Capacity (portions)'], ['location', 'Location'], ['has_coordinates', 'Map position'], ['accepted_count', 'Accepted donations'], ['created_at', 'Created']],
+  recipients: [['request_count','Requests'],['active_count','Accepted'],['completed_count','Completed'],['account_status','Account status'],['created_at','Joined']],
+  activity: [['actor_name', 'Actor'], ['entity_type', 'Entity type'], ['entity_id', 'Related record'], ['details','Moderation reason'], ['created_at', 'Occurred']],
 }
-const titleField: Record<AdminView, string> = { users: 'name', donations: 'food_type', ngos: 'organization_name', volunteers: 'name', activity: 'action' }
+const titleField: Record<AdminView, string> = { users: 'name', donations: 'food_type', ngos: 'organization_name', recipients: 'name', activity: 'action' }
 const columns: Record<AdminView, string[]> = {
   users: ['email', 'role', 'created_at'], donations: ['donor_name', 'meal_portions', 'status', 'collection_deadline'],
-  ngos: ['capacity', 'accepted_count', 'location'], volunteers: ['active_count', 'delivered_count', 'pickup_count'],
+  ngos: ['verification_status', 'capacity', 'accepted_count'], recipients: ['request_count','active_count','completed_count'],
   activity: ['actor_name', 'entity_type', 'created_at'],
 }
-const icons: Record<AdminView, IconName> = { users: 'user', donations: 'box', ngos: 'building', volunteers: 'truck', activity: 'activity' }
-const titles: Record<AdminView, string> = { users: 'Member', donations: 'Donation', ngos: 'Organization', volunteers: 'Volunteer', activity: 'Event' }
+const icons: Record<AdminView, IconName> = { users: 'user', donations: 'box', ngos: 'building', recipients: 'user', activity: 'activity' }
+const titles: Record<AdminView, string> = { users: 'Member', donations: 'Donation', ngos: 'Organization', recipients: 'Recipient', activity: 'Event' }
 const detailGroups: Record<AdminView, Array<{ title: string; icon: IconName; keys: string[] }>> = {
   donations: [
     { title: 'Food & donor', icon: 'box', keys: ['donor_name', 'quantity', 'meal_portions'] },
@@ -29,21 +29,21 @@ const detailGroups: Record<AdminView, Array<{ title: string; icon: IconName; key
   ],
   users: [
     { title: 'Contact', icon: 'user', keys: ['email'] },
-    { title: 'Account', icon: 'shield', keys: ['role', 'created_at'] },
+    { title: 'Account', icon: 'shield', keys: ['role', 'account_status', 'created_at'] },
   ],
   ngos: [
-    { title: 'Organization', icon: 'building', keys: ['user_name', 'created_at'] },
+    { title: 'Organization', icon: 'building', keys: ['user_name', 'verification_status', 'registration_reference', 'created_at'] },
     { title: 'Receiving capacity', icon: 'box', keys: ['capacity', 'accepted_food_types', 'accepted_count'] },
-    { title: 'Location', icon: 'location', keys: ['location', 'has_coordinates'] },
+    { title: 'Service area', icon: 'location', keys: ['location', 'service_area', 'has_coordinates'] },
   ],
-  volunteers: [
-    { title: 'Assignments', icon: 'truck', keys: ['pickup_count', 'active_count'] },
-    { title: 'Rescue progress', icon: 'check', keys: ['collected_count', 'delivered_count'] },
-    { title: 'Account', icon: 'user', keys: ['created_at'] },
+  recipients: [
+    { title: 'Requests', icon: 'box', keys: ['request_count', 'active_count', 'completed_count'] },
+    { title: 'Account', icon: 'user', keys: ['account_status', 'created_at'] },
   ],
   activity: [
     { title: 'Who & when', icon: 'clock', keys: ['actor_name', 'created_at'] },
     { title: 'Related record', icon: 'activity', keys: ['entity_type', 'entity_id'] },
+    { title: 'Review', icon: 'shield', keys: ['details'] },
   ],
 }
 
@@ -60,11 +60,19 @@ function detailValue(row: AdminRow, field: string) {
   return formatAdminValue(row, field)
 }
 
-export function AdminRecordList({ view, rows }: { view: AdminView; rows: AdminRow[] }) {
+export function AdminRecordList({ view, rows, onModerate }: { view: AdminView; rows: AdminRow[]; onModerate?: (row: AdminRow, decision: string, reason: string) => Promise<void> }) {
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [reason, setReason] = useState(''), [decision, setDecision] = useState(''), [busy, setBusy] = useState(false), [actionError, setActionError] = useState<string | null>(null)
   const scrollRegion = useRef<HTMLDivElement>(null)
   const idPrefix = useId()
   if (!rows.length) return <EmptyState title="No records to display." />
+  async function moderate(row: AdminRow) {
+    if (!onModerate || !decision) return
+    setBusy(true); setActionError(null)
+    try { await onModerate(row, decision, reason); setDecision(''); setReason('') }
+    catch (error) { setActionError(error instanceof Error ? error.message : 'Moderation failed.') }
+    finally { setBusy(false) }
+  }
   function cell(row: AdminRow, field: string) {
     return (field === 'status' || field === 'pickup_status') && row[field]
       ? <StatusBadge status={String(row[field]) as DonationStatus | PickupTaskStatus} /> : formatAdminValue(row, field)
@@ -81,6 +89,12 @@ export function AdminRecordList({ view, rows }: { view: AdminView; rows: AdminRo
             <h4><Icon name={group.icon} width="18" />{group.title}</h4>
             <dl>{group.keys.map(field => <div key={field}><dt>{fields[view].find(([key]) => key === field)?.[1]}</dt><dd>{detailValue(row, field)}</dd></div>)}</dl>
           </section>)}</div>
+          {onModerate && ['users','recipients','ngos','donations'].includes(view) && <form className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border border-line bg-white p-4" onSubmit={(event) => { event.preventDefault(); void moderate(row) }}>
+            <label className="min-w-44 flex-1 text-sm font-medium">Moderation action<select required value={decision} onChange={(event) => setDecision(event.target.value)} className="mt-1 w-full rounded-lg border border-line bg-white p-3"><option value="">Select action</option>{view === 'ngos' ? <><option value="VERIFIED">Verify NGO</option><option value="REJECTED">Reject NGO</option></> : view === 'donations' ? <option value="CANCEL">Cancel donation</option> : <><option value="RESTRICTED">Restrict account</option><option value="ACTIVE">Restore account</option></>}</select></label>
+            <label className="min-w-60 flex-[2] text-sm font-medium">Reason<input required minLength={10} maxLength={500} value={reason} onChange={(event) => setReason(event.target.value)} className="mt-1 w-full rounded-lg border border-line bg-white p-3" placeholder="Record at least 10 characters for the audit log" /></label>
+            <button disabled={busy} className="min-h-11 rounded-lg bg-forest px-5 text-sm font-semibold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Apply action'}</button>
+            {actionError && <p role="alert" className="w-full text-sm text-red-800">{actionError}</p>}
+          </form>}
         </div>
       </td></tr>}
     </Fragment>

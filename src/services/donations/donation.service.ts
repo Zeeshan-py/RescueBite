@@ -30,6 +30,8 @@ function values(input: DonationInput) {
     collection_deadline: new Date(input.collectionDeadline).toISOString(),
     safety_information: input.safetyInformation.trim() || null,
     description: input.description.trim() || null,
+    recipient_scope: input.recipientScope,
+    public_area: input.recipientScope === 'NGO_ONLY' ? '' : input.publicArea.trim(),
   }
 }
 

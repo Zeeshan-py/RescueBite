@@ -25,20 +25,19 @@ const DonationDetailsPage = lazy(() => import('./pages/donor/DonationDetailsPage
 const NgoDashboardPage = lazy(() => import('./pages/ngo/NgoDashboardPage'))
 const NgoDonationListPage = lazy(() => import('./pages/ngo/NgoDonationListPage'))
 const NgoDonationDetailsPage = lazy(() => import('./pages/ngo/NgoDonationDetailsPage'))
-const VolunteerDashboardPage = lazy(() => import('./pages/volunteer/VolunteerDashboardPage'))
-const PickupListPage = lazy(() => import('./pages/volunteer/PickupListPage'))
-const PickupDetailsPage = lazy(() => import('./pages/volunteer/PickupDetailsPage'))
+const RecipientPage = lazy(() => import('./pages/recipient/RecipientPage'))
 const NotificationsPage = lazy(() => import('./pages/notifications/NotificationsPage'))
 
-const allRoles: UserRole[] = ['DONOR', 'NGO', 'VOLUNTEER', 'ADMIN']
+const allRoles: UserRole[] = ['DONOR', 'NGO', 'RECIPIENT', 'ADMIN']
 
 function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingState label="Loading page…" />}>{children}</Suspense>
 }
 
 function HomeRoute() {
-  const { isLoading, isAuthenticated, role } = useAuth()
+  const { isLoading, isAuthenticated, role, profile } = useAuth()
   if (isLoading) return <LoadingState label="Loading application…" fullScreen />
+  if (isAuthenticated && profile?.account_status !== 'ACTIVE') return <Navigate to="/account-unavailable" replace />
   if (isAuthenticated && role) return <Navigate to={roleHomePath[role]} replace />
   return <AppLayout><Page><OverviewPage /></Page></AppLayout>
 }
@@ -93,12 +92,13 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={['VOLUNTEER']} />}>
+      <Route element={<ProtectedRoute allowedRoles={['RECIPIENT']} />}>
         <Route element={<AuthenticatedLayout />}>
-          <Route path="/volunteer/analytics" element={<Page><AnalyticsPage /></Page>} />
-          <Route path="/volunteer" element={<Page><VolunteerDashboardPage /></Page>} />
-          <Route path="/volunteer/pickups" element={<Page><PickupListPage /></Page>} />
-          <Route path="/volunteer/pickups/:id" element={<Page><PickupDetailsPage /></Page>} />
+          <Route path="/recipient/analytics" element={<Page><AnalyticsPage /></Page>} />
+          <Route path="/recipient" element={<Page><RecipientPage view="available" /></Page>} />
+          <Route path="/recipient/requests" element={<Page><RecipientPage view="requests" /></Page>} />
+          <Route path="/recipient/profile" element={<Page><RecipientPage view="profile" /></Page>} />
+          <Route path="/recipient/collection/:donationId" element={<Page><RecipientPage view="collection" /></Page>} />
         </Route>
       </Route>
 
@@ -109,7 +109,7 @@ export default function App() {
           <Route path="/admin/users" element={<Page><AdminRecordsPage key="users" view="users" /></Page>} />
           <Route path="/admin/donations" element={<Page><AdminRecordsPage key="donations" view="donations" /></Page>} />
           <Route path="/admin/ngos" element={<Page><AdminRecordsPage key="ngos" view="ngos" /></Page>} />
-          <Route path="/admin/volunteers" element={<Page><AdminRecordsPage key="volunteers" view="volunteers" /></Page>} />
+          <Route path="/admin/recipients" element={<Page><AdminRecordsPage key="recipients" view="recipients" /></Page>} />
           <Route path="/admin/activity" element={<Page><AdminRecordsPage key="activity" view="activity" /></Page>} />
           <Route path="/admin/activity-logs" element={<Navigate to="/admin/activity" replace />} />
         </Route>

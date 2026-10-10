@@ -6,8 +6,8 @@ export const donationStatuses = ['POSTED', 'MATCHED', 'ACCEPTED', 'PICKUP_ASSIGN
 export const dashboardCards: Record<UserRole, Array<[string, string]>> = {
   DONOR: [['total_donations', 'Total donations'], ['active', 'Active donations'], ['completed', 'Completed'], ['closed', 'Cancelled / expired'], ['awaiting_acceptance', 'Awaiting NGO acceptance'], ['awaiting_pickup', 'Awaiting pickup'], ['delivered', 'Delivered / completed'], ['exceptions', 'Exceptions']],
   NGO: [['suggested', 'Pending decisions'], ['accepted', 'Accepted donations'], ['awaiting_pickup', 'Awaiting pickup'], ['collected', 'Collected / awaiting delivery'], ['awaiting_confirmation', 'Confirm receipt'], ['completed', 'Completed']],
-  VOLUNTEER: [['available', 'Available pickups'], ['assigned', 'Assigned to me'], ['collected', 'Ready to deliver'], ['delivered', 'Delivered'], ['completed', 'NGO confirmed'], ['history', 'My pickup history']],
-  ADMIN: [['total_users', 'Total users'], ['donors', 'Donors'], ['ngo_users', 'NGO users'], ['organizations', 'NGO profiles'], ['volunteers', 'Volunteers'], ['total_donations', 'Total donations'], ['active', 'Active donations'], ['completed', 'Completed donations'], ['closed', 'Cancelled / expired'], ['active_pickups', 'Active pickup tasks'], ['delivered_pickups', 'Delivered pickups'], ['exceptions', 'Exceptions']],
+  RECIPIENT: [['available','Available Meals'], ['total_requests','My Requests'], ['pending','Pending'], ['accepted','Accepted'], ['completed','Collected'], ['closed','Closed']],
+  ADMIN: [['total_users', 'Total users'], ['donors', 'Donors'], ['ngo_users', 'NGO users'], ['organizations', 'NGO profiles'], ['recipients', 'Recipients'], ['total_donations', 'Total donations'], ['active', 'Active donations'], ['completed', 'Completed donations'], ['closed', 'Cancelled / expired'], ['active_pickups', 'Awaiting collection'], ['exceptions', 'Exceptions']],
 }
 export function summaryCards(summary: DashboardSummary) {
   return dashboardCards[summary.role].map(([key, label]) => ({ key, label, value: summary.counts[key] ?? 0 }))
