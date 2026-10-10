@@ -11,7 +11,9 @@ RescueBite uses a shared operations layout for donors, NGOs, volunteers, and adm
 - Four priority metrics introduce a dashboard; secondary counts sit in a compact strip. Existing zero-count dashboard behavior is preserved.
 - Record tables show comparison fields first. Expand a row to see its complete administrative details in named groups, with separate date and time text. The detail sheet stays within the phone viewport even when its parent table scrolls horizontally, and has its own close control.
 - Donation and pickup cards prioritize food, quantities, status, location, and deadline. NGO match scores are labeled as scores out of 100, not probabilities.
-- Small screens use a collapsible navigation menu, two-column metrics, stacked report panels, and single-column cards. Wide tables scroll within their own region.
+- Phones and tablets use one sticky header with the brand, notification bell, and menu button. Navigation opens in a native modal drawer with the account and role-specific links; the desktop sidebar stays visible on larger screens.
+- Mobile page headers show the title and primary actions without repeated workspace labels or introductory copy. Admin filters expand on demand and show an active-filter count; analytics keeps the reporting period and UTC label visible.
+- Small screens use two-column metrics, stacked report panels, and single-column cards. Decorative metric icons disappear on the narrowest phones to leave room for labels. Wide tables scroll within their own region without breaking names into single letters.
 
 ## Analytics and data meaning
 
@@ -24,7 +26,8 @@ The outcomes chart groups current donation statuses. Delivered food remains in p
 ## Accessibility and maintenance
 
 - Charts provide textual totals, keyboard arrow navigation, and a detailed data table. The two activity series use solid and dashed strokes as well as different colors.
-- Controls have visible focus states and accessible names. Mobile navigation closes with Escape and returns focus to its toggle.
+- Controls have visible focus states and accessible names. Mobile header controls have 44px targets. The navigation drawer makes background content inert, locks background scrolling, closes with Escape or a backdrop tap, and returns focus to its toggle. It also closes after navigation or switching to the desktop layout.
+- After applying mobile record filters, keyboard focus returns to the filter toggle when the updated results finish loading.
 - Row expansion uses `aria-expanded`; tables include column headers, captions, and focusable scroll regions.
 - Existing reduced-motion support remains in place. SVG charts add no charting-library dependency.
 - Preserve server authorization, role-specific queries, and database policies when changing presentation. Design components receive authorized data; they do not broaden access.

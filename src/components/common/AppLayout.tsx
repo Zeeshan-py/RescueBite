@@ -49,6 +49,7 @@ function pageLabel(pathname: string, role: UserRole | null) {
 export function AppLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuButton = useRef<HTMLButtonElement>(null)
+  const mobileMenu = useRef<HTMLDialogElement>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const { user, role, profile, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
@@ -58,10 +59,37 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const activePath = [...items].sort((a, b) => b.to.length - a.to.length).find((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`))?.to
   useEffect(() => {
     if (!menuOpen) return
-    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus() } }
-    document.addEventListener('keydown', close)
-    return () => document.removeEventListener('keydown', close)
+    const dialog = mobileMenu.current
+    if (!dialog) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    dialog.showModal()
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const closeOnDesktop = () => { if (desktop.matches) dialog.close() }
+    desktop.addEventListener('change', closeOnDesktop)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      desktop.removeEventListener('change', closeOnDesktop)
+      if (dialog.open) dialog.close()
+    }
   }, [menuOpen])
+  useEffect(() => { mobileMenu.current?.close() }, [location.pathname])
+
+  function closeMenu() {
+    mobileMenu.current?.close()
+  }
+
+  function navigationLinks() {
+    return isAuthenticated && role ? items.map((item) => (
+      <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={closeMenu} className={`sidebar-link${activePath === item.to ? ' is-active' : ''}`}>
+        <Icon name={navigationIcons[item.label] ?? 'grid'} /><span>{item.label}</span>{activePath === item.to && <span className="nav-active-dot" />}
+      </Link>
+    )) : <>
+      <NavLink to="/" end onClick={closeMenu} className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}><Icon name="grid" />Overview</NavLink>
+      <Link to="/login" onClick={closeMenu} className="sidebar-link"><Icon name="user" />Sign in</Link>
+      <Link to="/register" onClick={closeMenu} className="sidebar-link"><Icon name="plus" />Create account</Link>
+    </>
+  }
 
   async function handleLogout() {
     setIsSigningOut(true)
@@ -84,21 +112,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <span className="brand-symbol"><Icon name="leaf" width="24" height="24" /></span>
             <span><span className="brand-name">RescueBite<span>.</span></span><span className="brand-caption">Every portion has a purpose</span></span>
           </Link>
-          <button ref={menuButton} type="button" className="sidebar-menu-button" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
         </div>
         <nav id="main-navigation" aria-label="Main navigation" className={`sidebar-navigation${menuOpen ? ' is-open' : ''}`}>
           <p className="sidebar-label">{role ? `${role.toLowerCase()} workspace` : 'Discover RescueBite'}</p>
-          {isAuthenticated && role ? items.map((item) => (
-            <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={() => setMenuOpen(false)} className={`sidebar-link${activePath === item.to ? ' is-active' : ''}`}>
-              <Icon name={navigationIcons[item.label] ?? 'grid'} /><span>{item.label}</span>{activePath === item.to && <span className="nav-active-dot" />}
-            </Link>
-          )) : (
-            <>
-              <NavLink to="/" end className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}><Icon name="grid" />Overview</NavLink>
-              <Link to="/login" className="sidebar-link"><Icon name="user" />Sign in</Link>
-              <Link to="/register" className="sidebar-link"><Icon name="plus" />Create account</Link>
-            </>
-          )}
+          {navigationLinks()}
         </nav>
         <div className={`sidebar-bottom${menuOpen ? ' is-open' : ''}`}>
           <div className="sidebar-purpose"><Icon name="leaf" /><p>Good food.<br /><strong>Greater possibilities.</strong></p><span>Connecting surplus with purpose.</span></div>
@@ -108,10 +125,22 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="workspace-topbar"><nav aria-label="Breadcrumb" className="workspace-breadcrumb"><Link to={homePath}>{role ? 'Workspace' : 'RescueBite'}</Link><Icon name="chevron" width="14" height="14" /><span aria-current="page">{pageLabel(location.pathname, role)}</span></nav><div className="topbar-actions"><span className="workspace-tag"><Icon name="shield" width="15" />{role === 'ADMIN' ? 'Admin workspace' : 'Food rescue network'}</span>{isAuthenticated && <NotificationBell />}</div></header>
+        <header className="workspace-topbar">
+          <Link to={homePath} className="mobile-brand" aria-label="RescueBite home"><span className="brand-symbol"><Icon name="leaf" width="21" height="21" /></span><span>RescueBite<span className="mobile-brand-dot">.</span></span></Link>
+          <nav aria-label="Breadcrumb" className="workspace-breadcrumb"><Link to={homePath}>{role ? 'Workspace' : 'RescueBite'}</Link><Icon name="chevron" width="14" height="14" /><span aria-current="page">{pageLabel(location.pathname, role)}</span></nav>
+          <div className="topbar-actions"><span className="workspace-tag"><Icon name="shield" width="15" />{role === 'ADMIN' ? 'Admin workspace' : 'Food rescue network'}</span>{isAuthenticated && <NotificationBell />}<button ref={menuButton} type="button" className="sidebar-menu-button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen(true)}><Icon name="menu" /></button></div>
+        </header>
         <main id="main-content" tabIndex={-1} className="workspace-main">{children}</main>
         <footer className="workspace-footer"><InformationLinks /><p>RescueBite · A better future for surplus food.</p></footer>
       </div>
+      <dialog ref={mobileMenu} id="mobile-navigation" className="mobile-navigation" aria-labelledby="mobile-navigation-title" onClose={() => { setMenuOpen(false); menuButton.current?.focus() }} onClick={(event) => { if (event.target === event.currentTarget) closeMenu() }}>
+        <div className="mobile-navigation-content">
+          <div className="mobile-navigation-heading"><h2 id="mobile-navigation-title">Menu</h2><button type="button" className="mobile-menu-close" aria-label="Close navigation" autoFocus onClick={closeMenu}><Icon name="close" /></button></div>
+          {isAuthenticated && <div className="mobile-account"><span className="profile-avatar">{(profile?.name ?? 'RB').split(' ').slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{profile?.name ?? 'RescueBite member'}</strong><span>{role === 'ADMIN' ? 'Administrator' : role?.toLowerCase()}</span></div></div>}
+          <nav aria-label="Mobile navigation" className="mobile-navigation-links">{navigationLinks()}</nav>
+          <div className="mobile-navigation-footer"><Link to="/about" onClick={closeMenu}><Icon name="leaf" width="18" />About RescueBite</Link>{isAuthenticated && <button type="button" disabled={isSigningOut} onClick={() => { closeMenu(); void handleLogout() }}><Icon name="logout" width="18" />{isSigningOut ? 'Signing out…' : 'Sign out'}</button>}</div>
+        </div>
+      </dialog>
     </div>
   )
   return isAuthenticated ? <NotificationProvider key={user?.id}>{layout}</NotificationProvider> : layout

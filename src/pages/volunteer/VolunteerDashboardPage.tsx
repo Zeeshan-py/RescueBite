@@ -15,7 +15,7 @@ export default function VolunteerDashboardPage() {
   const load = useCallback(() => getVolunteerDashboard(user!.id), [user])
   const query = useDashboardQuery(load)
   const current = query.data?.assigned[0]
-  return <DashboardView eyebrow="VOLUNTEER OVERVIEW" title="Make the next rescue happen." description="Find available pickups, follow assigned rescues, and review your delivery history." actions={<Link to="/volunteer/pickups" className="button-primary"><Icon name="truck" width="17" />Browse pickups</Link>} {...query}>
+  return <DashboardView mobileTitle="Your pickups" eyebrow="VOLUNTEER OVERVIEW" title="Make the next rescue happen." description="Find available pickups, follow assigned rescues, and review your delivery history." actions={<Link to="/volunteer/pickups" className="button-primary"><Icon name="truck" width="17" />Browse pickups</Link>} {...query}>
     {query.data && <><SummaryCards summary={query.data.summary} /><div className="quick-links"><Link to="/volunteer/analytics"><Icon name="chart" width="16" />View my delivery impact<Icon name="arrow" width="14" /></Link></div>
       {!query.data.assigned.length && !query.data.available.length && !query.data.history.length && <div className="mt-8"><EmptyState title="No pickup tasks are available yet." /></div>}
       {query.data.assigned.length > 0 && <DashboardSection title="My assigned rescues">{query.data.assigned.map((task) => <div key={task.id}><PickupTaskCard task={task} /><Link to={`/volunteer/pickups/${task.id}`} className="mt-2 inline-block text-sm font-semibold text-forest underline">{task.status === 'ASSIGNED' ? 'View pickup and mark collected' : 'View delivery and mark delivered'} →</Link></div>)}</DashboardSection>}

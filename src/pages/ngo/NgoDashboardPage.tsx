@@ -13,7 +13,7 @@ export default function NgoDashboardPage() {
   const ngoId = ngoProfile?.id ?? null
   const load = useCallback(() => getNgoDashboard(ngoId), [ngoId])
   const query = useDashboardQuery(load)
-  return <DashboardView eyebrow="ORGANIZATION OVERVIEW" title="Your community, supported." description={`Review matches and receiving progress for ${ngoProfile?.organization_name ?? 'your organization'}.`} actions={<Link to="/ngo/donations" className="button-primary"><Icon name="leaf" width="17" />Review matches</Link>} {...query}>
+  return <DashboardView mobileTitle="NGO dashboard" eyebrow="ORGANIZATION OVERVIEW" title="Your community, supported." description={`Review matches and receiving progress for ${ngoProfile?.organization_name ?? 'your organization'}.`} actions={<Link to="/ngo/donations" className="button-primary"><Icon name="leaf" width="17" />Review matches</Link>} {...query}>
     {query.data && <><SummaryCards summary={query.data.summary} />{!ngoProfile && <Link to="/ngo/setup" className="mt-6 block rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold text-amber-900">Complete your organization profile →</Link>}
       <div className="quick-links"><Link to="/ngo/analytics"><Icon name="chart" width="16" />View organization impact<Icon name="arrow" width="14" /></Link><Link to="/ngo/accepted">Accepted donations<Icon name="arrow" width="14" /></Link></div>
       {!query.data.pending.length && !query.data.accepted.length && !query.data.deliveries.length ? <div className="mt-8"><EmptyState title={ngoProfile ? 'No donations matched to your organization yet.' : 'Complete your organization profile to receive matches.'} /></div> : <>

@@ -8,10 +8,10 @@ const steps = [
 
 export default function OverviewPage() {
   return <div id="overview">
-    <section className="rounded-2xl border border-line bg-soft px-6 py-10 sm:px-10 sm:py-14" aria-labelledby="welcome-heading">
-      <p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">Food rescue, coordinated</p>
+    <section className="overview-hero rounded-2xl border border-line bg-soft px-6 py-10 sm:px-10 sm:py-14" aria-labelledby="welcome-heading">
+      <p className="overview-eyebrow text-xs font-semibold tracking-[0.16em] text-forest uppercase">Food rescue, coordinated</p>
       <h1 id="welcome-heading" className="mt-4 max-w-2xl font-display text-4xl leading-tight sm:text-5xl">Move surplus food to the people who need it.</h1>
-      <p className="mt-5 max-w-2xl text-base leading-7 text-muted">RescueBite connects donors, NGOs, and volunteers through a clear pickup and delivery process.</p>
+      <p className="mt-5 max-w-2xl text-base leading-7 text-muted">Connect with donors, NGOs, and volunteers to share surplus food.</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link to="/register" className="inline-flex min-h-11 items-center rounded-lg bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-pine">Create an account</Link>
         <Link to="/login" className="inline-flex min-h-11 items-center rounded-lg border border-forest/25 bg-white px-5 py-3 text-sm font-semibold text-forest hover:bg-soft">Sign in</Link>
