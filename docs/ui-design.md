@@ -4,10 +4,12 @@ RescueBite uses a shared operations layout for donors, NGOs, volunteers, and adm
 
 ## Layout and hierarchy
 
+- Typography uses self-hosted Inter Variable with system fallbacks and `font-display: swap`. Body text starts at 16px; primary table values use 15px, metadata uses 13px, and expanded mobile details use 16px. Font sizes use rem units so browser text scaling remains effective.
+- Dark ink is reserved for values and headings; secondary labels use a consistent, higher-contrast muted green-gray. Semibold headings, medium labels, and tabular numerals distinguish levels of information.
 - White navigation sidebar, neutral canvas, and emerald accents keep the primary action and current location visible.
 - The workspace expands to 1680px instead of keeping reports in a narrow centered column.
 - Four priority metrics introduce a dashboard; secondary counts sit in a compact strip. Existing zero-count dashboard behavior is preserved.
-- Record tables show comparison fields first. Expand a row to see its complete administrative details.
+- Record tables show comparison fields first. Expand a row to see its complete administrative details in named groups, with separate date and time text. The detail sheet stays within the phone viewport even when its parent table scrolls horizontally, and has its own close control.
 - Donation and pickup cards prioritize food, quantities, status, location, and deadline. NGO match scores are labeled as scores out of 100, not probabilities.
 - Small screens use a collapsible navigation menu, two-column metrics, stacked report panels, and single-column cards. Wide tables scroll within their own region.
 
