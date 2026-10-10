@@ -1,13 +1,16 @@
 import { StatusBadge } from '../common/StatusBadge'
 import { Link } from 'react-router-dom'
 import { DonationStatusBadge } from '../donations/DonationStatusBadge'
+import { Icon } from '../common/Icon'
 import type { NgoDonationMatch } from '../../services/ngo/ngo-workflow.types'
-
-const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+import { formatDashboardDate } from '../../services/dashboard/dashboard.utils'
 
 export function NgoMatchCard({ item }: { item: NgoDonationMatch }) {
-  return <Link to={`/ngo/donations/${item.id}`} className="block rounded-xl border border-line bg-white p-5 transition hover:border-forest/40 hover:shadow-sm sm:p-6">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-semibold tracking-wide text-forest uppercase"><StatusBadge status={item.status} /></p><h2 className="mt-2 text-lg font-semibold">{item.donation.food_type}</h2><p className="mt-1 text-sm text-muted">{item.donation.meal_portions} portions · {item.donation.quantity} quantity</p></div><div className="text-right"><DonationStatusBadge status={item.donation.status} /><p className="mt-3 font-display text-3xl text-forest">{item.matching_score}%</p></div></div>
-    <dl className="mt-5 grid gap-4 border-t border-line pt-4 text-sm sm:grid-cols-2"><div><dt className="text-xs text-muted">Pickup location</dt><dd className="mt-1 font-medium">{item.donation.location}</dd></div><div><dt className="text-xs text-muted">Collection deadline</dt><dd className="mt-1 font-medium">{formatDate(item.donation.collection_deadline)}</dd></div></dl>
+  const score = Math.max(0, Math.min(100, item.matching_score))
+  return <Link to={`/ngo/donations/${item.id}`} className="rescue-card">
+    <div className="rescue-card-heading"><span className="rescue-card-icon"><Icon name="leaf" width="22" height="22" /></span><div><h2>{item.donation.food_type}</h2><p>{item.donation.meal_portions.toLocaleString()} portions · {item.donation.quantity.toLocaleString()} quantity</p></div><div className="match-score"><div className="score-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="#e8eee9" strokeWidth="3" /><circle cx="24" cy="24" r="20" fill="none" stroke="#488968" strokeWidth="3" strokeDasharray={`${score / 100 * 125.66} 125.66`} transform="rotate(-90 24 24)" /></svg><strong>{Math.round(score)}</strong></div><span>Match score<br />out of 100</span></div></div>
+    <div className="match-statuses"><span>Match <StatusBadge status={item.status} /></span><span>Donation <DonationStatusBadge status={item.donation.status} /></span></div>
+    <dl className="rescue-card-details"><div><dt><Icon name="location" width="14" />Pickup location</dt><dd>{item.donation.location}</dd></div><div><dt><Icon name="clock" width="14" />Collection deadline</dt><dd>{formatDashboardDate(item.donation.collection_deadline)}</dd></div></dl>
+    <div className="rescue-card-footer"><span>Review food details and suitability</span><span>View match <Icon name="arrow" width="15" /></span></div>
   </Link>
 }

@@ -18,12 +18,12 @@ export function percentage(numerator: number, denominator: number): string {
 export function workflowRates(report: ImpactReport) {
   const d = report.donations, t = report.tasks
   return [
-    { label: 'Match rate', n: d.matched, d: d.total, definition: 'Donations with a stored candidate match / all cohort donations' },
-    { label: 'Acceptance rate', n: d.accepted, d: d.matched, definition: 'Donations with an ACCEPTED match / donations with any stored match' },
-    { label: 'Pickup completion rate', n: t.collected, d: t.total, definition: 'Tasks with collected_at / all tasks created in the range' },
-    { label: 'Delivery completion rate', n: t.delivered, d: t.total, definition: 'DELIVERED tasks / all tasks created in the range' },
-    { label: 'Donation completion rate', n: d.completed, d: d.total, definition: 'COMPLETED donations / all cohort donations, including active and unsuccessful records' },
-    { label: 'Cancellation rate', n: d.cancelled, d: d.total, definition: 'CANCELLED donations / all cohort donations' },
-    { label: 'Expiry rate', n: d.expired, d: d.total, definition: 'EXPIRED donations / all cohort donations' },
+    { label: 'Match rate', n: d.matched, d: d.total, definition: 'Donations with an NGO match / donations created' },
+    { label: 'Acceptance rate', n: d.accepted, d: d.matched, definition: 'Donations accepted by an NGO / matched donations' },
+    { label: 'Pickup completion rate', n: t.collected, d: t.total, definition: 'Pickups collected / pickup tasks created' },
+    { label: 'Delivery completion rate', n: t.delivered, d: t.total, definition: 'Pickups delivered / pickup tasks created' },
+    { label: 'Donation completion rate', n: d.completed, d: d.total, definition: 'Donations confirmed by an NGO / donations created' },
+    { label: 'Cancellation rate', n: d.cancelled, d: d.total, definition: 'Cancelled donations / donations created' },
+    { label: 'Expiry rate', n: d.expired, d: d.total, definition: 'Expired donations / donations created' },
   ]
 }

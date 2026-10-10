@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom'
 import type { PickupTaskWithDonation } from '../../services/pickups/pickup.types'
 import { PickupStatusBadge } from './PickupStatusBadge'
+import { Icon } from '../common/Icon'
+import { formatDashboardDate } from '../../services/dashboard/dashboard.utils'
 
-const formatDate = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 export function PickupTaskCard({ task }: { task: PickupTaskWithDonation }) {
-  return <Link to={`/volunteer/pickups/${task.id}`} className="block rounded-xl border border-line bg-white p-5 transition hover:border-forest/40 hover:shadow-sm sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-semibold tracking-wide text-forest uppercase">Pickup task</p><h2 className="mt-2 text-lg font-semibold">{task.donation.food_type}</h2><p className="mt-1 text-sm text-muted">{task.donation.meal_portions} portions · {task.donation.quantity} quantity</p></div><PickupStatusBadge status={task.status} /></div><dl className="mt-5 grid gap-4 border-t border-line pt-4 text-sm sm:grid-cols-3"><div><dt className="text-xs text-muted">Pickup</dt><dd className="mt-1 font-medium">{task.pickup_location}</dd></div><div><dt className="text-xs text-muted">Deliver to</dt><dd className="mt-1 font-medium">{task.delivery_location}</dd></div><div><dt className="text-xs text-muted">Deadline</dt><dd className="mt-1 font-medium">{formatDate(task.donation.collection_deadline)}</dd></div></dl></Link>
+  return <Link to={`/volunteer/pickups/${task.id}`} className="rescue-card">
+    <div className="rescue-card-heading"><span className="rescue-card-icon"><Icon name="truck" width="22" height="22" /></span><div><h2>{task.donation.food_type}</h2><p>{task.donation.meal_portions.toLocaleString()} portions · {task.donation.quantity.toLocaleString()} quantity</p></div><PickupStatusBadge status={task.status} /></div>
+    <dl className="pickup-route"><div><dt>Pickup</dt><dd>{task.pickup_location}</dd></div><div><dt>Deliver to</dt><dd>{task.delivery_location}</dd></div></dl>
+    <div className="rescue-card-footer"><span><Icon name="clock" width="14" />{formatDashboardDate(task.donation.collection_deadline)}</span><span>View pickup <Icon name="arrow" width="15" /></span></div>
+  </Link>
 }

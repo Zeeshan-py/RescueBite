@@ -6,6 +6,14 @@ import type { UserRole } from '../../types/domain'
 import { NotificationProvider } from '../../services/notifications/NotificationProvider'
 import { NotificationBell } from '../notifications/NotificationBell'
 import { InformationLinks } from './InformationLinks'
+import { Icon, type IconName } from './Icon'
+
+const navigationIcons: Record<string, IconName> = {
+  Dashboard: 'grid', Analytics: 'chart', Users: 'users', Donations: 'box', NGOs: 'building',
+  Volunteers: 'truck', 'Activity logs': 'activity', 'My donations': 'box', 'Create donation': 'plus',
+  'Available donations': 'box', 'Accepted donations': 'check', 'Organization profile': 'building',
+  Notifications: 'bell', Profile: 'user', 'Pickup tasks': 'truck',
+}
 
 const navigation: Record<UserRole, Array<{ label: string; to: string }>> = {
   DONOR: [
@@ -68,40 +76,41 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   const layout = (
-    <div className="min-h-screen lg:grid lg:grid-cols-[252px_1fr]">
+    <div className="app-shell">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:p-3">Skip to content</a>
-      <aside className="bg-pine text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
-        <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-6 sm:px-6">
+      <aside className="app-sidebar">
+        <div className="sidebar-brand">
           <Link to={homePath} className="flex items-center gap-3" aria-label="RescueBite home" onClick={() => setMenuOpen(false)}>
-            <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl bg-lime text-pine"><svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M19 4C8 3 3 8 6 15c7 4 13-1 13-11Z" /><path d="M4 21 15 10" /></svg></span>
-            <span><span className="block font-display text-2xl">RescueBite</span><span className="text-[11px] text-white/65">Surplus food. Shared purpose.</span></span>
+            <span className="brand-symbol"><Icon name="leaf" width="24" height="24" /></span>
+            <span><span className="brand-name">RescueBite<span>.</span></span><span className="brand-caption">Every portion has a purpose</span></span>
           </Link>
-          <button ref={menuButton} type="button" className="min-h-11 rounded-lg border border-white/30 px-3 py-2 text-sm lg:hidden" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'Close' : 'Menu'}</button>
+          <button ref={menuButton} type="button" className="sidebar-menu-button" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
         </div>
-        <nav id="main-navigation" aria-label="Main navigation" className={`${menuOpen ? 'block' : 'hidden'} px-4 py-7 lg:block`}>
-          <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.2em] text-white/55 uppercase">{role ? `${role.toLowerCase()} workspace` : 'Welcome'}</p>
+        <nav id="main-navigation" aria-label="Main navigation" className={`sidebar-navigation${menuOpen ? ' is-open' : ''}`}>
+          <p className="sidebar-label">{role ? `${role.toLowerCase()} workspace` : 'Discover RescueBite'}</p>
           {isAuthenticated && role ? items.map((item) => (
-            <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={() => setMenuOpen(false)} className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${activePath === item.to ? 'bg-white/12 text-white ring-1 ring-white/20' : 'text-white/80 hover:bg-white/7 hover:text-white'}`}>
-              <span aria-hidden="true" className="text-lime">•</span>{item.label}
+            <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={() => setMenuOpen(false)} className={`sidebar-link${activePath === item.to ? ' is-active' : ''}`}>
+              <Icon name={navigationIcons[item.label] ?? 'grid'} /><span>{item.label}</span>{activePath === item.to && <span className="nav-active-dot" />}
             </Link>
           )) : (
             <>
-              <NavLink to="/" end className={({ isActive }) => `mb-2 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium ${isActive ? 'bg-white/10' : ''}`}>Overview</NavLink>
-              <Link to="/login" className="mt-4 flex rounded-lg border border-white/20 px-3 py-3 text-sm font-medium hover:bg-white/10">Sign in</Link>
-              <Link to="/register" className="mt-2 flex rounded-lg bg-lime px-3 py-3 text-sm font-semibold text-pine hover:bg-white">Create account</Link>
+              <NavLink to="/" end className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}><Icon name="grid" />Overview</NavLink>
+              <Link to="/login" className="sidebar-link"><Icon name="user" />Sign in</Link>
+              <Link to="/register" className="sidebar-link"><Icon name="plus" />Create account</Link>
             </>
           )}
         </nav>
-        <div className="mt-auto border-t border-white/10 p-5 sm:p-6">
+        <div className={`sidebar-bottom${menuOpen ? ' is-open' : ''}`}>
+          <div className="sidebar-purpose"><Icon name="leaf" /><p>Good food.<br /><strong>Greater possibilities.</strong></p><span>Connecting surplus with purpose.</span></div>
           {isAuthenticated ? (
-            <div><p className="truncate text-sm font-semibold">{profile?.name ?? 'RescueBite member'}</p><p className="mt-1 text-xs text-white/55">{role}</p><button onClick={() => void handleLogout()} disabled={isSigningOut} className="mt-4 text-xs font-semibold text-lime hover:text-white disabled:opacity-60">{isSigningOut ? 'Signing out…' : 'Sign out'}</button></div>
-          ) : <p className="text-sm text-lime">A little less waste.<br />A little more possibility.</p>}
+            <div className="sidebar-profile"><span className="profile-avatar">{(profile?.name ?? 'RB').split(' ').slice(0, 2).map(part => part[0]).join('')}</span><div><p>{profile?.name ?? 'RescueBite member'}</p><span>{role === 'ADMIN' ? 'Administrator' : role?.toLowerCase()}</span></div><button onClick={() => void handleLogout()} disabled={isSigningOut} aria-label={isSigningOut ? 'Signing out' : 'Sign out'} title="Sign out"><Icon name="logout" width="18" /></button></div>
+          ) : <Link to="/about" className="sidebar-link">Our mission <Icon name="arrow" /></Link>}
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-4 sm:px-10"><nav aria-label="Breadcrumb" className="min-w-0 text-sm"><Link to={homePath} className="text-forest hover:underline">{role ? `${role === 'NGO' ? 'NGO' : role[0] + role.slice(1).toLowerCase()} workspace` : 'RescueBite'}</Link><span aria-hidden="true" className="mx-2 text-muted">/</span><span aria-current="page" className="text-ink">{pageLabel(location.pathname, role)}</span></nav><div className="flex shrink-0 items-center gap-3">{isAuthenticated && <NotificationBell />}</div></header>
-        <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
-        <footer className="mx-auto max-w-6xl space-y-4 border-t border-line px-5 py-6 text-xs text-muted sm:px-10"><InformationLinks /><p>RescueBite · Food Rescue & Surplus Redistribution</p></footer>
+        <header className="workspace-topbar"><nav aria-label="Breadcrumb" className="workspace-breadcrumb"><Link to={homePath}>{role ? 'Workspace' : 'RescueBite'}</Link><Icon name="chevron" width="14" height="14" /><span aria-current="page">{pageLabel(location.pathname, role)}</span></nav><div className="topbar-actions"><span className="workspace-tag"><Icon name="shield" width="15" />{role === 'ADMIN' ? 'Admin workspace' : 'Food rescue network'}</span>{isAuthenticated && <NotificationBell />}</div></header>
+        <main id="main-content" tabIndex={-1} className="workspace-main">{children}</main>
+        <footer className="workspace-footer"><InformationLinks /><p>RescueBite · A better future for surplus food.</p></footer>
       </div>
     </div>
   )
