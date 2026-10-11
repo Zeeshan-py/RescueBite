@@ -28,7 +28,7 @@ NGO and individual recipients confirm receipt through `confirm_donation_receipt`
 5. Verify production schema/RLS and administrator NGO verification, then deploy the matching frontend build to Netlify. Keep `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as public build settings. Never add a database password or service-role key to Netlify's browser bundle.
 6. Smoke-test a non-sensitive donor/NGO/recipient journey and inspect logs. If an operational issue appears after migration, use a new forward migration; PostgreSQL enum additions and migrated roles should not be assumed safely reversible by deleting files.
 
-This repository change has **not** applied a live Supabase migration or deployed the new frontend. A clean local PostgreSQL run is evidence of syntax and workflow behavior, not hosted Auth/OAuth readiness.
+Production migration record (2026-10-11): the four recipient migrations were applied through Supabase CLI to the RescueBite project after a local pre-release database backup. The migration history now contains 17 versions. Read-only checks confirmed that all four new tables have RLS enabled, 64 donations, 177 matches, and 53 historical pickup tasks remain, and six legacy Volunteer profiles are now Recipient profiles. All ten existing NGOs are `PENDING` and require administrator review before new matching. The optional-phone constraint was added `NOT VALID` to avoid rejecting historical rows; a preflight found no existing invalid numbers. Local tests and production schema checks do not substitute for a separate hosted test-project run or a signed-in end-to-end production smoke test.
 
 ## Local SQL integration check
 
