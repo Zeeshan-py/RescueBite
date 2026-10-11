@@ -36,7 +36,7 @@ export default function AdminRecordsPage({ view }: { view: AdminView }) {
     try { adminQuery(view, draft, 1); restoreFilterFocus.current = true; setFilters({ ...draft }); setPage(1); setFilterError(null); setFiltersOpen(false); filterToggle.current?.focus() }
     catch (reason) { setFilterError(reason instanceof Error ? reason.message : 'Invalid filters.') }
   }
-  return <><Link to="/admin" className="admin-overview-link mb-5 inline-block text-sm font-semibold text-forest">← Platform overview</Link><DashboardView title={titles[view]} description="Review operational records and moderation history. Filters apply on the server; dates use UTC." {...query}>
+  return <><Link to="/admin" className="admin-overview-link mb-5 inline-block text-sm font-semibold text-forest">← Platform overview</Link><DashboardView title={titles[view]} {...query}>
     <div className="admin-filter-panel"><button ref={filterToggle} type="button" className="mobile-filter-toggle" aria-expanded={filtersOpen} aria-controls={filterId} onClick={() => setFiltersOpen(!filtersOpen)}><Icon name="filter" width="18" /><span>Filters</span>{activeFilters > 0 && <span className="active-filter-count">{activeFilters} active</span>}<Icon name="chevron" width="16" /></button>
     <form id={filterId} onSubmit={apply} className={`admin-filter-form mt-7 rounded-xl border border-line bg-white p-5${filtersOpen ? ' is-open' : ''}`}><div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <label className="min-w-0 text-xs font-semibold text-muted">Search<input className={inputClass} value={draft.search} maxLength={200} onChange={(event) => set('search', event.target.value)} placeholder={view === 'activity' ? 'Action, actor or entity ID' : 'Name or relevant text'} /></label>

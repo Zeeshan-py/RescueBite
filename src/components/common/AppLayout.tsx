@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { roleHomePath } from '../../auth/route-access'
 import { useAuth } from '../../auth/useAuth'
@@ -7,6 +7,8 @@ import { NotificationProvider } from '../../services/notifications/NotificationP
 import { NotificationBell } from '../notifications/NotificationBell'
 import { InformationLinks } from './InformationLinks'
 import { Icon, type IconName } from './Icon'
+import { SidebarResizeHandle } from './SidebarResizeHandle'
+import { readSidebarPreferences, SIDEBAR_STORAGE_KEY } from './sidebar-preferences'
 
 const navigationIcons: Record<string, IconName> = {
   Dashboard: 'grid', Analytics: 'chart', Users: 'users', Donations: 'box', NGOs: 'building',
@@ -48,6 +50,10 @@ function pageLabel(pathname: string, role: UserRole | null) {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sidebar, setSidebar] = useState(readSidebarPreferences)
+  useEffect(() => {
+    try { localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(sidebar)) } catch { /* Resizing works without storage. */ }
+  }, [sidebar])
   const menuButton = useRef<HTMLButtonElement>(null)
   const mobileMenu = useRef<HTMLDialogElement>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
@@ -81,13 +87,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   function navigationLinks() {
     return isAuthenticated && role ? items.map((item) => (
-      <Link key={item.to} to={item.to} aria-current={activePath === item.to ? 'page' : undefined} onClick={closeMenu} className={`sidebar-link${activePath === item.to ? ' is-active' : ''}`}>
+      <Link key={item.to} to={item.to} title={item.label} aria-current={activePath === item.to ? 'page' : undefined} onClick={closeMenu} className={`sidebar-link${activePath === item.to ? ' is-active' : ''}`}>
         <Icon name={navigationIcons[item.label] ?? 'grid'} /><span>{item.label}</span>{activePath === item.to && <span className="nav-active-dot" />}
       </Link>
     )) : <>
-      <NavLink to="/" end onClick={closeMenu} className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}><Icon name="grid" />Overview</NavLink>
-      <Link to="/login" onClick={closeMenu} className="sidebar-link"><Icon name="user" />Sign in</Link>
-      <Link to="/register" onClick={closeMenu} className="sidebar-link"><Icon name="plus" />Create account</Link>
+      <NavLink to="/" end title="Overview" onClick={closeMenu} className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}><Icon name="grid" /><span>Overview</span></NavLink>
+      <Link to="/login" title="Sign in" onClick={closeMenu} className="sidebar-link"><Icon name="user" /><span>Sign in</span></Link>
+      <Link to="/register" title="Create account" onClick={closeMenu} className="sidebar-link"><Icon name="plus" /><span>Create account</span></Link>
     </>
   }
 
@@ -104,13 +110,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   const layout = (
-    <div className="app-shell">
+    <div className={`app-shell${sidebar.collapsed ? ' sidebar-collapsed' : ''}`} style={{ '--sidebar-width': `${sidebar.collapsed ? 72 : sidebar.width}px` } as CSSProperties}>
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:p-3">Skip to content</a>
-      <aside className="app-sidebar">
+      <aside id="desktop-sidebar" className="app-sidebar">
         <div className="sidebar-brand">
           <Link to={homePath} className="flex items-center gap-3" aria-label="RescueBite home" onClick={() => setMenuOpen(false)}>
             <span className="brand-symbol"><Icon name="leaf" width="24" height="24" /></span>
-            <span><span className="brand-name">RescueBite<span>.</span></span><span className="brand-caption">Every portion has a purpose</span></span>
+            <span className="sidebar-brand-copy"><span className="brand-name">RescueBite<span>.</span></span></span>
           </Link>
         </div>
         <nav id="main-navigation" aria-label="Main navigation" className={`sidebar-navigation${menuOpen ? ' is-open' : ''}`}>
@@ -118,14 +124,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {navigationLinks()}
         </nav>
         <div className={`sidebar-bottom${menuOpen ? ' is-open' : ''}`}>
-          <div className="sidebar-purpose"><Icon name="leaf" /><p>Good food.<br /><strong>Greater possibilities.</strong></p><span>Connecting surplus with purpose.</span></div>
           {isAuthenticated ? (
             <div className="sidebar-profile"><span className="profile-avatar">{(profile?.name ?? 'RB').split(' ').slice(0, 2).map(part => part[0]).join('')}</span><div><p>{profile?.name ?? 'RescueBite member'}</p><span>{role === 'ADMIN' ? 'Administrator' : role?.toLowerCase()}</span></div><button onClick={() => void handleLogout()} disabled={isSigningOut} aria-label={isSigningOut ? 'Signing out' : 'Sign out'} title="Sign out"><Icon name="logout" width="18" /></button></div>
-          ) : <Link to="/about" className="sidebar-link">Our mission <Icon name="arrow" /></Link>}
+          ) : <Link to="/about" title="About RescueBite" className="sidebar-link"><Icon name="leaf" /><span>About RescueBite</span></Link>}
         </div>
+        {!sidebar.collapsed && <SidebarResizeHandle width={sidebar.width} onResize={width => setSidebar(previous => ({ ...previous, width }))} />}
       </aside>
       <div className="min-w-0">
         <header className="workspace-topbar">
+          <button type="button" className="desktop-sidebar-toggle" aria-label={sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebar.collapsed} aria-controls="desktop-sidebar" onClick={() => setSidebar(previous => ({ ...previous, collapsed: !previous.collapsed }))}><Icon name="panel" /></button>
           <Link to={homePath} className="mobile-brand" aria-label="RescueBite home"><span className="brand-symbol"><Icon name="leaf" width="21" height="21" /></span><span>RescueBite<span className="mobile-brand-dot">.</span></span></Link>
           <nav aria-label="Breadcrumb" className="workspace-breadcrumb"><Link to={homePath}>{role ? 'Workspace' : 'RescueBite'}</Link><Icon name="chevron" width="14" height="14" /><span aria-current="page">{pageLabel(location.pathname, role)}</span></nav>
           <div className="topbar-actions"><span className="workspace-tag"><Icon name="shield" width="15" />{role === 'ADMIN' ? 'Admin workspace' : 'Food rescue network'}</span>{isAuthenticated && <NotificationBell />}<button ref={menuButton} type="button" className="sidebar-menu-button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen(true)}><Icon name="menu" /></button></div>

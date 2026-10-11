@@ -45,10 +45,9 @@ export default function AnalyticsPage() {
   const rates = report ? workflowRates(report) : []
   const participationLabels: Record<string, string> = { donors: 'Donor registrations', ngos: 'NGO profiles created', recipients: 'Individual recipients', participating_donors: 'Participating donors', receiving_ngos: 'Receiving NGOs', receiving_individuals: 'Individuals served' }
   return <DashboardView eyebrow={role === 'ADMIN' ? 'PLATFORM INTELLIGENCE' : 'YOUR CONTRIBUTION'} title={role === 'ADMIN' ? 'Analytics & impact' : 'Your impact, in focus'}
-    description={role === 'ADMIN' ? 'A clearer view of every rescue, every connection, and the impact they create.' : 'Follow your rescue activity and see the difference your contributions make.'}
     actions={<button type="button" className="button-secondary" disabled={!report || query.loading || Boolean(query.error)} onClick={() => report && exportReport(report)}><Icon name="download" width="17" />Export report</button>} {...query}>
     <form aria-label="Report date filters" onSubmit={apply} className="report-toolbar">
-      <div className="report-scope"><span className="scope-icon"><Icon name="calendar" /></span><div><strong>{report?.from ? `${report.from} – ${report.to}` : 'All-time overview'}</strong><span>{role === 'ADMIN' ? 'Across your food rescue network' : 'Your records and confirmed impact'} · UTC</span><small className="mobile-report-timezone">UTC</small></div></div>
+      <div className="report-scope"><span className="scope-icon"><Icon name="calendar" /></span><div><strong>{report?.from ? `${report.from} – ${report.to}` : 'All-time overview'}</strong><span>Dates in UTC</span><small className="mobile-report-timezone">UTC</small></div></div>
       <div className="report-filter-controls"><label className="sr-only" htmlFor="report-period">Reporting period</label><select id="report-period" value={preset} onChange={event => setPreset(event.target.value as RangePreset)}><option value="all">All time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="custom">Custom dates</option></select>
         {preset === 'custom' && <><label className="custom-date-label">From (UTC)<input type="date" value={from} onChange={event => setFrom(event.target.value)} required /></label><label className="custom-date-label">To (UTC)<input type="date" value={to} onChange={event => setTo(event.target.value)} required /></label></>}
         <button className="button-primary" type="submit">Apply period</button>
@@ -59,7 +58,7 @@ export default function AnalyticsPage() {
       <div className="analytics-primary-grid">
         <ActivityChart trends={report.trends} bucket={report.bucket} />
         <section className="impact-spotlight"><div className="spotlight-top"><span className="eyebrow">FOOD WITH A FUTURE</span><span className="spotlight-icon"><Icon name="leaf" width="24" height="24" /></span></div>
-          <h2>Small actions.<br />Meaningful impact.</h2><p>{recipient ? 'Track the meals you have collected and confirmed.' : 'Every confirmed portion is shared with a community or individual.'}</p>
+          <h2>Small actions.<br />Meaningful impact.</h2>
           <div className="spotlight-total"><strong>{report.impact.portions.toLocaleString()}</strong><span>{recipient ? 'portions received' : 'portions redistributed'}</span></div>
           <div className="spotlight-detail"><Icon name="check" width="17" /><span>{report.impact.completed.toLocaleString()} rescues confirmed during this period</span></div>
           <div className="spotlight-art" aria-hidden="true"><span /><span /><span /></div>
@@ -68,17 +67,17 @@ export default function AnalyticsPage() {
       <div className="analytics-secondary-grid">
         <OutcomeChart statuses={report.statuses} />
         {!recipient && <section className="surface performance-panel"><div className="panel-heading"><div><p className="eyebrow">FROM SURPLUS TO SHARED</p><h2>Workflow performance</h2></div><Icon name="activity" /></div>
-          <div className="performance-list">{rates.map(rate => <div key={rate.label} className={`performance-row${['Cancellation rate', 'Expiry rate'].includes(rate.label) ? ' risk-rate' : ''}`}><div><span>{rate.label.replace(' rate', '')}</span><strong>{percentage(rate.n, rate.d)}</strong></div><div className="bar-track" aria-hidden="true"><span style={{ width: `${rate.d ? Math.min(100, rate.n / rate.d * 100) : 0}%` }} /></div><p>{rate.n.toLocaleString()} of {rate.d.toLocaleString()} · {rate.definition}</p></div>)}</div>
-          <p className="panel-footnote">Current outcomes for records created in the selected period. N/A means no eligible records.</p>
+          <div className="performance-list">{rates.map(rate => <div key={rate.label} className={`performance-row${['Cancellation rate', 'Expiry rate'].includes(rate.label) ? ' risk-rate' : ''}`}><div><span>{rate.label.replace(' rate', '')}</span><strong>{percentage(rate.n, rate.d)}</strong></div><div className="bar-track" aria-hidden="true"><span style={{ width: `${rate.d ? Math.min(100, rate.n / rate.d * 100) : 0}%` }} /></div><p>{rate.n.toLocaleString()} of {rate.d.toLocaleString()}</p></div>)}</div>
+          <details className="metric-definitions"><summary>How rates are calculated</summary><dl>{rates.map(rate => <div key={rate.label}><dt>{rate.label}</dt><dd>{rate.definition}</dd></div>)}</dl><p>Records created in this period. N/A means no eligible records.</p></details>
         </section>}
       </div>
       {role === 'ADMIN' && <section className="surface network-panel"><div className="panel-heading"><div><p className="eyebrow">PEOPLE BEHIND THE IMPACT</p><h2>A connected rescue network</h2></div><Icon name="users" /></div><dl className="network-metrics">{Object.entries(report.participation).map(([key, value]) => <div key={key}><dd>{value.toLocaleString()}</dd><dt>{participationLabels[key] ?? key.replaceAll('_', ' ')}</dt></div>)}</dl></section>}
-      <details className="surface report-details"><summary><div><span className="eyebrow">EXPLORE THE NUMBERS</span><h2>Detailed report</h2><p>Period-by-period records and donation status breakdown</p></div><Icon name="plus" /></summary>
+      <details className="surface report-details"><summary><div><span className="eyebrow">EXPLORE THE NUMBERS</span><h2>Detailed report</h2></div><Icon name="plus" /></summary>
         <div className="report-details-content"><section><h3 className="text-sm font-semibold">Donation status breakdown</h3><StatusBars statuses={report.statuses} /></section>
           <div className="table-scroll" tabIndex={0} role="region" aria-label="Trend records"><table className="records-table"><caption className="sr-only">Trend records by {report.bucket}, UTC</caption><thead><tr><th scope="col">Period</th>{['Donation created', 'Completed', recipient ? 'Portions received' : 'Portions shared'].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{report.trends.map(row => <tr key={row.date}><th scope="row">{row.date}</th>{[row.posted, row.completed, row.portions].map((value, i) => <td key={i}>{value.toLocaleString()}</td>)}</tr>)}</tbody></table></div>
         </div>
       </details>
-      <p className="analytics-note"><Icon name="shield" width="15" />Calculated from your authorized records. Today’s totals may be incomplete.</p>
+      <p className="analytics-note"><Icon name="shield" width="15" />Today’s totals may be incomplete.</p>
     </>}
   </DashboardView>
 }

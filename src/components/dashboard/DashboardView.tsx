@@ -7,10 +7,10 @@ import { Icon, type IconName } from '../common/Icon'
 import { MetricCard } from './MetricCard'
 
 export function DashboardView({ title, mobileTitle, description, loading, error, refresh, children, eyebrow = 'YOUR RESCUE WORKSPACE', actions }: {
-  title: string; description: string; loading: boolean; error: string | null; refresh: () => void; children: ReactNode
+  title: string; description?: string; loading: boolean; error: string | null; refresh: () => void; children: ReactNode
   eyebrow?: string; actions?: ReactNode; mobileTitle?: string
 }) {
-  return <div className="dashboard-page"><div className="page-heading"><div className="page-heading-copy"><p className="eyebrow">{eyebrow}</p><h1>{mobileTitle ? <><span className="desktop-page-title">{title}</span><span className="mobile-page-title">{mobileTitle}</span></> : title}</h1><p className="page-description">{description}</p></div><div className="page-actions">{actions}<button type="button" onClick={refresh} disabled={loading} className="button-secondary page-refresh" aria-label="Refresh" title="Refresh"><Icon name="refresh" width="17" /><span>Refresh</span></button></div></div>
+  return <div className="dashboard-page"><div className="page-heading"><div className="page-heading-copy"><p className="eyebrow">{eyebrow}</p><h1>{mobileTitle ? <><span className="desktop-page-title">{title}</span><span className="mobile-page-title">{mobileTitle}</span></> : title}</h1>{description && <p className="page-description">{description}</p>}</div><div className="page-actions">{actions}<button type="button" onClick={refresh} disabled={loading} className="button-secondary page-refresh" aria-label="Refresh" title="Refresh"><Icon name="refresh" width="17" /><span>Refresh</span></button></div></div>
     {loading ? <LoadingState label="Loading dashboard…" /> : error ? <div role="alert" className="mt-7 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800"><p>{error}</p><button onClick={refresh} className="mt-3 font-semibold underline">Try again</button></div> : children}
   </div>
 }

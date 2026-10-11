@@ -19,6 +19,7 @@ const paths = {
   user: 'M20 21v-2a6 6 0 0 0-6-6h-4a6 6 0 0 0-6 6v2 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
   plus: 'M12 5v14 M5 12h14',
   menu: 'M4 6h16 M4 12h16 M4 18h16',
+  panel: 'M3 4h18v16H3z M9 4v16',
   filter: 'M4 6h16 M7 12h10 M10 18h4',
   close: 'M6 6l12 12 M6 18 18 6',
   logout: 'M9 4H4v16h5 M13 8l4 4-4 4 M8 12h13',

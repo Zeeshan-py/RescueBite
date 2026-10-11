@@ -65,7 +65,7 @@ export function ActivityChart({ trends, bucket }: {
       </div>
       <div className="chart-readout" aria-live="polite"><span>{current ? labelDate(current.date, bucket) : 'No period selected'}</span>{current && series.map(s => <span key={s.key}><i style={{ background: s.color }} /><strong>{number.format(current[s.key])}</strong> {s.label.toLowerCase()}</span>)}<span className="chart-hint">Hover or use arrow keys</span></div>
     </>}
-    <p className="panel-footnote">Created and completed totals use their respective event dates. Food impact counts confirmed portions.</p>
+    <p className="panel-footnote">By event date · confirmed portions only.</p>
   </section>
 }
 
@@ -84,7 +84,7 @@ export function OutcomeChart({ statuses }: { statuses: Record<string, number> })
       return g.value > 0 && <circle key={g.label} cx="90" cy="90" r="68" fill="none" stroke={g.color} strokeWidth="19" strokeDasharray={`${Math.max(0, g.value / total * circumference - 3)} ${circumference}`} strokeDashoffset={-offset} transform="rotate(-90 90 90)" />
     })}</svg><div className="donut-value"><strong>{number.format(total)}</strong><span>total donations</span></div></div>
       <dl className="outcome-legend">{groups.map(g => <div key={g.label}><dt><i style={{ background: g.color }} />{g.label}</dt><dd>{number.format(g.value)}<span>{total ? Math.round(g.value / total * 100) : 0}%</span></dd></div>)}</dl>
-    </div><p className="panel-footnote">Current status of donations created in the selected period.</p>
+    </div><p className="panel-footnote">Donations created in this period.</p>
   </section>
 }
 

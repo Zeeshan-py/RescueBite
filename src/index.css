@@ -65,6 +65,7 @@ input:disabled { background: var(--color-canvas); color: var(--color-muted); }
 body { font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
 .app-shell { min-height: 100dvh; }
 .app-sidebar { background: #fff; border-right: 1px solid var(--color-line); }
+.desktop-sidebar-toggle, .sidebar-resize-handle { display: none; }
 .sidebar-brand { display: flex; align-items: center; justify-content: space-between; padding: 27px 23px; gap: 10px; }
 .brand-symbol { display: grid; place-items: center; width: 39px; height: 42px; border-radius: 13px 13px 13px 4px; background: var(--color-forest); color: #e5f1d5; }
 .brand-name { display: block; font-size: 20px; font-weight: 750; letter-spacing: -.9px; color: #183c2d; line-height: 1.25; }
@@ -185,6 +186,11 @@ body { font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
 .bar-track > span { display: block; height: 100%; border-radius: inherit; background: #70a284; }
 .performance-row.risk-rate .bar-track > span { background: #d4b783; }
 .performance-row > p { margin-top: 8px; color: var(--color-muted); font-size: .75rem; line-height: 1.65; }
+.metric-definitions { margin: 0 24px 18px; border-top: 1px solid var(--color-line); font-size: .75rem; color: var(--color-muted); }
+.metric-definitions summary { padding: 13px 0 0; color: var(--color-forest); font-weight: 600; }
+.metric-definitions dl { display: grid; gap: 12px; margin-top: 16px; }
+.metric-definitions dt { font-weight: 600; color: var(--color-forest); }
+.metric-definitions dd, .metric-definitions > p { margin-top: 5px; line-height: 1.6; }
 .network-panel { margin-bottom: 22px; }
 .network-metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; padding: 24px; }
 .network-metrics > div { border-right: 1px solid #ebefeb; padding-right: 14px; }
@@ -263,9 +269,29 @@ body { font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
 .activity-feed p { color: var(--color-muted); font-size: .75rem; margin-top: 5px; }
 .activity-feed time { color: var(--color-muted); font-size: .75rem; margin-left: auto; flex-shrink: 0; }
 @media (min-width: 1024px) {
-  .app-shell { display: grid; grid-template-columns: 238px minmax(0, 1fr); }
-  .app-sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100dvh; overflow-y: auto; }
+  .app-shell { display: grid; grid-template-columns: var(--sidebar-width, 238px) minmax(0, 1fr); }
+  .app-sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100dvh; min-width: 0; }
   .sidebar-navigation, .sidebar-bottom { display: block; }
+  .sidebar-brand, .sidebar-bottom { flex-shrink: 0; }
+  .sidebar-brand { padding: 24px 18px; }
+  .sidebar-navigation { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .sidebar-label { letter-spacing: 1px; padding: 0 10px; }
+  .sidebar-link { gap: 10px; padding-inline: 10px; }
+  .sidebar-link > span:first-of-type { min-width: 0; }
+  .sidebar-bottom { padding: 12px 15px 18px; }
+  .desktop-sidebar-toggle { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--color-line); border-radius: 9px; color: var(--color-forest); }
+  .desktop-sidebar-toggle:hover { background: #edf4ee; }
+  .workspace-breadcrumb { margin-right: auto; }
+  .sidebar-resize-handle { position: absolute; z-index: 15; top: 0; bottom: 0; right: -5px; display: grid; place-items: center; width: 10px; cursor: col-resize; touch-action: none; user-select: none; }
+  .sidebar-resize-handle > span { width: 3px; height: 38px; border-radius: 3px; background: #b5c6bb; transition: background .15s; }
+  .sidebar-resize-handle:is(:hover, :focus-visible, .is-dragging) { background: #dcebe380; }
+  .sidebar-resize-handle:is(:hover, :focus-visible, .is-dragging) > span { background: var(--color-forest); }
+  .sidebar-collapsed .sidebar-brand { padding: 24px 15px; }
+  .sidebar-collapsed .sidebar-navigation, .sidebar-collapsed .sidebar-bottom { padding-inline: 10px; }
+  .sidebar-collapsed .app-sidebar .sidebar-link { justify-content: center; padding-inline: 0; }
+  .sidebar-collapsed .app-sidebar :is(.sidebar-brand-copy, .sidebar-label, .sidebar-link > span, .sidebar-profile > div) { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sidebar-collapsed .sidebar-profile { flex-direction: column; gap: 8px; }
+  .sidebar-collapsed .sidebar-profile button { width: 44px; }
   .sidebar-menu-button { display: none; }
 }
 @media (min-width: 1600px) {

@@ -46,7 +46,7 @@ export default function ProfilePage() {
     <div>
       <p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">Account</p>
       <h1 className="mt-3 font-display text-4xl sm:text-5xl">Your profile</h1>
-      <p className="mt-4 text-sm text-muted">Update your contact details. Your optional mobile number is shared with participants in an accepted donation and administrators.</p>
+      <p className="mt-4 text-sm text-muted">Mobile contact is optional. Shared with accepted donation participants and admins.</p>
       <form onSubmit={submit} className="mt-8 max-w-2xl space-y-5 rounded-xl border border-line bg-white p-6 sm:p-8">
         {message && <p role="status" className="rounded-lg bg-soft px-4 py-3 text-sm text-forest">{message}</p>}
         {error && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
@@ -63,7 +63,7 @@ export default function ProfilePage() {
         <label className="text-sm font-medium">Business type<select value={business.business_type} onChange={event => setBusiness({...business,business_type:event.target.value as DonorBusinessProfile['business_type']})} className="mt-2 w-full rounded-lg border border-line p-3">{['RESTAURANT','BAKERY','CATERER','GROCERY','OTHER'].map(type=><option key={type}>{type}</option>)}</select></label>
         <label className="text-sm font-medium">Public description (optional)<textarea maxLength={2000} value={business.description??''} onChange={event => setBusiness({...business,description:event.target.value})} className="mt-2 w-full rounded-lg border border-line p-3" /></label>
         <button disabled={saving} className="min-h-11 rounded-lg bg-forest px-5 text-white sm:col-span-2">Save business profile</button></form>
-        <p className="mt-7 border-t border-line pt-5 text-sm text-muted">{verification?.email_verified ? 'Email confirmed.' : 'Confirm your email to post donations.'} Mobile contact is optional and does not require a text message.</p>
+        <p className="mt-7 border-t border-line pt-5 text-sm text-muted">{verification?.email_verified ? 'Email confirmed.' : 'Confirm your email to post donations.'}</p>
       </section>}
     </div>
   )
