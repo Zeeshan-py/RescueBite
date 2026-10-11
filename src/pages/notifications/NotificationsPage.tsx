@@ -1,3 +1,5 @@
+import { ErrorState } from '../../components/common/ErrorState'
+import { LoadingState } from '../../components/common/LoadingState'
 import { NotificationList } from '../../components/notifications/NotificationList'
 import { useState } from 'react'
 import { useNotifications } from '../../services/notifications/useNotifications'
@@ -14,7 +16,7 @@ export default function NotificationsPage() {
     </div>
     <section aria-label="Notification history" className="mt-8 overflow-hidden rounded-2xl border border-line bg-white">
       {actionError && <p role="alert" className="p-5 text-sm text-red-800">{actionError}</p>}
-      {isLoading ? <p className="p-8 text-sm text-muted">Loading notification history…</p> : error && notifications.length === 0 ? <div className="p-8"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => void refresh()} className="mt-4 text-sm font-semibold text-forest hover:underline">Try again</button></div> : <NotificationList notifications={notifications} onMarkRead={markRead} />}
+      {isLoading ? <LoadingState label="Loading notification history…" /> : error && notifications.length === 0 ? <ErrorState title="Your updates couldn’t load." message={error} onRetry={() => void refresh()} /> : <NotificationList notifications={notifications} onMarkRead={markRead} />}
     </section>
     {error && notifications.length > 0 && <p role="status" className="mt-4 text-xs text-muted">{error}</p>}
   </div>

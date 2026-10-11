@@ -1,3 +1,4 @@
+import { ErrorState } from '../../components/common/ErrorState'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LoadingState } from '../../components/common/LoadingState'
@@ -34,7 +35,7 @@ export default function NgoDonationDetailsPage() {
     finally { setWorking(false) }
   }
   if (loading) return <LoadingState label="Loading donation opportunity…" />
-  if (!item) return <div><Link to="/ngo/donations" className="text-sm font-semibold text-forest">← Matched donations</Link><p role="alert" className="mt-8 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">{error ?? 'Donation match unavailable.'}</p></div>
+  if (!item) return <div><Link to="/ngo/donations" className="text-sm font-semibold text-forest">← Matched donations</Link><ErrorState kind="missing" title="This opportunity isn’t available." message={error ?? 'The match may no longer be available, or you may not have permission to view it.'} onRetry={() => window.location.reload()} /></div>
   const donation = item.donation, actionable = isActionableMatch(item)
   return <div><Link to="/ngo/donations" className="text-sm font-semibold text-forest hover:underline">← Matched donations</Link>{message && <p role="status" className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900">{message}</p>}{error && <p role="alert" className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
     <div className="mt-8 flex flex-wrap items-start justify-between gap-5"><div><p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">Donation opportunity</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">{donation.food_type}</h1><p className="mt-3 text-sm text-muted">Match status: <StatusBadge status={item.status} /></p></div><div className="text-right"><DonationStatusBadge status={donation.status} /><p className="mt-3 font-display text-4xl text-forest">{item.matching_score}%</p><p className="text-xs text-muted">matching score</p></div></div>

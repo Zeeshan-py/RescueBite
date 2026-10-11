@@ -1,3 +1,4 @@
+import { LoadingState } from '../common/LoadingState'
 import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { useNotifications } from '../../services/notifications/useNotifications'
@@ -27,7 +28,7 @@ export function NotificationBell() {
       </div>
       <div className="max-h-[min(60vh,430px)] overflow-y-auto">
         {actionError && <p role="alert" className="p-4 text-sm text-red-800">{actionError}</p>}
-        {isLoading ? <p role="status" className="p-6 text-sm text-muted">Loading notifications…</p> : error && notifications.length === 0 ? <p role="alert" className="p-6 text-sm text-red-700">{error}</p> : <NotificationList notifications={notifications.slice(0, 8)} onMarkRead={markRead} compact />}
+        {isLoading ? <LoadingState compact label="Loading notifications…" /> : error && notifications.length === 0 ? <p role="alert" className="p-6 text-sm text-red-700">{error}</p> : <NotificationList notifications={notifications.slice(0, 8)} onMarkRead={markRead} compact />}
         {error && notifications.length > 0 && <p role="status" className="p-4 text-xs text-muted">{error}</p>}
       </div>
       <Link to="/notifications" onClick={(event) => event.currentTarget.closest('details')?.removeAttribute('open')} className="block border-t border-line px-4 py-3 text-center text-sm font-semibold text-forest hover:bg-canvas">View all notifications</Link>

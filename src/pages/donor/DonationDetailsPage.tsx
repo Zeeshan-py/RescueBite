@@ -1,3 +1,4 @@
+import { ErrorState } from '../../components/common/ErrorState'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LoadingState } from '../../components/common/LoadingState'
@@ -43,7 +44,7 @@ export default function DonationDetailsPage() {
   }, [id])
   async function handleCancel() { if (!id) return; setCancelling(true); setError(null); try { setDonation(await cancelDonation(id)); setMessage('Donation cancelled. The record remains available in your history.') } catch (e) { setError(e instanceof Error ? e.message : 'The donation could not be cancelled.') } finally { setCancelling(false) } }
   if (loading) return <LoadingState label="Loading donation details…" />
-  if (!donation) return <div><Link to="/donor/donations" className="text-sm font-semibold text-forest">← My donations</Link><div className="mt-8 rounded-xl border border-line bg-white p-8"><h1 className="font-display text-3xl">Donation unavailable</h1><p role="alert" className="mt-3 text-sm text-muted">{error ?? 'Donation not found or you do not have permission to view it.'}</p></div></div>
+  if (!donation) return <div><Link to="/donor/donations" className="text-sm font-semibold text-forest">← My donations</Link><ErrorState kind="missing" title="Donation unavailable" message={error ?? 'Donation not found or you do not have permission to view it.'} onRetry={() => window.location.reload()} /></div>
   const editable = donation.status === 'POSTED'
   const cancellable = ['POSTED', 'MATCHED', 'ACCEPTED'].includes(donation.status)
   const fields = [['Quantity', String(donation.quantity)], ['Meal portions', String(donation.meal_portions)], ['Pickup location', donation.location], ['Available from', formatDate(donation.available_from)], ['Collection deadline', formatDate(donation.collection_deadline)], ['Created', formatDate(donation.created_at)]]

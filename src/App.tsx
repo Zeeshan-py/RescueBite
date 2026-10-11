@@ -1,5 +1,6 @@
+import { ErrorState } from './components/common/ErrorState'
 import { lazy, Suspense, type ReactNode } from 'react'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { roleHomePath } from './auth/route-access'
 import { useAuth } from './auth/useAuth'
@@ -31,7 +32,8 @@ const NotificationsPage = lazy(() => import('./pages/notifications/Notifications
 const allRoles: UserRole[] = ['DONOR', 'NGO', 'RECIPIENT', 'ADMIN']
 
 function Page({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<LoadingState label="Loading page…" />}>{children}</Suspense>
+  const { pathname } = useLocation()
+  return <Suspense fallback={<LoadingState label="Opening your next page…" />}><div key={pathname} className="route-arrival">{children}</div></Suspense>
 }
 
 function HomeRoute() {
@@ -48,7 +50,7 @@ function AuthenticatedLayout() {
 
 function UnknownRoute() {
   const { role } = useAuth()
-  return <Navigate to={role ? roleHomePath[role] : '/'} replace />
+  return <main><ErrorState fullScreen kind="missing" title="This page wandered off." message="The link may have changed, or the address may be incomplete. Let’s get you back to your next food rescue." actions={<Link className="button-primary" to={role ? roleHomePath[role] : '/'}>{role ? 'Back to workspace' : 'Back to overview'}</Link>} /></main>
 }
 
 export default function App() {

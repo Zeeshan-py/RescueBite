@@ -1,3 +1,4 @@
+import { ErrorNotice } from '../../components/common/ErrorState'
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthShell } from '../../components/auth/AuthShell'
@@ -72,7 +73,7 @@ export default function RegisterPage() {
     <AuthShell eyebrow="Join the network" title="A fresh start. A shared purpose." description="Create your account and find your place in the food rescue community.">
       <GoogleSignInButton mode="register" />
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
-        {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}
+        {formError && <ErrorNotice message={formError} />}
         <fieldset>
           <legend className="mb-3 text-sm font-semibold">I am joining as</legend>
           <div className="auth-role-grid">

@@ -1,3 +1,4 @@
+import { ErrorNotice } from '../common/ErrorState'
 import { useState, type FormEvent } from 'react'
 import { FormField, TextInput } from '../auth/FormField'
 import { EMPTY_DONATION_INPUT, FOOD_TYPES, type DonationFieldErrors, type DonationInput } from '../../services/donations/donation.types'
@@ -21,7 +22,7 @@ export function DonationForm({ initialValue = EMPTY_DONATION_INPUT, submitLabel,
     else requestAnimationFrame(() => document.getElementById(Object.keys(nextErrors)[0] ?? '')?.focus())
   }
   return <form onSubmit={(event) => void handleSubmit(event)} noValidate className="mt-8 rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-8">
-    {serverError && <div role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{serverError}</div>}
+    {serverError && <ErrorNotice message={serverError} />}
     <p className="mb-6 text-sm text-muted">Complete the required food and collection details. Map position, safety notes, and description are optional.</p>
     <div className="grid gap-6 md:grid-cols-2">
       <FormField label="Food type" required htmlFor="foodType" error={errors.foodType} hint="Choose the closest practical category."><select id="foodType" value={input.foodType} onChange={(e) => set('foodType', e.target.value as DonationInput['foodType'])} aria-invalid={Boolean(errors.foodType)} className={inputClass}><option value="">Select a food type</option>{FOOD_TYPES.map((type) => <option key={type}>{type}</option>)}</select></FormField>

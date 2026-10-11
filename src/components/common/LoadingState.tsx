@@ -1,8 +1,10 @@
-export function LoadingState({ label = 'Loading RescueBite…', fullScreen = false }: { label?: string; fullScreen?: boolean }) {
-  return (
-    <div role="status" aria-live="polite" className={`flex items-center justify-center gap-3 px-5 text-center text-sm text-muted ${fullScreen ? 'min-h-screen bg-canvas' : 'min-h-64'}`}>
-      <span aria-hidden="true" className="size-5 animate-spin rounded-full border-2 border-line border-t-forest motion-reduce:animate-none" />
-      {label}
-    </div>
-  )
+import { Icon } from './Icon'
+import './feedback.css'
+
+export function LoadingState({ label = 'Loading RescueBite…', fullScreen = false, compact = false }: { label?: string; fullScreen?: boolean; compact?: boolean }) {
+  return <div className={`feedback-loading${fullScreen ? ' feedback-fullscreen' : ''}${compact ? ' feedback-compact' : ''}`} role="status" aria-live="polite" aria-atomic="true">
+    <div className="feedback-loader-art" aria-hidden="true"><span className="feedback-loader-ring" /><span className="feedback-loader-leaf"><Icon name="leaf" width="32" height="32" /></span><span className="feedback-loader-dot" /></div>
+    <div><p className="feedback-loading-label">{label}</p>{!compact && <p className="feedback-loading-note">A moment closer to sharing something good.</p>}</div>
+    {!compact && <div className="feedback-loading-track" aria-hidden="true"><span /></div>}
+  </div>
 }

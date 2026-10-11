@@ -1,24 +1,11 @@
 import { Component, type ReactNode } from 'react'
+import { ErrorState } from './ErrorState'
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
+  static getDerivedStateFromError() { return { hasError: true } }
   render() {
-    if (this.state.hasError) {
-      return (
-        <main className="mx-auto max-w-xl p-8" role="alert">
-          <h1 className="font-display text-3xl">We couldn’t load this page.</h1>
-          <p className="my-4 text-muted">Please reload RescueBite and try again.</p>
-          <button className="rounded-lg bg-forest px-5 py-3 text-white" onClick={() => window.location.reload()}>
-            Reload page
-          </button>
-        </main>
-      )
-    }
+    if (this.state.hasError) return <main><ErrorState fullScreen title="We couldn’t open this page." message="Something interrupted the page. Reload to try again, or head back to the overview." onRetry={() => window.location.reload()} retryLabel="Reload page" actions={<a className="button-secondary" href="/">Back to overview</a>} /></main>
     return this.props.children
   }
 }

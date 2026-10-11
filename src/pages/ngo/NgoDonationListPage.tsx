@@ -1,3 +1,4 @@
+import { ErrorState } from '../../components/common/ErrorState'
 import { useEffect, useMemo, useState } from 'react'
 import { LoadingState } from '../../components/common/LoadingState'
 import { NgoMatchCard } from '../../components/ngo/NgoMatchCard'
@@ -12,6 +13,6 @@ export default function NgoDonationListPage({ acceptedOnly = false }: { accepted
   const shown = acceptedOnly ? groups.accepted : [...groups.actionable, ...groups.history]
   if (loading) return <LoadingState label={acceptedOnly ? 'Loading accepted donations…' : 'Loading matched donations…'} />
   return <div><p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">NGO donation workflow</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">{acceptedOnly ? 'Accepted donations' : 'Matched donations'}</h1>
-    {error ? <p role="alert" className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p> : shown.length === 0 ? <div className="mt-9 rounded-2xl border border-dashed border-line bg-white p-10 text-center"><h2 className="font-display text-3xl">{acceptedOnly ? 'No accepted donations' : 'No matched donations'}</h2><p className="mt-3 text-sm text-muted">{acceptedOnly ? 'Accepted opportunities will appear here.' : 'There are no suggestions awaiting your organization.'}</p></div> : <div className="rescue-card-grid">{shown.map((item) => <NgoMatchCard key={item.id} item={item} />)}</div>}
+    {error ? <ErrorState title="We couldn’t load these opportunities." message={error} onRetry={() => window.location.reload()} /> : shown.length === 0 ? <div className="mt-9 rounded-2xl border border-dashed border-line bg-white p-10 text-center"><h2 className="font-display text-3xl">{acceptedOnly ? 'No accepted donations' : 'No matched donations'}</h2><p className="mt-3 text-sm text-muted">{acceptedOnly ? 'Accepted opportunities will appear here.' : 'There are no suggestions awaiting your organization.'}</p></div> : <div className="rescue-card-grid">{shown.map((item) => <NgoMatchCard key={item.id} item={item} />)}</div>}
   </div>
 }
