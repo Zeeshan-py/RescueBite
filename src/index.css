@@ -116,7 +116,7 @@ body { font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
 .report-scope strong { display: block; font-size: .8125rem; font-weight: 600; }
 .report-scope div > span { display: block; margin-top: 4px; font-size: .75rem; color: var(--color-muted); }
 .report-filter-controls { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 9px; }
-.report-filter-controls select, .report-filter-controls input { border: 1px solid var(--color-line); border-radius: 8px; padding: 9px 12px; background: white; font-size: .8125rem; color: #43564a; min-width: 142px; }
+.report-filter-controls select, .report-filter-controls input { min-width: 142px; }
 .custom-date-label { font-size: .75rem; display: flex; gap: 6px; flex-direction: column; }
 .filter-error { width: 100%; font-size: .8125rem; color: #9b342f; }
 .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }

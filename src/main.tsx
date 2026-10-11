@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from './auth/AuthProvider'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import './index.css'
+import './styles/form-controls.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
