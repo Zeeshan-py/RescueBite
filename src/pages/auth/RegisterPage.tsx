@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthShell } from '../../components/auth/AuthShell'
 import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton'
 import { FormField, TextInput } from '../../components/auth/FormField'
+import { PasswordInput } from '../../components/auth/PasswordInput'
+import { Icon } from '../../components/common/Icon'
 import { roleHomePath } from '../../auth/route-access'
 import { signUp } from '../../services/auth/auth.service'
 import type { PublicRegistrationRole, SignUpInput } from '../../services/auth/auth.types'
@@ -67,30 +69,30 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthShell eyebrow="Join the network" title="Create your RescueBite account." description="Choose how you participate. Administrator accounts are provisioned separately.">
+    <AuthShell eyebrow="Join the network" title="A fresh start. A shared purpose." description="Create your account and find your place in the food rescue community.">
       <GoogleSignInButton mode="register" />
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {formError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</div>}
         <fieldset>
           <legend className="mb-3 text-sm font-semibold">I am joining as</legend>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="auth-role-grid">
             {roles.map((option) => (
-              <label key={option.value} className={`cursor-pointer rounded-xl border p-4 transition ${role === option.value ? 'border-forest bg-soft ring-1 ring-forest' : 'border-line bg-white hover:border-forest/40'}`}>
+              <label key={option.value} className="auth-role-choice">
                 <input type="radio" name="role" value={option.value} checked={role === option.value} onChange={() => setRole(option.value)} className="mr-2 accent-forest" />
-                <span className="block text-sm font-semibold">{option.label}</span>
-                <span className="mt-1 block text-xs leading-5 text-muted">{option.description}</span>
+                <Icon name={option.value === 'DONOR' ? 'box' : option.value === 'NGO' ? 'building' : 'users'} /><strong>{option.label}</strong>
+                <span>{option.description}</span>
               </label>
             ))}
           </div>
         </fieldset>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="auth-form-divider"><h2 className="auth-section-title">Your details</h2><div className="grid gap-5 sm:grid-cols-2">
           <FormField label="Full name" required htmlFor="name" error={errors.name}><TextInput id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} /></FormField>
           <FormField label="Mobile number" htmlFor="phone" hint="Optional · shared after a donation is accepted" error={errors.phone}><TextInput id="phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} /></FormField>
-        </div>
+        </div></div>
         <FormField label="Email address" required htmlFor="email" error={errors.email}><TextInput id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} /></FormField>
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField label="Password" required htmlFor="password" error={errors.password} hint="8+ characters with uppercase, lowercase, and a number."><TextInput id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} /></FormField>
-          <FormField label="Confirm password" required htmlFor="confirm-password" error={errors.confirmPassword}><TextInput id="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} error={errors.confirmPassword} /></FormField>
+          <FormField label="Password" required htmlFor="password" error={errors.password} hint="8+ characters with uppercase, lowercase, and a number."><PasswordInput id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} /></FormField>
+          <FormField label="Confirm password" required htmlFor="confirm-password" error={errors.confirmPassword}><PasswordInput id="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} error={errors.confirmPassword} /></FormField>
         </div>
 
         {role === 'NGO' && (
@@ -107,7 +109,7 @@ export default function RegisterPage() {
           </fieldset>
         )}
 
-        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center rounded-lg bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-pine disabled:cursor-wait disabled:opacity-65">{isSubmitting ? 'Creating account…' : 'Create account'}</button>
+        <button type="submit" disabled={isSubmitting} className="auth-submit">{isSubmitting ? 'Creating account…' : 'Create account'}{!isSubmitting && <Icon name="arrow" width="18" />}</button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">Already registered? <Link to="/login" className="font-semibold text-forest underline-offset-4 hover:underline">Sign in</Link></p>
     </AuthShell>

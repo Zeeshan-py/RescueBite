@@ -1,37 +1,36 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { InformationLinks } from '../common/InformationLinks'
+import { Icon } from '../common/Icon'
+import './auth.css'
 
 export function AuthShell({ eyebrow, title, description, children }: { eyebrow: string; title: string; description: string; children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-canvas lg:grid lg:grid-cols-[minmax(0,0.88fr)_minmax(520px,1.12fr)]">
-      <aside className="relative hidden overflow-hidden bg-pine p-12 text-white lg:flex lg:flex-col">
-        <div aria-hidden="true" className="absolute -top-24 -right-20 size-96 rounded-full border-[70px] border-white/5" />
-        <Link to="/" className="relative flex items-center gap-3" aria-label="RescueBite home">
-          <span className="grid size-11 place-items-center rounded-xl bg-lime text-pine">
-            <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M19 4C8 3 3 8 6 15c7 4 13-1 13-11Z" /><path d="M4 21 15 10" /></svg>
-          </span>
-          <span className="font-display text-2xl">RescueBite</span>
-        </Link>
-        <div className="relative my-auto max-w-lg py-16">
-          <p className="text-xs font-semibold tracking-[0.18em] text-lime uppercase">A shared rescue network</p>
-          <blockquote className="mt-6 font-display text-5xl leading-[1.12]">Good food deserves somewhere to go.</blockquote>
-          <p className="mt-7 max-w-md text-sm leading-7 text-white/65">One secure account connects donors, receiving organizations, individual recipients, and platform administrators.</p>
+  const { pathname } = useLocation()
+  const registering = pathname === '/register'
+  return <div className="auth-page">
+    <header className="auth-topbar">
+      <Link to="/" className="auth-brand" aria-label="RescueBite home"><span><Icon name="leaf" width="23" height="23" /></span>RescueBite<span className="auth-brand-dot">.</span></Link>
+      <Link to="/" className="auth-home-link">Back to overview <Icon name="arrow" width="16" /></Link>
+    </header>
+    <div className="auth-layout">
+      <aside className="auth-story" aria-label="The RescueBite community">
+        <div><p className="auth-eyebrow">Every portion has a purpose</p><h2>Good food.<br />Shared with <em>good people.</em></h2><p className="auth-story-intro">A little surplus can go a long way. Be part of a community that helps it find a better destination.</p></div>
+        <div className="auth-illustration" aria-hidden="true">
+          <div className="auth-orbit" /><div className="auth-plate"><div><Icon name="leaf" width="62" height="62" /></div></div>
+          <span className="auth-food-node"><Icon name="box" width="25" height="25" /><span>Something to share</span></span>
+          <span className="auth-people-node"><Icon name="users" width="25" height="25" /><span>Someone to receive</span></span>
+          <span className="auth-spark auth-spark-one">✦</span><span className="auth-spark auth-spark-two">✦</span>
         </div>
-        <p className="relative text-xs text-white/45">Food Rescue & Surplus Redistribution Platform</p>
+        <div className="auth-story-footer"><span className="auth-community-icons" aria-hidden="true"><Icon name="box" /><Icon name="building" /><Icon name="users" /></span><p>Donors. NGOs. Individuals.<br /><strong>One shared purpose.</strong></p></div>
       </aside>
-      <main className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
-        <div className="w-full max-w-xl">
-          <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm font-semibold text-pine lg:hidden">
-            <span className="grid size-8 place-items-center rounded-lg bg-lime">↗</span> RescueBite
-          </Link>
-          <p className="text-xs font-semibold tracking-[0.16em] text-forest uppercase">{eyebrow}</p>
-          <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{title}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-6 text-muted">{description}</p>
-          <div className="mt-8">{children}</div>
-          <div className="mt-8 border-t border-line pt-5 text-xs text-muted"><InformationLinks /></div>
+      <main className="auth-main" id="auth-content">
+        <div className="auth-card">
+          <nav className="auth-switch" aria-label="Account access"><Link to="/login" aria-current={pathname === '/login' ? 'page' : undefined}>Sign in</Link><Link to="/register" aria-current={registering ? 'page' : undefined}>Create account</Link></nav>
+          <div className="auth-heading"><p className="auth-eyebrow">{eyebrow}</p><h1>{title}</h1><p>{description}</p></div>
+          {children}
         </div>
+        <footer className="auth-footer"><InformationLinks /></footer>
       </main>
     </div>
-  )
+  </div>
 }

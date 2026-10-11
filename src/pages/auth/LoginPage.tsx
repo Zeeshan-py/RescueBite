@@ -5,6 +5,8 @@ import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton'
 import { FormField, TextInput } from '../../components/auth/FormField'
 import { signIn } from '../../services/auth/auth.service'
 import { validateLogin, type FieldErrors } from '../../services/auth/auth.validation'
+import { PasswordInput } from '../../components/auth/PasswordInput'
+import { Icon } from '../../components/common/Icon'
 import { roleHomePath } from '../../auth/route-access'
 
 export default function LoginPage() {
@@ -37,7 +39,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell eyebrow="Welcome back" title="Continue your rescue work." description="Sign in with the email connected to your RescueBite account.">
+    <AuthShell eyebrow="Your RescueBite account" title="Welcome back." description="Sign in to pick up where you left off.">
       <GoogleSignInButton />
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {logoutWarning && <p role="alert" className="text-sm text-amber-900">{logoutWarning}</p>}
@@ -46,10 +48,10 @@ export default function LoginPage() {
           <TextInput id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} error={errors.email} placeholder="you@example.com" />
         </FormField>
         <FormField label="Password" required htmlFor="password" error={errors.password}>
-          <TextInput id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} error={errors.password} placeholder="Enter your password" />
+          <PasswordInput id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} error={errors.password} placeholder="Enter your password" />
         </FormField>
-        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center rounded-lg bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-pine disabled:cursor-wait disabled:opacity-65">
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+        <button type="submit" disabled={isSubmitting} className="auth-submit">
+          {isSubmitting ? 'Signing in…' : 'Sign in'}{!isSubmitting && <Icon name="arrow" width="18" />}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">New to RescueBite? <Link to="/register" className="font-semibold text-forest underline-offset-4 hover:underline">Create an account</Link></p>
